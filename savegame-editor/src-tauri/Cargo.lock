@@ -2229,7 +2229,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "save-editor"
+name = "savegame-editor"
 version = "0.0.0"
 dependencies = [
  "serde",
