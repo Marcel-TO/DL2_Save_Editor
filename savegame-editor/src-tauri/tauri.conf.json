@@ -12,6 +12,14 @@
   },
   "tauri": {
     "allowlist": {
+      "dialog": {
+        "all": true,
+        "ask": true,
+        "confirm": true,
+        "message": true,
+        "open": true,
+        "save": true
+      },
       "all": false,
       "shell": {
         "all": false,

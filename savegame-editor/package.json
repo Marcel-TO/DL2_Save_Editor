@@ -14,10 +14,11 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.16",
     "@mui/material": "^5.14.16",
-    "@tauri-apps/api": "^1.5.0",
+    "@tauri-apps/api": "^1.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.18.0"
+    "react-router-dom": "^6.18.0",
+    "tauri-plugin-log-api": "github:tauri-apps/tauri-plugin-log"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.5.0",
