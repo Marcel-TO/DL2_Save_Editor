@@ -1,0 +1,9 @@
+body {
+    background-color: transparent;
+}
+
+.container {
+    position: absolute;
+    height: 100vh;
+    overflow: hidden;
+}

@@ -1,0 +1,31 @@
+.background {
+    position: absolute;
+    z-index: -99;
+    background-image: url('/src/assets/pictures/Background.jpg');
+    height: 110%;
+    width: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    opacity: 0.7;
+    top: 0;
+    left: 0;
+}
+
+.header {
+    color: #e9eecd;
+}
+
+.navbar {
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    height: 100%;
+}
+
+.container {
+    position: absolute;
+    height: 100vh;
+    overflow: hidden;
+}
