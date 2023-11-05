@@ -1,12 +1,12 @@
-import './main-page.css'
+import './ids-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
 
-export const MainPage = (): JSX.Element => {
+export const IDsPage = (): JSX.Element => {
     return (
         <>
         <div className="background"></div>
         <div className="container">
-            <NavbarDrawer pagename={"Main"}></NavbarDrawer>
+            <NavbarDrawer pagename={"IDs"}></NavbarDrawer>
         </div>
         </>
     )

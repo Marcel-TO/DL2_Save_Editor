@@ -4,22 +4,30 @@ import Box from '@mui/material/Box';
 import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
-import List from '@mui/material/List';
+import { Link } from 'react-router-dom';
 import CssBaseline from '@mui/material/CssBaseline';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
+import { List } from '@mui/material';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import { ThemeProvider } from '@emotion/react';
+
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import { AccountTree } from '@mui/icons-material';
-import MailIcon from '@mui/icons-material/Mail';
-import { ThemeProvider } from '@emotion/react';
-import Icon from '@mui/material/Icon';
+import AccountTree from '@mui/icons-material/AccountTree';
+import Inventory2RoundedIcon from '@mui/icons-material/Inventory2Rounded';
+import SchoolRoundedIcon from '@mui/icons-material/SchoolRounded';
+import BackpackRoundedIcon from '@mui/icons-material/BackpackRounded';
+import AssignmentLateRoundedIcon from '@mui/icons-material/AssignmentLateRounded';
+import FingerprintIcon from '@mui/icons-material/Fingerprint';
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded';
 
 // Themes
 const openedMixin = (theme: Theme): CSSObject => ({
@@ -52,6 +60,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'flex-end',
   padding: theme.spacing(0, 1),
+  zIndex: theme.zIndex.drawer + 2,
   margin: 0,
   // necessary for content to be below app bar
   ...theme.mixins.toolbar,
@@ -81,6 +90,13 @@ const AppBar = styled(MuiAppBar, {
     backgroundColor: '#00000080',
     color: '#e9eecd',
   }),
+}));
+
+// Add a placeholder div beneath the AppBar
+const AppBarPlaceholder = styled('div')(({ theme }) => ({
+  height: '64px', // Adjust this height to match your AppBar's height
+  background: 'transparent', // Make it transparent
+  zIndex: theme.zIndex.appBar - 1, // Place it beneath the AppBar
 }));
 
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
@@ -122,11 +138,24 @@ const drawerTheme = createTheme({
 const drawerWidth = 240;
 
 // The different pages
-const itemPages: [string, string][] = [['Skills', 'account_tree'], ['Experience', 'school'], ['Inventory', 'inventory_2'], ['Backpack', 'backpack'], ['Campaign', 'task_alt']];
-const otherPages: [string, string][] = [['Player', 'account_circle'], ['IDs', 'fingerprint']];
+const itemPages: [string, JSX.Element, string][] = [
+  ['Skills', <AccountTree/>, '/skills'], 
+  ['Experience', <SchoolRoundedIcon/>, '/experience'], 
+  ['Inventory', <Inventory2RoundedIcon/>, '/inventory'], 
+  ['Backpack', <BackpackRoundedIcon/>, '/backpack'], 
+  ['Campaign', <AssignmentLateRoundedIcon/>, '/campaign'],
+];
+const otherPages: [string, JSX.Element, string][] = [
+  ['Player', <AccountCircleOutlinedIcon/>, '/player'],
+  ['IDs', <FingerprintIcon/>, '/ids'], 
+];
+const infoPages: [string, JSX.Element, string][] = [
+  ['Home', <HomeRoundedIcon/>, '/'],
+  ['Info', <HelpOutlineRoundedIcon/>, '/info'], 
+];
 
 // Actual Navbar
-export const NavbarDrawer = ({pagename}: {pagename: string}): JSX.Element => {
+export const NavbarDrawer = ({pagename, pagecontent}: {pagename: string, pagecontent: JSX.Element}): JSX.Element => {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
 
@@ -141,7 +170,7 @@ export const NavbarDrawer = ({pagename}: {pagename: string}): JSX.Element => {
   return (
     <div className="container">
       <ThemeProvider theme={darkTheme}>
-        <Box sx={{ display: 'flex', height: '100%'}} bgcolor={'transparent'}>
+        <Box sx={{ display: 'flex' }} bgcolor={'transparent'}>
           <CssBaseline />
           <AppBar position="fixed" open={open}>
             <Toolbar>
@@ -164,28 +193,35 @@ export const NavbarDrawer = ({pagename}: {pagename: string}): JSX.Element => {
             </Toolbar>
           </AppBar>
           <ThemeProvider theme={drawerTheme}>
-            <Drawer variant="permanent" open={open}>
+            <Drawer variant="permanent" open={open} sx={{ backgroundColor: 'transparent' }}>
               <DrawerHeader>
                 <IconButton onClick={handleDrawerClose}
-                            sx={{
-                              opacity: '1',
-                              color: '#e9eecd',
-                              ...(!open && { display: 'none' }),
-                            }}>
+                  sx={{
+                    opacity: '1',
+                    color: '#e9eecd',
+                    ...(!open && { display: 'none' }),
+                  }}>
                   {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
                 </IconButton>
               </DrawerHeader>
-              <Divider />
+              <Divider sx={{ backgroundColor: '#e9eecd60' }} />
               <List>
-                {itemPages.map(([text, icon]) => (
-                  <ListItem key={text} disablePadding sx={{ display: 'block' }}>
+                {itemPages.map(([text, icon, link]) => (
+                  <ListItem key={text} disablePadding sx={{
+                    display: 'block',
+                    color: '#e9eecd',
+                  }}>
                     <ListItemButton
                       sx={{
                         minHeight: 48,
                         justifyContent: open ? 'initial' : 'center',
                         px: 2.5,
-                        color: '#e9eecd',
+                        '&:hover': {
+                          color: '#e9eecd',
+                          backgroundColor: '#526264',
+                        },
                       }}
+                      component={Link} to={link}
                     >
                       <ListItemIcon
                         sx={{
@@ -195,24 +231,35 @@ export const NavbarDrawer = ({pagename}: {pagename: string}): JSX.Element => {
                           color: '#e9eecd',
                         }}
                       >
-                        <Icon>account_tree</Icon>
+                        {icon}
                       </ListItemIcon>
-                      <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
+                      <ListItemText
+                        primary={text}
+                        sx={{
+                          opacity: open ? 1 : 0,
+                        }} />
                     </ListItemButton>
                   </ListItem>
                 ))}
               </List>
-              <Divider />
+              <Divider sx={{ backgroundColor: '#e9eecd60' }} />
               <List>
-                {['All mail', 'Trash', 'Spam'].map((text, index) => (
-                  <ListItem key={text} disablePadding sx={{ display: 'block' }}>
+                {otherPages.map(([text, icon, link]) => (
+                  <ListItem key={text} disablePadding sx={{
+                    display: 'block',
+                    color: '#e9eecd',
+                  }}>
                     <ListItemButton
                       sx={{
                         minHeight: 48,
                         justifyContent: open ? 'initial' : 'center',
                         px: 2.5,
-                        color: '#e9eecd',
+                        '&:hover': {
+                          color: '#e9eecd',
+                          backgroundColor: '#526264',
+                        },
                       }}
+                      component={Link} to={link}
                     >
                       <ListItemIcon
                         sx={{
@@ -222,15 +269,63 @@ export const NavbarDrawer = ({pagename}: {pagename: string}): JSX.Element => {
                           color: '#e9eecd',
                         }}
                       >
-                        {index % 2 === 0 ? <AccountTree /> : <MailIcon />}
+                        {icon}
                       </ListItemIcon>
-                      <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
+                      <ListItemText
+                        primary={text}
+                        sx={{
+                          opacity: open ? 1 : 0,
+                        }} />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+              <Divider sx={{ backgroundColor: '#e9eecd60' }} />
+              <List>
+                {infoPages.map(([text, icon, link]) => (
+                  <ListItem key={text} disablePadding sx={{
+                    display: 'block',
+                    color: '#e9eecd',
+                  }}>
+                    <ListItemButton
+                      sx={{
+                        minHeight: 48,
+                        justifyContent: open ? 'initial' : 'center',
+                        px: 2.5,
+                        '&:hover': {
+                          color: '#e9eecd',
+                          backgroundColor: '#526264',
+                        },
+                      }}
+                      component={Link} to={link}
+                    >
+                      <ListItemIcon
+                        sx={{
+                          minWidth: 0,
+                          mr: open ? 3 : 'auto',
+                          justifyContent: 'center',
+                          color: '#e9eecd',
+                        }}
+                      >
+                        {icon}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={text}
+                        sx={{
+                          opacity: open ? 1 : 0,
+                        }} />
                     </ListItemButton>
                   </ListItem>
                 ))}
               </List>
             </Drawer>
           </ThemeProvider>
+          <Box component="main" sx={{
+            flexGrow: 1,
+            margin: '4%',
+          }}>
+            {pagecontent}
+          </Box>
         </Box>
       </ThemeProvider>
     </div>

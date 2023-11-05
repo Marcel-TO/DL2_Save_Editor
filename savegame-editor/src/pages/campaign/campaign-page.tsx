@@ -1,12 +1,12 @@
-import './main-page.css'
+import './campaign-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
 
-export const MainPage = (): JSX.Element => {
+export const CampaignPage = (): JSX.Element => {
     return (
         <>
         <div className="background"></div>
         <div className="container">
-            <NavbarDrawer pagename={"Main"}></NavbarDrawer>
+            <NavbarDrawer pagename={"Campaign"}></NavbarDrawer>
         </div>
         </>
     )

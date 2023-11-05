@@ -1,0 +1,19 @@
+.header {
+    color: #e9eecd;
+}
+
+.info-content {
+    background-color: transparent;
+}
+
+.header {
+    color: #e9eecd;
+}
+
+.container {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    overflow: scroll;
+}

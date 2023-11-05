@@ -5,6 +5,14 @@ import "./App.css";
 
 import { MainPage } from "./pages/main/main-page";
 import { Route, RouterProvider, createBrowserRouter, createRoutesFromElements } from "react-router-dom";
+import { SkillPage } from "./pages/skills/skill-page";
+import { ExperiencePage } from "./pages/experience/experience-page";
+import { InventoryPage } from "./pages/inventory/inventory-page";
+import { BackpackPage } from "./pages/backpack/backpack-page";
+import { CampaignPage } from "./pages/campaign/campaign-page";
+import { PlayerPage } from "./pages/player/player-page";
+import { IDsPage } from "./pages/ids/ids-page";
+import { InfoPage } from "./pages/info/info-page";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
@@ -18,7 +26,15 @@ function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       [
-        (<Route path={'/'} element={<MainPage/>}></Route>)
+        (<Route path={'/'} element={<MainPage/>}></Route>),
+        (<Route path={'/skills'} element={<SkillPage/>}></Route>),
+        (<Route path={'/experience'} element={<ExperiencePage/>}></Route>),
+        (<Route path={'/inventory'} element={<InventoryPage/>}></Route>),
+        (<Route path={'/backpack'} element={<BackpackPage/>}></Route>),
+        (<Route path={'/campaign'} element={<CampaignPage/>}></Route>),
+        (<Route path={'/player'} element={<PlayerPage/>}></Route>),
+        (<Route path={'/ids'} element={<IDsPage/>}></Route>),
+        (<Route path={'/info'} element={<InfoPage/>}></Route>),
       ]
     )
   )
