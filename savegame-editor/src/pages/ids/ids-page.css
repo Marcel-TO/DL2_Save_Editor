@@ -1,0 +1,10 @@
+.id-list-container {
+    position: 'flex'; 
+    justify-content: 'center';
+    background-color: #00000070;
+    width: 100%;
+}
+
+.fixedSizeListContainer {
+    height: 100%;
+  }

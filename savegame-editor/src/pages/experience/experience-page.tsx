@@ -4,7 +4,6 @@ import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
 export const ExperiencePage = (): JSX.Element => {
     return (
         <>
-        <div className="background"></div>
         <div className="container">
             <NavbarDrawer pagename={"Experience"}></NavbarDrawer>
         </div>

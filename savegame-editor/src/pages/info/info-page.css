@@ -1,19 +1,12 @@
-.header {
-    color: #e9eecd;
-}
-
-.info-content {
+body {
     background-color: transparent;
 }
 
-.header {
-    color: #e9eecd;
+.title-container {
+    position: relative;
 }
 
-.container {
+.title-container-blob {
     position: absolute;
-    width: 100vw;
-    height: 100vh;
     top: 0;
-    overflow: scroll;
 }

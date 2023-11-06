@@ -1,46 +1,39 @@
 import './info-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
-import { InformationDetails } from '../../components/information/information-details'
 import { Box, Typography } from '@mui/material'
+import ContributorsAvatar from '../../components/contributors/contributors-avatar'
 
 export const InfoPage = (): JSX.Element => {
     return (
         <>
-        <div className="background"></div>
-        <div className="container">
-            <NavbarDrawer pagename={"Info"} pagecontent={<InformationDetails/>}></NavbarDrawer>
-            <div className="info-content">
-            {/* <Box>
-                <Typography paragraph>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-                tempor incididunt ut labore et dolore magna aliqua. Rhoncus dolor purus non
-                enim praesent elementum facilisis leo vel. Risus at ultrices mi tempus
-                imperdiet. Semper risus in hendrerit gravida rutrum quisque non tellus.
-                Convallis convallis tellus id interdum velit laoreet id donec ultrices.
-                Odio morbi quis commodo odio aenean sed adipiscing. Amet nisl suscipit
-                adipiscing bibendum est ultricies integer quis. Cursus euismod quis viverra
-                nibh cras. Metus vulputate eu scelerisque felis imperdiet proin fermentum
-                leo. Mauris commodo quis imperdiet massa tincidunt. Cras tincidunt lobortis
-                feugiat vivamus at augue. At augue eget arcu dictum varius duis at
-                consectetur lorem. Velit sed ullamcorper morbi tincidunt. Lorem donec massa
-                sapien faucibus et molestie ac.
-                </Typography>
-                <Typography paragraph>
-                Consequat mauris nunc congue nisi vitae suscipit. Fringilla est ullamcorper
-                eget nulla facilisi etiam dignissim diam. Pulvinar elementum integer enim
-                neque volutpat ac tincidunt. Ornare suspendisse sed nisi lacus sed viverra
-                tellus. Purus sit amet volutpat consequat mauris. Elementum eu facilisis
-                sed odio morbi. Euismod lacinia at quis risus sed vulputate odio. Morbi
-                tincidunt ornare massa eget egestas purus viverra accumsan in. In hendrerit
-                gravida rutrum quisque non tellus orci ac. Pellentesque nec nam aliquam sem
-                et tortor. Habitant morbi tristique senectus et. Adipiscing elit duis
-                tristique sollicitudin nibh sit. Ornare aenean euismod elementum nisi quis
-                eleifend. Commodo viverra maecenas accumsan lacus vel facilisis. Nulla
-                posuere sollicitudin aliquam ultrices sagittis orci a.
-                </Typography>
-            </Box> */}
-            </div>
+        <div className="page-container">
+            <NavbarDrawer pagename={"Info"} pagecontent={infoDetails()}></NavbarDrawer>
         </div>
+        </>
+    )
+}
+
+const infoDetails = (): JSX.Element => {
+    return (
+        <>
+            <Box>
+                <Typography variant="h1" component="h1">
+                    Hello there, 
+                </Typography>                
+                <Typography variant="h1" component="h1">
+                    fellow Nightrunner! 
+                </Typography>
+                <Typography paragraph align='center' sx={{marginTop: '50px'}}>
+                    Introducing our work-in-progress application, the first public Dying Light 2 Editor! Developed by a dedicated team of two passionate gamers, our editor empowers you to take control of your Dying Light 2 experience like never before. With this tool, you can manipulate stats and customize items to tailor your in-game adventure to your liking. While not all features are implemented just yet, we're committed to continuously improving and expanding our editor to enhance your gaming journey. Stay tuned for updates and join us in shaping your Dying Light 2 experience!
+                </Typography>
+                <Typography variant="h2" component="h1" sx={{marginTop: '50px'}}>
+                    Contributors
+                </Typography>
+                <Typography paragraph align='center'>
+                Currently there are 2 contributers that work hard to increase the experience of Dying Light 2. With the help of Caz`s incredible knowledge of savegamefiles and the coding experience of Marcel, the Editor is not only extremely useful, but has a modern UI with Dying Light 2 themed content.
+                </Typography>
+                <ContributorsAvatar/>
+            </Box>
         </>
     )
 }

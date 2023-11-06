@@ -1,0 +1,9 @@
+LockpickItem
+LockpickItem_Upgrade1
+LockpickItem_Upgrade2
+LockpickItem_Upgrade3
+LockpickItem_Upgrade4
+LockpickItem_Upgrade5
+LockpickItem_Upgrade6
+LockpickItem_Upgrade7
+LockpickItem_Upgrade8

@@ -13,6 +13,7 @@ import { CampaignPage } from "./pages/campaign/campaign-page";
 import { PlayerPage } from "./pages/player/player-page";
 import { IDsPage } from "./pages/ids/ids-page";
 import { InfoPage } from "./pages/info/info-page";
+import { Background } from "./components/background/background";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
@@ -41,6 +42,7 @@ function App() {
 
   return (
     <>
+      <Background/>
       <RouterProvider router={router}></RouterProvider>
     </>
   );

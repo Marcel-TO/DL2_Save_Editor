@@ -9,7 +9,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
-import { List } from '@mui/material';
+import { Container, List } from '@mui/material';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
@@ -92,13 +92,6 @@ const AppBar = styled(MuiAppBar, {
   }),
 }));
 
-// Add a placeholder div beneath the AppBar
-const AppBarPlaceholder = styled('div')(({ theme }) => ({
-  height: '64px', // Adjust this height to match your AppBar's height
-  background: 'transparent', // Make it transparent
-  zIndex: theme.zIndex.appBar - 1, // Place it beneath the AppBar
-}));
-
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
     width: drawerWidth,
@@ -116,18 +109,15 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   }),
 );
 
-const darkTheme = createTheme({
+const drawerTheme = createTheme({
   palette: {
     mode: 'dark',
-  }
-})
-
-const drawerTheme = createTheme({
+  },
   components: {
     MuiDrawer: {
       styleOverrides: {
-        paper: {
-          backgroundColor: "transparent",
+        root: {
+          backgroundColor: "transparent !important",
         }
       }
     }
@@ -154,8 +144,14 @@ const infoPages: [string, JSX.Element, string][] = [
   ['Info', <HelpOutlineRoundedIcon/>, '/info'], 
 ];
 
+// Props
+interface NavbarDrawerProps {
+  pagename: string,
+  pagecontent: JSX.Element,
+}
+
 // Actual Navbar
-export const NavbarDrawer = ({pagename, pagecontent}: {pagename: string, pagecontent: JSX.Element}): JSX.Element => {
+export const NavbarDrawer = ({pagename, pagecontent}: NavbarDrawerProps): JSX.Element => {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
 
@@ -168,166 +164,167 @@ export const NavbarDrawer = ({pagename, pagecontent}: {pagename: string, pagecon
   };
 
   return (
-    <div className="container">
-      <ThemeProvider theme={darkTheme}>
-        <Box sx={{ display: 'flex' }} bgcolor={'transparent'}>
-          <CssBaseline />
-          <AppBar position="fixed" open={open}>
-            <Toolbar>
-              <IconButton
-                color="inherit"
-                aria-label="open drawer"
-                onClick={handleDrawerOpen}
-                edge="start"
-                sx={{
-                  marginRight: 5,
-                  opacity: '1',
-                  ...(open && { display: 'none' }),
-                }}
-              >
-                <MenuIcon />
-              </IconButton>
-              <Typography variant="h6" noWrap component="div">
-                {pagename}
-              </Typography>
-            </Toolbar>
-          </AppBar>
-          <ThemeProvider theme={drawerTheme}>
-            <Drawer variant="permanent" open={open} sx={{ backgroundColor: 'transparent' }}>
-              <DrawerHeader>
-                <IconButton onClick={handleDrawerClose}
+    <>
+      <div className="navbar-container">
+        <ThemeProvider theme={drawerTheme}>
+          <Box sx={{ display: 'flex', backgroundColor: 'transparent'}}>
+            <CssBaseline/>
+            <AppBar position="fixed" open={open}>
+              <Toolbar>
+                <IconButton
+                  color="inherit"
+                  aria-label="open drawer"
+                  onClick={handleDrawerOpen}
+                  edge="start"
                   sx={{
+                    marginRight: 5,
                     opacity: '1',
-                    color: '#e9eecd',
-                    ...(!open && { display: 'none' }),
-                  }}>
-                  {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+                    ...(open && { display: 'none' }),
+                  }}
+                >
+                  <MenuIcon />
                 </IconButton>
-              </DrawerHeader>
-              <Divider sx={{ backgroundColor: '#e9eecd60' }} />
-              <List>
-                {itemPages.map(([text, icon, link]) => (
-                  <ListItem key={text} disablePadding sx={{
-                    display: 'block',
-                    color: '#e9eecd',
-                  }}>
-                    <ListItemButton
-                      sx={{
-                        minHeight: 48,
-                        justifyContent: open ? 'initial' : 'center',
-                        px: 2.5,
-                        '&:hover': {
-                          color: '#e9eecd',
-                          backgroundColor: '#526264',
-                        },
-                      }}
-                      component={Link} to={link}
-                    >
-                      <ListItemIcon
+                <Typography variant="h6" noWrap component="div">
+                  {pagename}
+                </Typography>
+              </Toolbar>
+            </AppBar>
+              <Drawer variant="permanent" open={open}>
+                <DrawerHeader>
+                  <IconButton onClick={handleDrawerClose}
+                    sx={{
+                      opacity: '1',
+                      color: '#e9eecd',
+                      ...(!open && { display: 'none' }),
+                    }}>
+                    {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+                  </IconButton>
+                </DrawerHeader>
+                <Divider sx={{ backgroundColor: '#e9eecd60' }} />
+                <List>
+                  {infoPages.map(([text, icon, link]) => (
+                    <ListItem key={text} disablePadding sx={{
+                      display: 'block',
+                      color: '#e9eecd',
+                    }}>
+                      <ListItemButton
                         sx={{
-                          minWidth: 0,
-                          mr: open ? 3 : 'auto',
-                          justifyContent: 'center',
-                          color: '#e9eecd',
+                          minHeight: 48,
+                          justifyContent: open ? 'initial' : 'center',
+                          px: 2.5,
+                          '&:hover': {
+                            color: '#e9eecd',
+                            backgroundColor: '#526264',
+                          },
                         }}
+                        component={Link} to={link}
                       >
-                        {icon}
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={text}
+                        <ListItemIcon
+                          sx={{
+                            minWidth: 0,
+                            mr: open ? 3 : 'auto',
+                            justifyContent: 'center',
+                            color: '#e9eecd',
+                          }}
+                        >
+                          {icon}
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={text}
+                          sx={{
+                            opacity: open ? 1 : 0,
+                          }} />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
+                </List>
+                <Divider sx={{ backgroundColor: '#e9eecd60' }} />
+                <List>
+                  {itemPages.map(([text, icon, link]) => (
+                    <ListItem key={text} disablePadding sx={{
+                      display: 'block',
+                      color: '#e9eecd',
+                    }}>
+                      <ListItemButton
                         sx={{
-                          opacity: open ? 1 : 0,
-                        }} />
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-              </List>
-              <Divider sx={{ backgroundColor: '#e9eecd60' }} />
-              <List>
-                {otherPages.map(([text, icon, link]) => (
-                  <ListItem key={text} disablePadding sx={{
-                    display: 'block',
-                    color: '#e9eecd',
-                  }}>
-                    <ListItemButton
-                      sx={{
-                        minHeight: 48,
-                        justifyContent: open ? 'initial' : 'center',
-                        px: 2.5,
-                        '&:hover': {
-                          color: '#e9eecd',
-                          backgroundColor: '#526264',
-                        },
-                      }}
-                      component={Link} to={link}
-                    >
-                      <ListItemIcon
-                        sx={{
-                          minWidth: 0,
-                          mr: open ? 3 : 'auto',
-                          justifyContent: 'center',
-                          color: '#e9eecd',
+                          minHeight: 48,
+                          justifyContent: open ? 'initial' : 'center',
+                          px: 2.5,
+                          '&:hover': {
+                            color: '#e9eecd',
+                            backgroundColor: '#526264',
+                          },
                         }}
+                        component={Link} to={link}
                       >
-                        {icon}
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={text}
+                        <ListItemIcon
+                          sx={{
+                            minWidth: 0,
+                            mr: open ? 3 : 'auto',
+                            justifyContent: 'center',
+                            color: '#e9eecd',
+                          }}
+                        >
+                          {icon}
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={text}
+                          sx={{
+                            opacity: open ? 1 : 0,
+                          }} />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
+                </List>
+                <Divider sx={{ backgroundColor: '#e9eecd60' }} />
+                <List>
+                  {otherPages.map(([text, icon, link]) => (
+                    <ListItem key={text} disablePadding sx={{
+                      display: 'block',
+                      color: '#e9eecd',
+                    }}>
+                      <ListItemButton
                         sx={{
-                          opacity: open ? 1 : 0,
-                        }} />
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-              </List>
-              <Divider sx={{ backgroundColor: '#e9eecd60' }} />
-              <List>
-                {infoPages.map(([text, icon, link]) => (
-                  <ListItem key={text} disablePadding sx={{
-                    display: 'block',
-                    color: '#e9eecd',
-                  }}>
-                    <ListItemButton
-                      sx={{
-                        minHeight: 48,
-                        justifyContent: open ? 'initial' : 'center',
-                        px: 2.5,
-                        '&:hover': {
-                          color: '#e9eecd',
-                          backgroundColor: '#526264',
-                        },
-                      }}
-                      component={Link} to={link}
-                    >
-                      <ListItemIcon
-                        sx={{
-                          minWidth: 0,
-                          mr: open ? 3 : 'auto',
-                          justifyContent: 'center',
-                          color: '#e9eecd',
+                          minHeight: 48,
+                          justifyContent: open ? 'initial' : 'center',
+                          px: 2.5,
+                          '&:hover': {
+                            color: '#e9eecd',
+                            backgroundColor: '#526264',
+                          },
                         }}
+                        component={Link} to={link}
                       >
-                        {icon}
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={text}
-                        sx={{
-                          opacity: open ? 1 : 0,
-                        }} />
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-              </List>
-            </Drawer>
-          </ThemeProvider>
-          <Box component="main" sx={{
-            flexGrow: 1,
-            margin: '4%',
-          }}>
-            {pagecontent}
+                        <ListItemIcon
+                          sx={{
+                            minWidth: 0,
+                            mr: open ? 3 : 'auto',
+                            justifyContent: 'center',
+                            color: '#e9eecd',
+                          }}
+                        >
+                          {icon}
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={text}
+                          sx={{
+                            opacity: open ? 1 : 0,
+                          }} />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
+                </List>
+              </Drawer>
+            <Container sx={{
+              flexGrow: 1,
+              p: 3,
+              color: '#e9eecd',
+            }}>
+              {pagecontent}
+            </Container>
           </Box>
-        </Box>
-      </ThemeProvider>
-    </div>
+        </ThemeProvider>
+      </div>
+    </>
   );
 }
