@@ -80,25 +80,6 @@ const VirtualizedList = ({
   ids: string[];
   minWidth: number;
 }): JSX.Element => {
-  return (
-    <Box sx={{ height: '100%', minWidth: minWidth }}>
-      <FixedSizeList
-        height={500}
-        width='100%'
-        itemSize={60}
-        itemCount={ids?.length || 0}
-        className='fixedSizeListContainer'
-      >
-        {({ index, style }) => (
-          <VirtualizedRow id={ids[index]} style={style} />
-        )}
-      </FixedSizeList>
-    </Box>
-  );
-};
-
-// Represents the row of the collapsed nested list.
-const VirtualizedRow = ({ id, style }: { id: string; style: React.CSSProperties }) => {
   // The Properties of the selected id.
   interface SnackProps {
     name: string,
@@ -126,22 +107,45 @@ const VirtualizedRow = ({ id, style }: { id: string; style: React.CSSProperties 
     navigator.clipboard.writeText(id);
     handleClick({name: id, isOpen: true});
   };
-  
+
+  // Represents the row of the collapsed nested list.
+  const VirtualizedRow = ({ id, style }: { id: string; style: React.CSSProperties }) => {
+    return (
+      <>
+        <ListItemButton key={id} sx={{ pl: 4, minWidth: 360 }} style={style} onClick={() => handleCopyID(id)}>
+          <ListItemIcon>
+            <SavedSearchIcon sx={{color: '#e9eecd'}}/>
+          </ListItemIcon>
+          <ListItemText primary={id} />
+        </ListItemButton>
+      </>
+    );
+  };
+
   return (
     <>
-      <ListItemButton key={id} sx={{ pl: 4, minWidth: 360 }} style={style} onClick={() => handleCopyID(id)}>
-        <ListItemIcon>
-          <SavedSearchIcon sx={{color: '#e9eecd'}}/>
-        </ListItemIcon>
-        <ListItemText primary={id} />
-        <Snackbar
-          open={state.isOpen}
-          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-          onClose={handleClose}
-          TransitionComponent={Slide}
-          message={`Copied ${state.name} to clipboard.`}
-          key={'top' + 'left'}/>
-      </ListItemButton>
+    <Box sx={{ height: '100%', minWidth: minWidth }}>
+      <FixedSizeList
+        height={500}
+        width='100%'
+        itemSize={60}
+        itemCount={ids?.length || 0}
+        className='fixedSizeListContainer'
+      >
+        {({ index, style }) => (
+          <>
+            <VirtualizedRow id={ids[index]} style={style} />
+          </>
+        )}
+      </FixedSizeList>
+    </Box>
+    <Snackbar
+              open={state.isOpen}
+              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+              onClose={handleClose}
+              TransitionComponent={Slide}
+              message={`Copied ${state.name} to clipboard.`}
+              key={'top' + 'left'}/>
     </>
   );
 };
