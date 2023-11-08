@@ -25,7 +25,7 @@ pub struct InventoryChunk {
     amount: Vec<u8>,
     durability: Vec<u8>,
     space: Vec<u8>,
-    index: f32,
+    index: usize,
     level_value: f32,
     seed_value: f32,
     amount_value: f32,
@@ -40,7 +40,7 @@ impl InventoryChunk {
         amount: Vec<u8>,
         durability: Vec<u8>,
         space: Vec<u8>,
-        index: f32,
+        index: usize,
     ) -> Self {
         InventoryChunk {
             level: level.clone(),
@@ -61,7 +61,7 @@ impl InventoryChunk {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Mod {
     name: String,
-    index: f32,
+    index: usize,
     data_content: Vec<u8>,
     data_string: String,
 }
@@ -69,7 +69,7 @@ pub struct Mod {
 impl Mod {
     pub fn new(
         name: String, 
-        index: f32,
+        index: usize,
         data_content: Vec<u8>,
     ) -> Self {
         Mod {
@@ -84,8 +84,8 @@ impl Mod {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InventoryItem {
     name: String,
-    index: f32,
-    size: f32,
+    index: usize,
+    size: usize,
     sgd_data: Vec<u8>,
     chunk_data: InventoryChunk,
     mod_data: Vec<Mod>,
@@ -94,8 +94,8 @@ pub struct InventoryItem {
 impl InventoryItem {
     pub fn new(
         name: String,
-        index: f32,
-        size: f32,
+        index: usize,
+        size: usize,
         sgd_data: Vec<u8>,
         chunk_data: InventoryChunk,
         mod_data: Vec<Mod>
@@ -114,8 +114,8 @@ impl InventoryItem {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SkillItem {
     name: String,
-    index: f32,
-    size: f32,
+    index: usize,
+    size: usize,
     sgd_data: Vec<u8>,
     points_data: Vec<u8>,
     points_value: f32,
@@ -124,8 +124,8 @@ pub struct SkillItem {
 impl SkillItem {
     pub fn new(
         name: String,
-        index: f32,
-        size: f32,
+        index: usize,
+        size: usize,
         sgd_data: Vec<u8>,
         points_data: Vec<u8>,
     ) -> Self {

@@ -1,10 +1,16 @@
 use std::{fs, io::Read, env};
 use log::info;
-use tauri::api::file;
 use std::error::Error;
+use regex::Regex;
+
 
 // Import all struct datas.
-use crate::struct_data::{IdData, self};
+use crate::struct_data::{
+    IdData, 
+    SaveFile, 
+    Skills, 
+    SkillItem
+};
 
 // Define global result definition for easier readability.
 type Result<T> = std::result::Result<T,Box<dyn Error>>;
@@ -33,22 +39,111 @@ static START_INVENTORY: [u8; 18] = [
 
 //  -> Result<struct_data::SaveFile>
 pub fn load_save_file(file_path: &str) {
+    info!("{}", file_path);
     // Gets the content from the file.
-    let file_content = get_contents_from_file(file_path).unwrap();
+    let file_content: Vec<u8> = get_contents_from_file(file_path).unwrap();
+    info!("{}", format_bytes_to_string(file_content.clone()));
     
     // Gets the indices of the skill data.
-    let skill_start_index = get_index_from_sequence(&file_content, &START_SKILLS);
-    let skill_end_index = get_index_from_sequence(&file_content, &START_SKILLS);
+    let skill_start_index: usize = get_index_from_sequence(&file_content, &START_SKILLS);
+    let skill_end_index: usize = get_index_from_sequence(&file_content, &START_SKILLS);
+    let skill_data_range = &file_content[skill_start_index + START_SKILLS.len() .. skill_end_index];
 
     // Check if there was an error while trying to get the indices.
-    if skill_start_index == 0 || skill_end_index == 0 {
+    if skill_data_range.len() <= 0 {
         info!("Error: index not found");
     }
+
+    let base_skills: Vec<String> = find_base_skill_matches(&file_content);
+    let legend_skills: Vec<String> = find_legend_skill_matches(&file_content);
+    let skills: Skills = analize_skill_data(&file_content, &base_skills, &legend_skills);
+
+
 }
 
-fn get_index_from_sequence(content: &[u8], sequence: &[u8]) -> i32 {
-    content.windows(sequence.len()).position(|window| window == sequence).try_into(i32).unwrap_or(0)
+fn find_base_skill_matches(content: &[u8]) -> Vec<String> {
+    let string_data = String::from_utf8_lossy(content).to_string();
+    let pattern = r"([A-Za-z0-9_]+_skill)";
+    let regex = Regex::new(pattern).expect("Failed to create regex");
+
+    let matches: Vec<String> = regex
+        .find_iter(&string_data)
+        .map(|m| m.as_str().to_string())
+        .filter(|s| !s.contains("LP_"))
+        .collect();
+
+    matches
 }
+
+fn find_legend_skill_matches(content: &[u8]) -> Vec<String> {
+    let string_data = String::from_utf8_lossy(content).to_string();
+    let pattern = r"(LP_[A-Za-z0-9_]+)";
+    let regex = Regex::new(pattern).expect("Failed to create regex");
+
+    let matches: Vec<String> = regex
+        .find_iter(&string_data)
+        .map(|m| m.as_str().to_string())
+        .collect();
+
+    matches
+}
+
+fn analize_skill_data(
+    data: &[u8],
+    base_matches: &[String],
+    legend_matches: &[String],
+) -> Skills {
+    let mut base_skills = Vec::new();
+    let mut legend_skills = Vec::new();
+
+    for base_match in base_matches {
+        let match_bytes = base_match.as_bytes();
+        let index = get_index_from_sequence(data, match_bytes);
+        let name = base_match.replace('\x01', "").replace('\x00', "").to_string();
+        let extracted_bytes = &data[index + match_bytes.len() .. index + match_bytes.len() + 2];
+
+        let skill_item = SkillItem::new(
+            name,
+            index,
+            match_bytes.len(),
+            match_bytes.to_vec(),
+            extracted_bytes.to_vec(),
+        );
+
+        base_skills.push(skill_item);
+    }
+
+    for legend_match in legend_matches {
+        let match_bytes = legend_match.as_bytes();
+        let index = get_index_from_sequence(data, match_bytes);
+        let name = legend_match.replace('\x01', "").replace('\x00', "").to_string();
+        let extracted_bytes = &data[index + match_bytes.len() .. index + match_bytes.len() + 2];
+
+        let skill_item = SkillItem::new(
+            name,
+            index,
+            match_bytes.len(),
+            match_bytes.to_vec(),
+            extracted_bytes.to_vec(),
+        );
+
+        legend_skills.push(skill_item);
+    }
+
+    Skills::new(
+        base_skills,
+        legend_skills,
+    )
+}
+
+
+fn get_index_from_sequence(content: &[u8], sequence: &[u8]) -> usize {
+    content
+        .windows(sequence.len())
+        .position(|window| window == sequence)
+        .unwrap_or(0)
+}
+
 
 pub fn format_bytes_to_string(file_content: Vec<u8>) -> String {
     file_content.iter()

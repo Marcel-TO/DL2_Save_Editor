@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::env;
+use file_analizer::load_save_file;
 use log::info;
 mod file_analizer;
 mod struct_data;
@@ -38,6 +39,21 @@ fn get_ids() -> Vec<struct_data::IdData> {
     }
 }
 
+#[tauri::command(rename_all = "snake_case")]
+fn load_save() {
+    if let Ok(current_dir) = env::current_dir() {
+        let file_path = current_dir.join("save_main_0.sav");
+        if let Some(file_path_str) = file_path.to_str() {
+            load_save_file(file_path_str);
+        } else {
+            eprintln!("Error converting file path to a valid string");
+        }
+    } else {
+        eprintln!("Error getting current directory");
+    }
+}
+
+
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_log::Builder::default().build())
@@ -46,6 +62,7 @@ fn main() {
             file_to_backend,
             get_content,
             get_ids,
+            load_save
             ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
