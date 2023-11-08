@@ -1,5 +1,6 @@
 use std::{fs, io::Read, env};
 use log::info;
+use tauri::api::file;
 use std::error::Error;
 
 // Import all struct datas.
@@ -30,10 +31,24 @@ static START_INVENTORY: [u8; 18] = [
     0x00, 0x07, 0x00, 0x55, 0x6E, 0x6B, 0x6E, 0x6F, 0x77, 0x6E
 ];
 
-// pub fn load_save_file(file_path: &str) -> Result<struct_data::SaveFile> {
-//
-// }
+//  -> Result<struct_data::SaveFile>
+pub fn load_save_file(file_path: &str) {
+    // Gets the content from the file.
+    let file_content = get_contents_from_file(file_path).unwrap();
+    
+    // Gets the indices of the skill data.
+    let skill_start_index = get_index_from_sequence(&file_content, &START_SKILLS);
+    let skill_end_index = get_index_from_sequence(&file_content, &START_SKILLS);
 
+    // Check if there was an error while trying to get the indices.
+    if skill_start_index == 0 || skill_end_index == 0 {
+        info!("Error: index not found");
+    }
+}
+
+fn get_index_from_sequence(content: &[u8], sequence: &[u8]) -> i32 {
+    content.windows(sequence.len()).position(|window| window == sequence).try_into(i32).unwrap_or(0)
+}
 
 pub fn format_bytes_to_string(file_content: Vec<u8>) -> String {
     file_content.iter()
