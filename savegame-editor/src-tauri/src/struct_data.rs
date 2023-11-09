@@ -1,11 +1,18 @@
 use serde::{Serialize, Deserialize};
 
-use crate::file_analizer::{bytes_to_f32, to_little_endian, format_bytes_to_string};
+use crate::file_analizer::{ format_bytes_to_string};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum ItemTypeEnum {
+    Craftplan,
+    ToolSkin,
+    Collectable
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct IdData {
-    filename: String,
-    ids: Vec<String>,
+    pub filename: String,
+    pub ids: Vec<String>,
 }
 
 impl IdData {
@@ -18,19 +25,19 @@ impl IdData {
 }
 
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InventoryChunk {
-    level: Vec<u8>,
-    seed: Vec<u8>,
-    amount: Vec<u8>,
-    durability: Vec<u8>,
-    space: Vec<u8>,
-    index: usize,
-    level_value: f32,
-    seed_value: f32,
-    amount_value: f32,
-    durability_value: f32,
-    space_value: f32,
+    pub level: Vec<u8>,
+    pub seed: Vec<u8>,
+    pub amount: Vec<u8>,
+    pub durability: Vec<u8>,
+    pub space: Vec<u8>,
+    pub index: usize,
+    pub level_value: u16,
+    pub seed_value: u16,
+    pub amount_value: u16,
+    pub durability_value: u16,
+    pub space_value: u16,
 }
 
 impl InventoryChunk {
@@ -49,21 +56,21 @@ impl InventoryChunk {
             durability: durability.clone(),
             space: space.clone(),
             index,
-            level_value: bytes_to_f32(to_little_endian(level.clone())),
-            seed_value: bytes_to_f32(to_little_endian(seed.clone())),
-            amount_value: bytes_to_f32(to_little_endian(amount.clone())),
-            durability_value: bytes_to_f32(to_little_endian(durability.clone())),
-            space_value: bytes_to_f32(to_little_endian(space.clone())),
+            level_value: u16::from_le_bytes(level.clone().try_into().unwrap()),
+            seed_value: u16::from_le_bytes(seed.clone().try_into().unwrap()),
+            amount_value: u16::from_le_bytes(amount.clone().try_into().unwrap()),
+            durability_value: u16::from_le_bytes(durability.clone().try_into().unwrap()),
+            space_value: u16::from_le_bytes(space.clone().try_into().unwrap()),
         }
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Mod {
-    name: String,
-    index: usize,
-    data_content: Vec<u8>,
-    data_string: String,
+    pub name: String,
+    pub index: usize,
+    pub data_content: Vec<u8>,
+    pub data_string: String,
 }
 
 impl Mod {
@@ -81,14 +88,14 @@ impl Mod {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InventoryItem {
-    name: String,
-    index: usize,
-    size: usize,
-    sgd_data: Vec<u8>,
-    chunk_data: InventoryChunk,
-    mod_data: Vec<Mod>,
+    pub name: String,
+    pub index: usize,
+    pub size: usize,
+    pub sgd_data: Vec<u8>,
+    pub chunk_data: InventoryChunk,
+    pub mod_data: Vec<Mod>,
 }
 
 impl InventoryItem {
@@ -105,20 +112,20 @@ impl InventoryItem {
             index,
             size,
             sgd_data,
-            chunk_data,
+            chunk_data: chunk_data,
             mod_data,
         }
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SkillItem {
-    name: String,
-    index: usize,
-    size: usize,
-    sgd_data: Vec<u8>,
-    points_data: Vec<u8>,
-    points_value: f32,
+    pub name: String,
+    pub index: usize,
+    pub size: usize,
+    pub sgd_data: Vec<u8>,
+    pub points_data: Vec<u8>,
+    pub points_value: u16,
 }
 
 impl SkillItem {
@@ -135,15 +142,15 @@ impl SkillItem {
             size,
             sgd_data,
             points_data: points_data.clone(),
-            points_value: bytes_to_f32(to_little_endian(points_data.clone())),
+            points_value: u16::from_le_bytes(points_data.try_into().unwrap()),
         }
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Skills {
-    base_skills: Vec<SkillItem>,
-    legend_skills: Vec<SkillItem>,
+    pub base_skills: Vec<SkillItem>,
+    pub legend_skills: Vec<SkillItem>,
 }
 
 impl Skills {
@@ -158,28 +165,54 @@ impl Skills {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct UnlockableItem {
+    pub name: String,
+    pub index: usize,
+    pub size: usize,
+    pub sgd_data: Vec<u8>,
+}
+
+impl UnlockableItem {
+    pub fn new(
+        name: String,
+        index: usize,
+        size: usize,
+        sgd_data: Vec<u8>,
+    ) -> Self {
+        UnlockableItem {
+            name,
+            index,
+            size,
+            sgd_data,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SaveFile {
-    path: String,
-    file_content: Vec<u8>,
-    file_string: String,
-    items: Vec<Vec<InventoryItem>>,
-    skills: Vec<SkillItem>,
+    pub path: String,
+    pub file_content: Vec<u8>,
+    pub file_string: String,
+    pub skills: Skills,
+    pub unlockable_items: Vec<UnlockableItem>,
+    pub items: Vec<Vec<InventoryItem>>,
 }
 
 impl SaveFile {
     pub fn new(
         path: String,
         file_content: Vec<u8>,
-        file_string: String,
+        skills: Skills,
+        unlockable_items: Vec<UnlockableItem>,
         items: Vec<Vec<InventoryItem>>,
-        skills: Vec<SkillItem>,
     ) -> Self {
         SaveFile {
             path,
             file_content: file_content.clone(),
             file_string: format_bytes_to_string(file_content.clone()),
             items,
+            unlockable_items,
             skills,
         }
     }
