@@ -35,9 +35,8 @@ pub struct InventoryChunk {
     pub index: usize,
     pub level_value: u16,
     pub seed_value: u16,
-    pub amount_value: u16,
-    pub durability_value: u16,
-    pub space_value: u16,
+    pub amount_value: u32,
+    pub durability_value: u32,
 }
 
 impl InventoryChunk {
@@ -58,9 +57,8 @@ impl InventoryChunk {
             index,
             level_value: u16::from_le_bytes(level.clone().try_into().unwrap()),
             seed_value: u16::from_le_bytes(seed.clone().try_into().unwrap()),
-            amount_value: u16::from_le_bytes(amount.clone().try_into().unwrap()),
-            durability_value: u16::from_le_bytes(durability.clone().try_into().unwrap()),
-            space_value: u16::from_le_bytes(space.clone().try_into().unwrap()),
+            amount_value: u32::from_le_bytes(amount.clone().try_into().unwrap()),
+            durability_value: u32::from_le_bytes(durability.clone().try_into().unwrap()),
         }
     }
 }

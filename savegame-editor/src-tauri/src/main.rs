@@ -41,7 +41,8 @@ fn get_ids() -> Vec<struct_data::IdData> {
 
 #[tauri::command(rename_all = "snake_case")]
 fn load_save() {
-    load_save_file("M:/Marcel/Desktop/GitHub/DL2_Save_Editor/savegame-editor/src-tauri/saves/save_main_0.sav");
+    // load_save_file("M:/Marcel/Desktop/GitHub/DL2_Save_Editor/savegame-editor/src-tauri/saves/save_main_0.sav");
+    load_save_file("/home/mchawk/Documents/Github/DL2_Save_Editor/savegame-editor/src-tauri/saves/save_main_0.sav");
 }
 
 

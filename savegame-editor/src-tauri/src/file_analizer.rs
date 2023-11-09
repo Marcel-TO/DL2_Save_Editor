@@ -358,43 +358,46 @@ fn find_all_inventory_chunks(content: &[u8], start_index: usize) -> (Vec<Invento
 
         let last_index = chunks.last().map_or(start_index, |chunk| chunk.index + data_offset + 4);
         
-        (chunks, 0)
+        (chunks, last_index)
     }
 }
 
 fn get_sgd_matches(content: &[u8], start_index: usize) -> (Vec<String>, Vec<usize>) {
-    // Prepare data for iteration.
-    let mut match_values: Vec<String> = Vec::new();
-    let string_data = String::from_utf8_lossy(&content[start_index..]);
+    // Preparing data.
+    let mut match_values = Vec::new();
+    let string_data = String::from_utf8_lossy(&content[start_index..]).to_string();
 
-    // Create regex pattern.
-    let pattern = r"[a-zA-Z0-9_]*SGDs";
-    let re = Regex::new(pattern).expect("Invalid regex pattern");
+    let pattern = r"[A-Za-z0-9_]*SGDs";
+    let re = Regex::new(pattern).unwrap();
+    let mut match_iter = re.find_iter(&string_data);
 
-    let mut found_match = re.find(&string_data);
-    while let Some(mat) = found_match {
-        if mat.as_str().len() == 4 {
+    while let Some(mat) = match_iter.next() {
+        if mat.end() - mat.start() == 4 {
             match_values.push(mat.as_str().to_string());
         } else {
             break;
         }
-
-        found_match = re.find(mat.as_str()).or_else(|| re.find(&string_data[mat.end()..]));
     }
 
-    let mut match_indices = get_indices_from_values(content, start_index, &match_values);
+    let mut match_indices = get_indices_from_values(&content, start_index, &match_values);
 
-    // Check if Savegame section is between the start and the first SGDs
-    let is_savegame = match_values.len() > 1 && is_savegame_between(&content, start_index, match_indices[0]);
+    // Check if Savegame section is between the start and the first SGDs.
+    let mut is_savegame: bool = false;
+    let mut first_index: usize = 0;
 
-    // Reset matches if savegame is between
+    if match_values.len() > 1 {
+        first_index = match_indices[0];
+    }
+    
+    is_savegame = is_savegame_between(&content, start_index, first_index);
+
+    // Reset matches if savegame is between.
     if is_savegame {
         match_values.clear();
         match_indices.clear();
     }
 
     (match_values, match_indices)
-
 }
 
 fn is_savegame_between(content: &[u8], start_index: usize, end_index: usize) -> bool {
