@@ -1,11 +1,15 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::env;
-use file_analizer::load_save_file;
-use log::info;
 mod file_analizer;
+mod id_fetcher;
 mod struct_data;
+
+use log::info;
+use dotenv::dotenv;
+use file_analizer::load_save_file;
+use id_fetcher::fetch_ids;
+
 
 #[tauri::command(rename_all = "snake_case")]
 fn greet(name: &str) -> String {
@@ -28,7 +32,7 @@ fn get_content(file_path: &str) {
 
 #[tauri::command(rename_all = "snake_case")]
 fn get_ids() -> Vec<struct_data::IdData> {
-    match file_analizer::fetch_ids() {
+    match fetch_ids() {
         Ok(id_datas) => {
             id_datas
         }
@@ -41,24 +45,25 @@ fn get_ids() -> Vec<struct_data::IdData> {
 
 #[tauri::command(rename_all = "snake_case")]
 fn load_save() {
-    // load_save_file("M:/Marcel/Desktop/GitHub/DL2_Save_Editor/savegame-editor/src-tauri/saves/save_main_0.sav");
-    load_save_file("/home/mchawk/Documents/Github/DL2_Save_Editor/savegame-editor/src-tauri/saves/save_main_0.sav");
+    let file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
+    load_save_file(&file_path);
 }
 
 
 fn main() {
-    // tauri::Builder::default()
-    //     .plugin(tauri_plugin_log::Builder::default().build())
-    //     .invoke_handler(tauri::generate_handler![
-    //         greet, 
-    //         file_to_backend,
-    //         get_content,
-    //         get_ids,
-    //         load_save
-    //         ])
-    //     .run(tauri::generate_context!())
-    //     .expect("error while running tauri application");
+    dotenv().ok();
+    tauri::Builder::default()
+        .plugin(tauri_plugin_log::Builder::default().build())
+        .invoke_handler(tauri::generate_handler![
+            greet, 
+            file_to_backend,
+            get_content,
+            get_ids,
+            load_save
+            ])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
     
-    // For Debuggin savefile:
-    load_save();
+    // // For Debuggin savefile:
+    // load_save();
 }

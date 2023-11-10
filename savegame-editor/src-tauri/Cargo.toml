@@ -1,10 +1,10 @@
 [package]
 name = "savegame-editor"
-version = "0.0.0"
-description = "A Tauri App"
-authors = ["you"]
-license = ""
-repository = ""
+version = "0.0.3"
+description = "A Dying Light 2 Save Editor. Allows to edit inventory and skills."
+authors = ["McHawk", "zCaazual"]
+license = "MIT License"
+repository = "https://github.com/Marcel-TO/DL2_Save_Editor.git"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -19,6 +19,7 @@ serde_json = "1.0"
 log = "0.4.20"
 tauri-plugin-log = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "dev" }
 regex = "1.10.2"
+dotenv = "0.15.0"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
