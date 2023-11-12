@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Backdrop from '@mui/material/Backdrop';
 import SpeedDial from '@mui/material/SpeedDial';
@@ -10,6 +10,8 @@ import PrintIcon from '@mui/icons-material/Print';
 import ShareIcon from '@mui/icons-material/Share';
 import { Button } from '@mui/material';
 import { invoke } from '@tauri-apps/api';
+import { info } from 'tauri-plugin-log-api';
+import { SaveFile } from '../../models/save-models';
 
 const actions = [
   { icon: <FileCopyIcon />, name: 'Copy' },
@@ -19,12 +21,15 @@ const actions = [
 ];
 
 export default function LoadSaveComponent() {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [currentSaveFile, setCurrentSaveFile] = useState<SaveFile>();
+
+
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-    const loadSave = () => {
-        invoke("load_save", {})
+    async function loadSave() {
+        await setCurrentSaveFile(await invoke<SaveFile>("load_save", {}))
     }
 
   return (
@@ -53,6 +58,16 @@ export default function LoadSaveComponent() {
     // </Box>
     <>
         <Button onClick={loadSave} variant='outlined' sx={{color: '#e9eecd', borderColor: '#e9eecd'}}>Load Save</Button>
+        <div>
+          <h2>Item Names:</h2>
+          {currentSaveFile?.items.map((itemArray, index) => (
+            <div key={index}>
+              {itemArray.map((item, itemIndex) => (
+                <div key={itemIndex}>{item.name}</div>
+              ))}
+            </div>
+          ))}
+        </div>
     </>
   );
 }

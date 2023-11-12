@@ -2,7 +2,7 @@ import './ids-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
 import { Fragment, useState } from 'react'
 import { invoke } from '@tauri-apps/api';
-import { IdData } from '../../models/idData';
+import { IdData } from '../../models/save-models';
 import CatchingPokemonIcon from '@mui/icons-material/CatchingPokemon';
 import { Box, Button, Collapse, Divider, List, ListItemButton, ListItemIcon, ListItemText, Slide, Snackbar } from '@mui/material';
 import SavedSearchIcon from '@mui/icons-material/SavedSearch';

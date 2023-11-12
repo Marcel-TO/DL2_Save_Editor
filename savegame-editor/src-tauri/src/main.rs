@@ -8,6 +8,7 @@ mod struct_data;
 use log::info;
 use dotenv::dotenv;
 use file_analizer::load_save_file;
+use struct_data::SaveFile;
 use id_fetcher::fetch_ids;
 
 
@@ -44,9 +45,9 @@ fn get_ids() -> Vec<struct_data::IdData> {
 }
 
 #[tauri::command(rename_all = "snake_case")]
-fn load_save() {
+fn load_save() -> SaveFile {
     let file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
-    load_save_file(&file_path);
+    load_save_file(&file_path)
 }
 
 

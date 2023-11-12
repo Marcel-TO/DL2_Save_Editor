@@ -92,7 +92,6 @@ pub fn load_save_file(file_path: &str) -> SaveFile {
         unlockable_items,
         items
     )
-
 }
 
 /// Represents a method for converting byte content into string content
@@ -448,9 +447,6 @@ fn find_all_inventory_chunks(content: &[u8], start_index: usize) -> (Vec<Invento
 
         // The 4 is for the SGDs name offset.
         let last_index: usize = chunks.last().map_or(start_index, |chunk| chunk.index + data_offset + 4);
-        
-        info!("{:?}", chunks);
-        info!("{:?}", last_index);
 
         (chunks, last_index)
     }
