@@ -449,6 +449,9 @@ fn find_all_inventory_chunks(content: &[u8], start_index: usize) -> (Vec<Invento
         // The 4 is for the SGDs name offset.
         let last_index: usize = chunks.last().map_or(start_index, |chunk| chunk.index + data_offset + 4);
         
+        info!("{:?}", chunks);
+        info!("{:?}", last_index);
+
         (chunks, last_index)
     }
 }
@@ -599,13 +602,23 @@ fn find_amount_of_matches(content: &[u8], start_index: usize, amount: usize) -> 
 fn get_indices_from_values(content: &[u8], start_index: usize, values: &[String]) -> Vec<usize>{
     // Prepare indices vector.
     let mut indices: Vec<usize> = Vec::new();
+
+    // Get first index.
+    if values.len() > 0 {
+        let first_index: usize = get_index_from_sequence(content, &start_index, &values[0].as_bytes(), true);
+        info!("{:?}", first_index);
+        indices.push(first_index);
+    }
+
     // Seperates the content into blocks and returns position if found. 
-    for value in values {
-        if let Some(index) = content[start_index..].windows(value.len()).position(|window| {
-            window == value.as_bytes()
-        }) {
-            indices.push(index + start_index);
-        }
+    for i in 1..values.len() {
+        let last_index: usize = indices[i - 1];
+        let match_bytes: &[u8] = values[i].as_bytes();
+        info!("{:?}", last_index);
+        info!("{:?}", match_bytes);
+        let current_index: usize = last_index + &values[i - 1].as_bytes().len();
+
+        indices.push(get_index_from_sequence(content, &current_index, match_bytes, true));
     }
 
     indices

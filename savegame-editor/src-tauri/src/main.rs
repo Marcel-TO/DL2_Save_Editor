@@ -63,7 +63,4 @@ fn main() {
             ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-    
-    // // For Debuggin savefile:
-    // load_save();
 }
