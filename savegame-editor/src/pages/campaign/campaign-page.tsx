@@ -5,7 +5,7 @@ export const CampaignPage = (): JSX.Element => {
     return (
         <>
         <div className="container">
-            <NavbarDrawer pagename={"Campaign"}></NavbarDrawer>
+            <NavbarDrawer pagename={"Campaign"} pagecontent={<h1>Welcome to CampaignPage</h1>}></NavbarDrawer>
         </div>
         </>
     )

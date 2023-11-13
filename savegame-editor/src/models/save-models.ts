@@ -59,5 +59,5 @@ export interface SaveFile {
     file_string: string,
     skills: Skills,
     unlockable_items: UnlockableItem[],
-    items: InventoryItem[][]
+    items: InventoryItem[][],
 }

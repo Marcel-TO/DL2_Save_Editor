@@ -5,7 +5,7 @@ export const BackpackPage = (): JSX.Element => {
     return (
         <>
         <div className="container">
-            <NavbarDrawer pagename={"Backpack"}></NavbarDrawer>
+            <NavbarDrawer pagename={"Backpack"} pagecontent={<h1>Welcome to BackpackPage</h1>}></NavbarDrawer>
         </div>
         </>
     )

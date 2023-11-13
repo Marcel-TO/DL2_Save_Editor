@@ -1,35 +1,34 @@
 import './ids-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
-import { Fragment, useState } from 'react'
-import { invoke } from '@tauri-apps/api';
+import { Fragment, useEffect, useState } from 'react'
 import { IdData } from '../../models/save-models';
 import CatchingPokemonIcon from '@mui/icons-material/CatchingPokemon';
-import { Box, Button, Collapse, Divider, List, ListItemButton, ListItemIcon, ListItemText, Slide, Snackbar } from '@mui/material';
+import { Box, Collapse, List, ListItemButton, ListItemIcon, ListItemText, Slide, Snackbar } from '@mui/material';
 import SavedSearchIcon from '@mui/icons-material/SavedSearch';
 import { FixedSizeList } from 'react-window';
 
 
 // The ID page
-export const IDsPage = (): JSX.Element => {
-    return (
+export const IDsPage = ({idData, handleIdData}: {idData: IdData[], handleIdData: Function}): JSX.Element => {
+  useEffect(() => {
+    if (idData.length == 0) {
+      handleIdData();
+    }
+  }, [idData, handleIdData])  
+  
+  return (
         <>
         <div className="container">
-            <NavbarDrawer pagename={"IDs"} pagecontent={idContent()}></NavbarDrawer>
+            <NavbarDrawer pagename={"IDs"} pagecontent={<IdContent idData={idData}/>}></NavbarDrawer>
         </div>
         </>
     )
 }
 
 // The content of the ID page
-const idContent = (): JSX.Element => {
+const IdContent = ({idData}: {idData: IdData[]}): JSX.Element => {
   // The handled data
-  const [idDatas, setIdDatas] = useState<IdData[]>([]);
   const [currentSelected, setCurrentSelected] = useState<string>("");
-
-  // Invokes backend and sets IDs.
-  async function handleIDs() {
-      await setIdDatas( await invoke("get_ids", {}));
-  }
 
   // Handles the current selected file.
   function handleCurrentSelected(filename: string) {
@@ -43,15 +42,12 @@ const idContent = (): JSX.Element => {
 
   return (
       <>
-          <Button onClick={handleIDs}>Get IDs</Button>
-          <Divider/>
           <div className="id-list-container">
-
-          <List
+            <List
               sx={{ width: '100%', minWidth: 360, bgcolor: 'transparent' }}
               component="nav"
               aria-labelledby="nested-list-subheader">
-              {idDatas?.map((item) => (
+              {idData.map((item) => (
                   <Fragment key={item.filename}>
                       <ListItemButton
                           onClick={() => handleCurrentSelected(item.filename)}>

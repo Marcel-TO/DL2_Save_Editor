@@ -20,7 +20,7 @@ use crate::struct_data::{
     ItemTypeEnum,
     InventoryItem,
     InventoryChunk,
-    Mod
+    Mod,
 };
 
 // Define global result definition for easier readability.
@@ -85,12 +85,13 @@ pub fn load_save_file(file_path: &str) -> SaveFile {
 
     // Get all items within the inventory.
     let items: Vec<Vec<InventoryItem>> = get_all_items(&file_content, jump_offset);
+
     SaveFile::new(
         file_path.to_string(),
         file_content,
         skills,
         unlockable_items,
-        items
+        items,
     )
 }
 
@@ -602,7 +603,6 @@ fn get_indices_from_values(content: &[u8], start_index: usize, values: &[String]
     // Get first index.
     if values.len() > 0 {
         let first_index: usize = get_index_from_sequence(content, &start_index, &values[0].as_bytes(), true);
-        info!("{:?}", first_index);
         indices.push(first_index);
     }
 
@@ -610,8 +610,6 @@ fn get_indices_from_values(content: &[u8], start_index: usize, values: &[String]
     for i in 1..values.len() {
         let last_index: usize = indices[i - 1];
         let match_bytes: &[u8] = values[i].as_bytes();
-        info!("{:?}", last_index);
-        info!("{:?}", match_bytes);
         let current_index: usize = last_index + &values[i - 1].as_bytes().len();
 
         indices.push(get_index_from_sequence(content, &current_index, match_bytes, true));

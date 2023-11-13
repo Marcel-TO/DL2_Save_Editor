@@ -5,7 +5,7 @@ export const PlayerPage = (): JSX.Element => {
     return (
         <>
         <div className="container">
-            <NavbarDrawer pagename={"Player"}></NavbarDrawer>
+            <NavbarDrawer pagename={"Player"} pagecontent={<h1>Welcome to PlayerPage</h1>}></NavbarDrawer>
         </div>
         </>
     )

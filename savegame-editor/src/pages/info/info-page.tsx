@@ -16,16 +16,68 @@ export const InfoPage = (): JSX.Element => {
 const infoDetails = (): JSX.Element => {
     return (
         <>
-            <Box>
+            <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>             
                 <Typography variant="h1" component="h1">
-                    Hello there, 
-                </Typography>                
-                <Typography variant="h1" component="h1">
-                    fellow Nightrunner! 
+                    Grettings Pilgrim! 
                 </Typography>
-                <Typography paragraph align='center' sx={{marginTop: '50px'}}>
-                    Introducing our work-in-progress application, the first public Dying Light 2 Editor! Developed by a dedicated team of two passionate gamers, our editor empowers you to take control of your Dying Light 2 experience like never before. With this tool, you can manipulate stats and customize items to tailor your in-game adventure to your liking. While not all features are implemented just yet, we're committed to continuously improving and expanding our editor to enhance your gaming journey. Stay tuned for updates and join us in shaping your Dying Light 2 experience!
+                <Typography paragraph align='center' sx={{ marginTop: '50px' }}>
+                    We are thrilled to present the first beta version of our Open-Source Save Editor for the Videogame ***Dying Light 2***. This tool allows players to take control of their game saves, unlocking a realm of possibilities and customization.
                 </Typography>
+                
+                <Typography variant="h2" component="h1" sx={{marginTop: '50px'}}>
+                    What has the Editor to offer?
+                </Typography>
+                <Typography paragraph align='left' sx={{ marginTop: '50px' }}>
+                    <ol type='I' style={{maxWidth: '600px'}}>
+                        <li>
+                            It is fully open source, fostering a collaborative environment where fellow gamers and developers alike can contribute to its evolution.
+                        </li>
+                        <li>
+                            The whole User Interface is customized for *Dying Light 2* and provides not only functionality but a fitting design.
+                        </li>
+                        <li>
+                            Enhancing the gaming experience is the goal of this editor. The community will therefore play a big role regarding future features.
+                        </li>
+                    </ol>
+                </Typography>
+
+                <Typography variant="h2" component="h1" sx={{marginTop: '50px'}}>
+                    Key Features
+                </Typography>
+                <Typography paragraph align='left' sx={{ marginTop: '50px' }}>
+                    <ul style={{maxWidth: '600px'}}>
+                        <li>
+                            All Skills can be adjusted and manipulated.
+                        </li>
+                        <li>
+                            Items can be repaired or switched (currently still limited due to the savefile size).
+                        </li>
+                        <li>
+                            An Index visualization of all IDs currently inside the game.
+                        </li>
+                        <li>
+                            Full stack consumables
+                        </li>
+                    </ul>
+                </Typography>
+
+                <Typography variant="h2" component="h1" sx={{marginTop: '50px'}}>
+                    Planned Features
+                </Typography>
+                <Typography paragraph align='left' sx={{ marginTop: '50px' }}>
+                    <ul style={{maxWidth: '600px'}}>
+                        <li>
+                            Calculating savefile size to switch to every desired weapon.
+                        </li>
+                        <li>
+                            Change Mods
+                        </li>
+                        <li>
+                            Change Stats
+                        </li>
+                    </ul>
+                </Typography>
+
                 <Typography variant="h2" component="h1" sx={{marginTop: '50px'}}>
                     Contributors
                 </Typography>

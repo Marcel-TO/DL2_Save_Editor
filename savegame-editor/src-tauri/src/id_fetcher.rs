@@ -1,4 +1,5 @@
-use std::{fs, env, error::Error};
+use std::{fs, error::Error, path::Path};
+
 use crate::struct_data::IdData;
 
 // Define global result definition for easier readability.
@@ -6,48 +7,40 @@ type Result<T> = std::result::Result<T,Box<dyn Error>>;
 
 /// Represents a method for fetching all ID datas. 
 /// 
-/// ### Returns `Result<Vec<IdData>>`
+/// ### Returns `Vec<IdData>`
 /// A list of all fetched id sections.
-pub fn fetch_ids() -> Result<Vec<IdData>> {
-    let mut id_datas = Vec::new();
+pub fn fetch_ids(id_path: &str) -> Result<Vec<IdData>> {
+    let mut id_datas: Vec<IdData> = Vec::new();
 
-    if let Ok(current_dir) = env::current_dir() {
-        // Now, you can use `current_dir` to construct full paths or access files
-        let current_path = current_dir.join("IDs/");
+    let entries = fs::read_dir(id_path).map_err(|_| "Unable to locate ID directory.")?;
 
-        if let Ok(entries) = fs::read_dir(current_path) {
-            for entry in entries {
-                if let Ok(entry) = entry {
-                    if entry.file_type().ok().map_or(false, |t| t.is_file()) {
-                        if let Ok(id_data) = read_id_file(entry.path().to_str().unwrap()) {
-                            id_datas.push(id_data);
-                        }
-                    }
-                }
+    for entry in entries {
+        let entry = entry.map_err(|e| format!("Error reading directory entry: {}", e))?;
+
+        if entry.file_type().map_or(false, |t| t.is_file()) {
+            if let Ok(id_data) = read_id_file(entry.path().to_str().ok_or("Invalid file path")?) {
+                id_datas.push(id_data);
             }
-        } else {
-            return Err("Unable to locate ID directory.".into());
         }
-    } else {
-        return Err("Unable to retrieve the current working directory.".into());
     }
 
     Ok(id_datas)
 }
 
-/// Represents a method for reading a single id file and retreiving the IDs.
-/// 
+/// Represents a method for reading a single id file and retrieving the IDs.
+///
 /// ### Parameter
 /// - `file_path`: The filepath from the current selected ID file.
-/// 
+///
 /// ### Returns `Result<IdData>`
 /// The found IDs from the selected file.
 fn read_id_file(file_path: &str) -> Result<IdData> {
-    // Create a PathBuf from the file_path
-    let path = std::path::Path::new(file_path);
-
-    // Get the filename without extension
-    let filename = path.file_stem().and_then(|s| s.to_str()).unwrap_or_default().to_string();
+    let path = Path::new(file_path);
+    let filename = path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or_default()
+        .to_string();
 
     let file_content = fs::read_to_string(file_path)?;
 

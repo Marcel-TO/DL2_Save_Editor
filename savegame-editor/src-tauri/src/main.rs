@@ -5,35 +5,14 @@ mod file_analizer;
 mod id_fetcher;
 mod struct_data;
 
-use log::info;
 use dotenv::dotenv;
 use file_analizer::load_save_file;
 use struct_data::SaveFile;
 use id_fetcher::fetch_ids;
 
-
 #[tauri::command(rename_all = "snake_case")]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
-#[tauri::command(rename_all = "snake_case")]
-fn file_to_backend(file_path: &str) -> String {
-    info!("RUST: {}", file_path);
-    let result = format!("{}", file_path);
-    info!("{}", result);
-    result
-}
-
-#[tauri::command(rename_all = "snake_case")]
-fn get_content(file_path: &str) {
-    info!("RUST: {}", file_path);
-    
-}
-
-#[tauri::command(rename_all = "snake_case")]
-fn get_ids() -> Vec<struct_data::IdData> {
-    match fetch_ids() {
+fn get_ids(id_path: &str) -> Vec<struct_data::IdData> {
+    match fetch_ids(id_path) {
         Ok(id_datas) => {
             id_datas
         }
@@ -45,8 +24,10 @@ fn get_ids() -> Vec<struct_data::IdData> {
 }
 
 #[tauri::command(rename_all = "snake_case")]
-fn load_save() -> SaveFile {
-    let file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
+fn load_save(file_path: &str) -> SaveFile {
+    // // Uncomment the following line to if .env file should be selected.
+    // file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
+    
     load_save_file(&file_path)
 }
 
@@ -56,9 +37,6 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_log::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
-            greet, 
-            file_to_backend,
-            get_content,
             get_ids,
             load_save
             ])

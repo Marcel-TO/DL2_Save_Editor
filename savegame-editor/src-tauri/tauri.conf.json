@@ -7,8 +7,8 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "savegame-editor",
-    "version": "0.0.0"
+    "productName": "Dying Light 2 Save Editor",
+    "version": "0.1.0"
   },
   "tauri": {
     "allowlist": {
@@ -24,12 +24,21 @@
       "shell": {
         "all": false,
         "open": true
+      },
+      "fs": {
+        "all": true,
+        "scope": [
+          "$RESOURCE/*"
+        ]
       }
     },
     "bundle": {
+      "resources": [
+        "./IDs/*"
+      ],
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "com.dyinglight.save.editor",
       "icon": [
         "icons/main-icon.ico",
         "icons/32x32.png",
@@ -46,9 +55,9 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "savegame-editor",
-        "width": 800,
-        "height": 600
+        "title": "Dying Light 2 Save Editor",
+        "width": 1080,
+        "height": 800
       }
     ]
   }

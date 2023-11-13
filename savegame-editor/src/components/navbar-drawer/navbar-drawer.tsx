@@ -19,7 +19,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ListItemIcon from '@mui/material/ListItemIcon';
-import AccountTree from '@mui/icons-material/AccountTree';
+import AccountTreeRoundedIcon from '@mui/icons-material/AccountTreeRounded';
 import Inventory2RoundedIcon from '@mui/icons-material/Inventory2Rounded';
 import SchoolRoundedIcon from '@mui/icons-material/SchoolRounded';
 import BackpackRoundedIcon from '@mui/icons-material/BackpackRounded';
@@ -128,12 +128,12 @@ const drawerTheme = createTheme({
 const drawerWidth = 240;
 
 // The different pages
-const itemPages: [string, JSX.Element, string][] = [
-  ['Skills', <AccountTree/>, '/skills'], 
-  ['Experience', <SchoolRoundedIcon/>, '/experience'], 
-  ['Inventory', <Inventory2RoundedIcon/>, '/inventory'], 
-  ['Backpack', <BackpackRoundedIcon/>, '/backpack'], 
-  ['Campaign', <AssignmentLateRoundedIcon/>, '/campaign'],
+const itemPages: [string, JSX.Element, string, boolean][] = [
+  ['Skills', <AccountTreeRoundedIcon/>, '/skills', false], 
+  ['Experience', <SchoolRoundedIcon/>, '/experience', true], 
+  ['Inventory', <Inventory2RoundedIcon/>, '/inventory', false], 
+  ['Backpack', <BackpackRoundedIcon/>, '/backpack', true], 
+  ['Campaign', <AssignmentLateRoundedIcon/>, '/campaign', true],
 ];
 const otherPages: [string, JSX.Element, string][] = [
   ['Player', <AccountCircleOutlinedIcon/>, '/player'],
@@ -240,7 +240,7 @@ export const NavbarDrawer = ({pagename, pagecontent}: NavbarDrawerProps): JSX.El
                 </List>
                 <Divider sx={{ backgroundColor: '#e9eecd60' }} />
                 <List>
-                  {itemPages.map(([text, icon, link]) => (
+                  {itemPages.map(([text, icon, link, isDisabled]) => (
                     <ListItem key={text} disablePadding sx={{
                       display: 'block',
                       color: '#e9eecd',
@@ -256,6 +256,7 @@ export const NavbarDrawer = ({pagename, pagecontent}: NavbarDrawerProps): JSX.El
                           },
                         }}
                         component={Link} to={link}
+                        disabled={isDisabled}
                       >
                         <ListItemIcon
                           sx={{

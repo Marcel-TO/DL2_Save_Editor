@@ -56,7 +56,7 @@ export default function ContributorsAvatar() {
                         badgeContent=" ">                    
                         <Avatar 
                             alt="McHawk" 
-                            src="/src/assets/pictures/contributors/mchawk.jpg" 
+                            src="/src/assets/pictures/mchawk.jpg" 
                             sx={{ width: 56, height: 56 }} 
                             />
                     </StyledBadge>
@@ -70,15 +70,13 @@ export default function ContributorsAvatar() {
                         badgeContent=" ">                    
                         <Avatar 
                             alt="McHawk" 
-                            src="/src/assets/pictures/contributors/caz.png" 
+                            src="/src/assets/pictures/caz.png" 
                             sx={{ width: 56, height: 56, backgroundColor: '#e9eecd' }} 
                             />
                     </StyledBadge>
                 </a>
             </CustomToolTip>
     </AvatarGroup>
-      
-      <img src=''></img>
     </Stack>
   );
 }
