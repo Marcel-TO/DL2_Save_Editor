@@ -54,7 +54,74 @@ const InventoryContent = ({currentSaveFile}: {currentSaveFile: SaveFile | undefi
                                             <ListItemIcon>
                                                 <ConstructionRoundedIcon sx={{ color: '#e9eecd' }} />
                                             </ListItemIcon>
-                                            <ListItemText primary={item.name} />
+                                            <ListItemText 
+                                                primary={item.name}
+                                                secondary={
+                                                    <ThemeProvider theme={listItemTheme}>
+                                                        <Box sx={{display: 'flex', flexDirection: 'column'}}>
+                                                            <Box sx={{display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center'}}>
+                                                                <Typography
+                                                                    sx={{ minWidth: '100px' }}
+                                                                    variant="subtitle1">
+                                                                        {"Index: "}
+                                                                </Typography>
+                                                                <Typography
+                                                                    variant='body2'>
+                                                                    {item.chunk_data.index}
+                                                                </Typography> 
+                                                            </Box>
+
+                                                            
+                                                            <Box sx={{display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center'}}>
+                                                                <Typography
+                                                                    sx={{ minWidth: '100px' }}
+                                                                    variant="subtitle1">
+                                                                        {"Level: "}
+                                                                </Typography>
+                                                                <Typography
+                                                                    variant='body2'>
+                                                                    {item.chunk_data.level_value}
+                                                                </Typography> 
+                                                            </Box>
+
+                                                            <Box sx={{display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center'}}>
+                                                                <Typography
+                                                                    sx={{ minWidth: '100px' }}
+                                                                    variant="subtitle1">
+                                                                        {"Seed: "}
+                                                                </Typography>
+                                                                <Typography
+                                                                    variant='body2'>
+                                                                    {item.chunk_data.seed_value}
+                                                                </Typography> 
+                                                            </Box>
+
+                                                            <Box sx={{display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center'}}>
+                                                                <Typography
+                                                                    sx={{ minWidth: '100px' }}
+                                                                    variant="subtitle1">
+                                                                        {"Amount: "}
+                                                                </Typography>
+                                                                <Typography
+                                                                    variant='body2'>
+                                                                    {item.chunk_data.amount_value}
+                                                                </Typography> 
+                                                            </Box>
+
+                                                            <Box sx={{display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center'}}>
+                                                                <Typography
+                                                                    sx={{ minWidth: '100px' }}
+                                                                    variant="subtitle1">
+                                                                        {"Durability: "}
+                                                                </Typography>
+                                                                <Typography
+                                                                    variant='body2'>
+                                                                    {item.chunk_data.durability_value}
+                                                                </Typography> 
+                                                            </Box>
+                                                        </Box>
+                                                    </ThemeProvider>
+                                                }/>
                                         </ListItemButton>
                                     </Fragment>
                                 ))}
@@ -131,4 +198,19 @@ const tabTheme = createTheme({
             }
         },
     }
-})
+});
+
+const listItemTheme = createTheme({
+    palette: {
+        mode: 'dark',
+    },
+    components: {
+        MuiTypography: {
+            styleOverrides: {
+                root: {
+                    color: 'white',
+                }
+            }
+        }
+    }
+});

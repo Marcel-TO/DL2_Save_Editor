@@ -5,7 +5,7 @@
 //! - Unlockable items (craftplans, toolskins, consumables)
 //! - Inventory items (weapons, gear, accesssories, etc)
 
-use std::{fs, io::Read};
+use std::{fs, io::Read, mem};
 use log::info;
 use std::error::Error;
 use regex::Regex;
@@ -294,6 +294,7 @@ fn get_all_items(content: &[u8], start_index: usize) -> Vec<Vec<InventoryItem>> 
         let mut inner_item_list: Vec<InventoryItem> = Vec::new();
         // Find all data chunks for the section.
         let (chunks, new_index) = find_all_inventory_chunks(content, index);
+        info!("{:?}", chunks);
 
         // Check if there are no chunks left.
         if chunks.len() == 0 {
