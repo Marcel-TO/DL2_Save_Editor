@@ -1,3 +1,4 @@
+import './contributors-avatar.css';
 import { styled } from '@mui/material/styles';
 import Badge from '@mui/material/Badge';
 import Avatar from '@mui/material/Avatar';
@@ -56,9 +57,10 @@ export default function ContributorsAvatar() {
                         badgeContent=" ">                    
                         <Avatar 
                             alt="McHawk" 
-                            src="/src/assets/pictures/mchawk.jpg" 
                             sx={{ width: 56, height: 56 }} 
-                            />
+                            >
+                              <div className="contributor-mchawk-image"></div>
+                            </Avatar>
                     </StyledBadge>
                 </a>
             </CustomToolTip>
@@ -69,10 +71,10 @@ export default function ContributorsAvatar() {
                         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                         badgeContent=" ">                    
                         <Avatar 
-                            alt="McHawk" 
-                            src="/src/assets/pictures/caz.png" 
-                            sx={{ width: 56, height: 56, backgroundColor: '#e9eecd' }} 
-                            />
+                          alt="Caz" 
+                          sx={{ width: 56, height: 56, backgroundColor: '#e9eecd' }} >
+                         <div className="contributor-caz-image"></div>
+                        </Avatar>
                     </StyledBadge>
                 </a>
             </CustomToolTip>

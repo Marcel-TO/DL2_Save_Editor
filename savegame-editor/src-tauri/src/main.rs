@@ -7,7 +7,6 @@ mod struct_data;
 
 use dotenv::dotenv;
 use file_analizer::load_save_file;
-use log::info;
 use struct_data::SaveFile;
 use id_fetcher::fetch_ids;
 use tauri::AppHandle;
@@ -15,7 +14,6 @@ use tauri::AppHandle;
 #[tauri::command(rename_all = "snake_case")]
 fn get_ids(app_handle: AppHandle) -> Vec<struct_data::IdData> {
     let resource_path = app_handle.path_resolver().resolve_resource("./IDs/").unwrap();
-    info!("{:?}", resource_path.display());
 
     match fetch_ids(&resource_path.display().to_string()) {
         Ok(id_datas) => {
@@ -36,6 +34,7 @@ fn load_save(file_path: &str) -> SaveFile {
 
 fn main() {
     dotenv().ok();
+    // Comment tauri builder if debugging.
     tauri::Builder::default()
         .plugin(tauri_plugin_log::Builder::default().build())
         .invoke_handler(tauri::generate_handler![

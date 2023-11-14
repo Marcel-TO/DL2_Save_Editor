@@ -34,7 +34,8 @@
     },
     "bundle": {
       "resources": [
-        "./IDs/*"
+        "./IDs/*",
+        "../src/assets/*"
       ],
       "active": true,
       "targets": "all",

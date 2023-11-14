@@ -2,7 +2,7 @@
 name = "savegame-editor"
 version = "0.0.3"
 description = "A Dying Light 2 Save Editor. Allows to edit inventory and skills."
-authors = ["McHawk", "zCaazual"]
+authors = ["Marcel-TO", "zCaazual"]
 license = "MIT License"
 repository = "https://github.com/Marcel-TO/DL2_Save_Editor.git"
 edition = "2021"
