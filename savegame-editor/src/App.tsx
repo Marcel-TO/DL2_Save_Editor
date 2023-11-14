@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { invoke } from "@tauri-apps/api/tauri";
 import "./App.css";
 
 import { MainPage } from "./pages/main/main-page";
@@ -14,35 +13,22 @@ import { IDsPage } from "./pages/ids/ids-page";
 import { InfoPage } from "./pages/info/info-page";
 import { Background } from "./components/background/background";
 import { IdData, SaveFile } from "./models/save-models";
-import { open } from '@tauri-apps/api/dialog';
 
 function App() {
   const [idDatas, setCurrentIdDatas] = useState<IdData[]>([])
   const [currentSaveFile, setCurrentSaveFile] = useState<SaveFile>();
 
-  async function handleSetCurrentIdDatas() {
-    let filepath = await open({
-      multiple: false,
-      directory: true,
-    });
-
-    if (filepath != null && !Array.isArray(filepath)) {
-      setCurrentIdDatas(await invoke<IdData[]>("get_ids", {id_path: filepath}));
-    }
-    
-  }
-
   const router = createBrowserRouter(
     createRoutesFromElements(
       [
-        (<Route path={'/'} element={<MainPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile}/>}></Route>),
+        (<Route path={'/'} element={<MainPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} setIdData={setCurrentIdDatas}/>}></Route>),
         (<Route path={'/skills'} element={<SkillPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile}/>}></Route>),
         (<Route path={'/experience'} element={<ExperiencePage/>}></Route>),
         (<Route path={'/inventory'} element={<InventoryPage currentSaveFile={currentSaveFile}/>}></Route>),
         (<Route path={'/backpack'} element={<BackpackPage/>}></Route>),
         (<Route path={'/campaign'} element={<CampaignPage/>}></Route>),
         (<Route path={'/player'} element={<PlayerPage/>}></Route>),
-        (<Route path={'/ids'} element={<IDsPage idData={idDatas} handleIdData={handleSetCurrentIdDatas}/>}></Route>),
+        (<Route path={'/ids'} element={<IDsPage idData={idDatas}/>}></Route>),
         (<Route path={'/info'} element={<InfoPage/>}></Route>),
       ]
     )

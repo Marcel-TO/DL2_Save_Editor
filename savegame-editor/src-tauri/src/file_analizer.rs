@@ -533,12 +533,11 @@ fn find_amount_of_matches(content: &[u8], start_index: usize, amount: usize) -> 
     // The Regex pattern to match the sgds.
     let pattern: &str = r"[a-zA-Z0-9_]*SGDs";
     // The patterns that need to be checked.
-    let sgd_pattern: &str = "SGDs";
-    let savegame_pattern: &str = "Savegame";
 
     // Defines the regex instances.
     let re: Regex = Regex::new(pattern).expect("Invalid regex pattern.");
-    let savegame_re: Regex = Regex::new(savegame_pattern).expect("Invalid regex pattern.");
+    let savegame_re: Regex = Regex::new("Savegame").expect("Invalid regex pattern.");
+    let is_savegame_match: bool = savegame_re.is_match(&string_data);
 
     for mat in re.find_iter(&string_data) {
         // There are mod slots for each item. Even tokens, I mean why not Techland, right?
@@ -546,9 +545,9 @@ fn find_amount_of_matches(content: &[u8], start_index: usize, amount: usize) -> 
         if counter <= amount && mat.as_str().len() >= 4 {
             // Check if it is an item or a mod.
             if !mat.as_str().contains("Mod") && !mat.as_str().contains("charm") &&
-                mat.as_str() != "NoneSGDs" && mat.as_str() != sgd_pattern {
+                mat.as_str() != "NoneSGDs" && mat.as_str() != "SGDs" {
                     // Check if the bullet acts as item or mod.
-                    if mat.as_str().contains("Bullet") && mod_counter > 0 && mod_counter <= 4 {
+                    if (mat.as_str().contains("Bullet") && mod_counter > 0 && mod_counter <= 4) || mod_counter == 4 {
                         match_values.push(mat.as_str().to_string());
                         mod_counter += 1;
                         continue;
@@ -559,14 +558,18 @@ fn find_amount_of_matches(content: &[u8], start_index: usize, amount: usize) -> 
                     mod_counter = 0;
                 } 
                 // Checks if the SGDs is at the end of the found list.
-                else if mat.as_str() == sgd_pattern && mod_counter != 4 {
+                else if mat.as_str() == "SGDs" && mod_counter != 4 {
                     break;
                 } 
                 // Checks if the match equals SGDs, since it is also possible for weapon mods.
-                else if mat.as_str() == sgd_pattern {
+                else if mat.as_str() == "SGDs" {
                     // Check if Savegame indicator is between
-                    if savegame_re.find(&string_data).map_or(false,|savegame_mat| savegame_mat.start() < mat.start()) {
-                        break;
+                    if is_savegame_match {
+                        if let Some(savegame) = savegame_re.find(&string_data) {
+                            if savegame.start() < mat.start() {
+                                break;
+                            }
+                        }
                     }
 
                     match_values.push(mat.as_str().to_string());

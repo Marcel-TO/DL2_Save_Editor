@@ -1,6 +1,6 @@
 import './ids-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useState } from 'react'
 import { IdData } from '../../models/save-models';
 import CatchingPokemonIcon from '@mui/icons-material/CatchingPokemon';
 import { Box, Collapse, List, ListItemButton, ListItemIcon, ListItemText, Slide, Snackbar } from '@mui/material';
@@ -9,13 +9,7 @@ import { FixedSizeList } from 'react-window';
 
 
 // The ID page
-export const IDsPage = ({idData, handleIdData}: {idData: IdData[], handleIdData: Function}): JSX.Element => {
-  useEffect(() => {
-    if (idData.length == 0) {
-      handleIdData();
-    }
-  }, [idData, handleIdData])  
-  
+export const IDsPage = ({idData}: {idData: IdData[]}): JSX.Element => {  
   return (
         <>
         <div className="container">

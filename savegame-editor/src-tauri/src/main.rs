@@ -7,12 +7,17 @@ mod struct_data;
 
 use dotenv::dotenv;
 use file_analizer::load_save_file;
+use log::info;
 use struct_data::SaveFile;
 use id_fetcher::fetch_ids;
+use tauri::AppHandle;
 
 #[tauri::command(rename_all = "snake_case")]
-fn get_ids(id_path: &str) -> Vec<struct_data::IdData> {
-    match fetch_ids(id_path) {
+fn get_ids(app_handle: AppHandle) -> Vec<struct_data::IdData> {
+    let resource_path = app_handle.path_resolver().resolve_resource("./IDs/").unwrap();
+    info!("{:?}", resource_path.display());
+
+    match fetch_ids(&resource_path.display().to_string()) {
         Ok(id_datas) => {
             id_datas
         }
@@ -25,9 +30,6 @@ fn get_ids(id_path: &str) -> Vec<struct_data::IdData> {
 
 #[tauri::command(rename_all = "snake_case")]
 fn load_save(file_path: &str) -> SaveFile {
-    // // Uncomment the following line to if .env file should be selected.
-    // file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
-    
     load_save_file(&file_path)
 }
 
@@ -42,4 +44,8 @@ fn main() {
             ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+
+    // // Uncomment the following line to if .env file should be selected.
+    // let file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
+    // load_save(&file_path);
 }

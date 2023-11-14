@@ -1,23 +1,23 @@
 import './main-page.css';
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer';
-import { SaveFile } from '../../models/save-models';
+import { IdData, SaveFile } from '../../models/save-models';
 import { Button, Card, CardActions, CardContent, CardHeader, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography, createTheme } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
 import { open } from '@tauri-apps/api/dialog';
 import { invoke } from "@tauri-apps/api/tauri";
 import { Fragment, useState } from 'react';
 
-export const MainPage = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function}): JSX.Element => {    
+export const MainPage = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function}): JSX.Element => {    
     return (
         <>
             <div className="container">
-                <NavbarDrawer pagename={"Main"} pagecontent={<MainContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile}/>}></NavbarDrawer>
+                <NavbarDrawer pagename={"Main"} pagecontent={<MainContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} setIdData={setIdData}/>}></NavbarDrawer>
             </div>
         </>
     )
 }
 
-const MainContent = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function}): JSX.Element => {    
+const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function}): JSX.Element => {    
     const [isOpen, setOpen] = useState(false);
 
     const handleClickOpen = () => {
@@ -33,6 +33,10 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: Sa
         handleClose();
     };
 
+    async function handleSetIdData() {
+        await setIdData(await invoke<IdData>("get_ids", {}))
+    }
+
     async function handleCurrentSaveFile() {
         let filepath = await open({
             multiple: false,
@@ -43,7 +47,8 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: Sa
           });
       
           if (filepath != null && !Array.isArray(filepath)) {
-            await setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: filepath}))
+            await setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: filepath}));
+            await handleSetIdData();
           }
     };
 

@@ -9,10 +9,10 @@ type Result<T> = std::result::Result<T,Box<dyn Error>>;
 /// 
 /// ### Returns `Vec<IdData>`
 /// A list of all fetched id sections.
-pub fn fetch_ids(id_path: &str) -> Result<Vec<IdData>> {
+pub fn fetch_ids(id_path: &String) -> Result<Vec<IdData>> {
     let mut id_datas: Vec<IdData> = Vec::new();
 
-    let entries = fs::read_dir(id_path).map_err(|_| "Unable to locate ID directory.")?;
+    let entries = fs::read_dir(id_path).unwrap();
 
     for entry in entries {
         let entry = entry.map_err(|e| format!("Error reading directory entry: {}", e))?;
