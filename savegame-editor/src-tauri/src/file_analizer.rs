@@ -27,13 +27,7 @@ use crate::struct_data::{
 type Result<T> = std::result::Result<T,Box<dyn Error>>;
 
 // Defines the first sequence for the skill section.
-static START_SKILLS: [u8; 35] = [
-    0x41, 0x6E, 0x74, 0x69, 0x7A, 0x69, 0x6E, 0x43,
-    0x61, 0x70, 0x61, 0x63, 0x69, 0x74, 0x79, 0x55,
-    0x70, 0x67, 0x72, 0x61, 0x64, 0x65, 0x53, 0x74,
-    0x61, 0x6D, 0x69, 0x6E, 0x61, 0x5F, 0x73, 0x6B,
-    0x69, 0x6C, 0x6C
-];
+static START_SKILLS: &[u8] = "Skills::SkillInstance".as_bytes();
 
 // Defines the last sequence for the skill section.
 static END_SKILLS: [u8; 33] = [
@@ -487,7 +481,7 @@ fn get_sgd_matches(content: &[u8], start_index: usize) -> (Vec<String>, Vec<usiz
     // Check if Savegame section is between the start and the first SGDs.
     let mut first_index: usize = 0;
 
-    if match_values.len() > 1 {
+    if match_values.len() >= 1 {
         first_index = match_indices[0];
     }
     

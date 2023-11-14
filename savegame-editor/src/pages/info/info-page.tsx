@@ -21,7 +21,7 @@ const infoDetails = (): JSX.Element => {
                     Grettings Pilgrim! 
                 </Typography>
                 <Typography paragraph align='center' sx={{ marginTop: '50px' }}>
-                    We are thrilled to present the first beta version of our Open-Source Save Editor for the Videogame ***Dying Light 2***. This tool allows players to take control of their game saves, unlocking a realm of possibilities and customization.
+                    We are thrilled to present the first beta version of our Open-Source Save Editor for the Videogame <strong><i>Dying Light 2</i></strong>. This tool allows players to take control of their game saves, unlocking a realm of possibilities and customization.
                 </Typography>
                 
                 <Typography variant="h2" component="h1" sx={{marginTop: '50px'}}>
