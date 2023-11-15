@@ -1,0 +1,22 @@
+{
+    "inventory-items": [
+        {
+            "name": "Max Amount",
+            "method-name": "change_items_amount"
+        },
+        {
+            "name": "Max Durability",
+            "method-name": "change_items_durability"
+        }
+    ],
+    "skill-items": [
+        {
+            "name": "Max Base Skills",
+            "method-name": "change_skills_base_max"
+        },
+        {
+            "name": "Max Legend Skills",
+            "method-name": "change_skills_legend_max"
+        }
+    ]
+}

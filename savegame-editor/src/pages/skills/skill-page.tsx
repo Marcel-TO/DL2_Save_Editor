@@ -1,7 +1,7 @@
 import './skill-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
 import { SaveFile } from '../../models/save-models'
-import { Box, List, ListItemButton, ListItemIcon, ListItemText, Tab, Tabs, Typography, createTheme, styled } from '@mui/material'
+import { Box, Divider, List, ListItemButton, ListItemIcon, ListItemText, Tab, Tabs, Typography, createTheme, styled } from '@mui/material'
 import { Fragment, useState } from 'react';
 import { ThemeProvider } from '@emotion/react';
 import AccountTreeRoundedIcon from '@mui/icons-material/AccountTreeRounded';
@@ -47,8 +47,40 @@ const SkillContent = ({currentSaveFile}: {currentSaveFile: SaveFile | undefined}
                                         <ListItemIcon>
                                             <AccountTreeRoundedIcon sx={{ color: '#e9eecd' }} />
                                         </ListItemIcon>
-                                        <ListItemText primary={item.name} />
+                                        <ListItemText 
+                                            primary={item.name} 
+                                            secondary={
+                                                <ThemeProvider theme={listItemTheme}>
+                                                    <Box sx={{display: 'flex', flexDirection: 'column'}}>
+                                                        <Box sx={{display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center'}}>
+                                                            <Typography
+                                                                sx={{ minWidth: '100px' }}
+                                                                variant="subtitle1">
+                                                                    {"Index: "}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant='body2'>
+                                                                {item.index}
+                                                            </Typography> 
+                                                        </Box>
+
+                                                        
+                                                        <Box sx={{display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center'}}>
+                                                            <Typography
+                                                                sx={{ minWidth: '100px' }}
+                                                                variant="subtitle1">
+                                                                    {"Value: "}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant='body2'>
+                                                                {item.points_value}
+                                                            </Typography> 
+                                                        </Box>
+                                                    </Box>
+                                                </ThemeProvider>
+                                            }/>
                                     </ListItemButton>
+                                    <Divider/>
                                 </Fragment>
                             ))}
                         </List>
@@ -64,7 +96,38 @@ const SkillContent = ({currentSaveFile}: {currentSaveFile: SaveFile | undefined}
                                         <ListItemIcon>
                                             <AccountTreeRoundedIcon sx={{ color: '#e9eecd' }} />
                                         </ListItemIcon>
-                                        <ListItemText primary={item.name} />
+                                        <ListItemText 
+                                            primary={item.name}
+                                            secondary={
+                                                <ThemeProvider theme={listItemTheme}>
+                                                    <Box sx={{display: 'flex', flexDirection: 'column'}}>
+                                                        <Box sx={{display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center'}}>
+                                                            <Typography
+                                                                sx={{ minWidth: '100px' }}
+                                                                variant="subtitle1">
+                                                                    {"Index: "}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant='body2'>
+                                                                {item.index}
+                                                            </Typography> 
+                                                        </Box>
+
+                                                        
+                                                        <Box sx={{display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center'}}>
+                                                            <Typography
+                                                                sx={{ minWidth: '100px' }}
+                                                                variant="subtitle1">
+                                                                    {"Value: "}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant='body2'>
+                                                                {item.points_value}
+                                                            </Typography> 
+                                                        </Box>
+                                                    </Box>
+                                                </ThemeProvider>
+                                            }/>
                                     </ListItemButton>
                                 </Fragment>
                             ))}
@@ -140,4 +203,19 @@ const tabTheme = createTheme({
             }
         },
     }
-})
+});
+
+const listItemTheme = createTheme({
+    palette: {
+        mode: 'dark',
+    },
+    components: {
+        MuiTypography: {
+            styleOverrides: {
+                root: {
+                    color: 'white',
+                }
+            }
+        }
+    }
+});

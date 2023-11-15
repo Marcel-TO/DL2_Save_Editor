@@ -61,3 +61,16 @@ export interface SaveFile {
     unlockable_items: UnlockableItem[],
     items: InventoryItem[][],
 }
+
+export interface ItemTemplates {
+    templates: {
+        "inventory-items": {
+            "name": string,
+            "method-name": string
+        },
+        "skill-items": {
+            "name": string,
+            "method-name": string
+        }
+    }
+}

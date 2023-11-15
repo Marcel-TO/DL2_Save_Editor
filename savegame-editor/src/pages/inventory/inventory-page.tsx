@@ -1,36 +1,45 @@
 import './inventory-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
 import { SaveFile } from '../../models/save-models'
-import { Box, List, ListItemButton, ListItemIcon, ListItemText, Tab, Tabs, Typography, createTheme, styled } from '@mui/material'
+import { Box, Button, Divider, List, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Tab, Tabs, Typography, createTheme, styled } from '@mui/material'
 import { Fragment, useState } from 'react';
 import { ThemeProvider } from '@emotion/react';
 import ConstructionRoundedIcon from '@mui/icons-material/ConstructionRounded';
+import template from '../../models/item-templates.json';
 
-
-export const InventoryPage = ({currentSaveFile}: {currentSaveFile: SaveFile | undefined}): JSX.Element => {
+export const InventoryPage = ({ currentSaveFile }: { currentSaveFile: SaveFile | undefined }): JSX.Element => {
     return (
         <>
-        <div className="container">
-            <NavbarDrawer pagename={"Inventory"} pagecontent={<InventoryContent currentSaveFile={currentSaveFile}/>}></NavbarDrawer>
-        </div>
+            <div className="container">
+                <NavbarDrawer pagename={"Inventory"} pagecontent={<InventoryContent currentSaveFile={currentSaveFile} />}></NavbarDrawer>
+            </div>
         </>
     )
 }
 
-const InventoryContent = ({currentSaveFile}: {currentSaveFile: SaveFile | undefined}) => {
-    const [value, setValue] = useState(0);
+const InventoryContent = ({ currentSaveFile }: { currentSaveFile: SaveFile | undefined }) => {
+    const [tabIndex, setValue] = useState(0);
 
     const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
-    
+
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const isOpen = Boolean(anchorEl);
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
     return (
         <>
             <ThemeProvider theme={tabTheme}>
-                <Box sx={{ width: '100%', backgroundColor: '#00000070'}}>
-                    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                        <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-                        {currentSaveFile?.items.map((_, index) => (
+                <Box sx={{ width: '100%', backgroundColor: '#00000070' }}>
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex', flexDirection: 'row', position: 'relative' }}>
+                        <Tabs value={tabIndex} onChange={handleChange}>
+                            {currentSaveFile?.items.map((_, index) => (
                                 <StyledTab
                                     key={index}
                                     icon={<ConstructionRoundedIcon />}
@@ -42,7 +51,7 @@ const InventoryContent = ({currentSaveFile}: {currentSaveFile: SaveFile | undefi
                         </Tabs>
                     </Box>
                     {currentSaveFile?.items.map((itemArray, index) => (
-                        <CustomTabPanel key={index} value={value} index={index}>
+                        <CustomTabPanel key={index} value={tabIndex} index={index}>
                             <List
                                 sx={{ width: '100%', minWidth: 360, bgcolor: 'transparent' }}
                                 component="nav"
@@ -54,81 +63,118 @@ const InventoryContent = ({currentSaveFile}: {currentSaveFile: SaveFile | undefi
                                             <ListItemIcon>
                                                 <ConstructionRoundedIcon sx={{ color: '#e9eecd' }} />
                                             </ListItemIcon>
-                                            <ListItemText 
+                                            <ListItemText
                                                 primary={item.name}
                                                 secondary={
                                                     <ThemeProvider theme={listItemTheme}>
-                                                        <Box sx={{display: 'flex', flexDirection: 'column'}}>
-                                                            <Box sx={{display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center'}}>
+                                                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                                                            <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
                                                                 <Typography
                                                                     sx={{ minWidth: '100px' }}
                                                                     variant="subtitle1">
-                                                                        {"Index: "}
+                                                                    {"Index: "}
                                                                 </Typography>
                                                                 <Typography
                                                                     variant='body2'>
                                                                     {item.chunk_data.index}
-                                                                </Typography> 
+                                                                </Typography>
                                                             </Box>
 
-                                                            
-                                                            <Box sx={{display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center'}}>
+
+                                                            <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
                                                                 <Typography
                                                                     sx={{ minWidth: '100px' }}
                                                                     variant="subtitle1">
-                                                                        {"Level: "}
+                                                                    {"Level: "}
                                                                 </Typography>
                                                                 <Typography
                                                                     variant='body2'>
                                                                     {item.chunk_data.level_value}
-                                                                </Typography> 
+                                                                </Typography>
                                                             </Box>
 
-                                                            <Box sx={{display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center'}}>
+                                                            <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
                                                                 <Typography
                                                                     sx={{ minWidth: '100px' }}
                                                                     variant="subtitle1">
-                                                                        {"Seed: "}
+                                                                    {"Seed: "}
                                                                 </Typography>
                                                                 <Typography
                                                                     variant='body2'>
                                                                     {item.chunk_data.seed_value}
-                                                                </Typography> 
+                                                                </Typography>
                                                             </Box>
 
-                                                            <Box sx={{display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center'}}>
+                                                            <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
                                                                 <Typography
                                                                     sx={{ minWidth: '100px' }}
                                                                     variant="subtitle1">
-                                                                        {"Amount: "}
+                                                                    {"Amount: "}
                                                                 </Typography>
                                                                 <Typography
                                                                     variant='body2'>
                                                                     {item.chunk_data.amount_value}
-                                                                </Typography> 
+                                                                </Typography>
                                                             </Box>
 
-                                                            <Box sx={{display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center'}}>
+                                                            <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
                                                                 <Typography
                                                                     sx={{ minWidth: '100px' }}
                                                                     variant="subtitle1">
-                                                                        {"Durability: "}
+                                                                    {"Durability: "}
                                                                 </Typography>
                                                                 <Typography
                                                                     variant='body2'>
                                                                     {item.chunk_data.durability_value}
-                                                                </Typography> 
+                                                                </Typography>
                                                             </Box>
                                                         </Box>
                                                     </ThemeProvider>
-                                                }/>
+                                                } />
                                         </ListItemButton>
+                                        <Divider />
                                     </Fragment>
                                 ))}
                             </List>
                         </CustomTabPanel>
                     ))}
                 </Box>
+
+                <div className='template-button'>
+                    <Button
+                        id="basic-button"
+                        aria-controls={isOpen ? 'basic-menu' : undefined}
+                        aria-haspopup="true"
+                        aria-expanded={isOpen ? 'true' : undefined}
+                        onClick={handleClick}
+                        variant='outlined'
+                        sx={{
+                            borderColor: '#e9eecd',
+                            color: '#e9eecd',
+                            backgroundColor: '#52626450',
+                            '&:hover': {
+                                backgroundColor: '#e9eecd',
+                                color: '#526264',
+                                borderColor: '#526264',
+                            }
+                        }}
+                    >
+                        Templates
+                    </Button>
+                    <Menu
+                        id="basic-menu"
+                        anchorEl={anchorEl}
+                        open={isOpen}
+                        onClose={handleClose}
+                        MenuListProps={{
+                            'aria-labelledby': 'basic-button',
+                        }}
+                    >
+                        {template['inventory-items'].map((item) => (
+                            <MenuItem onClick={handleClose}>{`Execute: ${item.name}`}</MenuItem>
+                        ))}
+                    </Menu>
+                </div>
             </ThemeProvider>
         </>
     )
@@ -145,27 +191,27 @@ function CustomTabPanel(props: TabPanelProps) {
 
     return (
         <div
-        role="tabpanel"
-        hidden={value !== index}
-        id={`simple-tabpanel-${index}`}
-        aria-labelledby={`simple-tab-${index}`}
-        {...other}
+            role="tabpanel"
+            hidden={value !== index}
+            id={`simple-tabpanel-${index}`}
+            aria-labelledby={`simple-tab-${index}`}
+            {...other}
         >
-        {value === index && (
-            <Box sx={{ p: 3 }}>
-            <Typography>{children}</Typography>
-            </Box>
-        )}
+            {value === index && (
+                <Box sx={{ p: 3 }}>
+                    <Typography>{children}</Typography>
+                </Box>
+            )}
         </div>
     );
 }
 
 const StyledTab = styled(Tab)({
     "&.Mui-selected": {
-      backgroundColor: "#e9eecd",
-      color: '#526264',
+        backgroundColor: "#e9eecd",
+        color: '#526264',
     }
-  });
+});
 
 function a11yProps(index: number) {
     return {
@@ -193,7 +239,7 @@ const tabTheme = createTheme({
                     borderRadius: '10% 10% 0 0',
                     '&:hover': {
                         backgroundColor: '#52626450',
-                      }
+                    }
                 },
             }
         },
