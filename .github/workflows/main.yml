@@ -20,7 +20,6 @@ jobs:
 
       - name: Install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-20.04'
-        # You can remove libayatana-appindicator3-dev if you don't use the system tray feature.
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libayatana-appindicator3-dev librsvg2-dev
@@ -37,41 +36,24 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 'lts/*'
-          cache: 'npm' # Set this to npm, yarn or pnpm.
+          cache: 'npm'
 
       - name: Install frontend dependencies
-        # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
-        run: npm install # Change this to npm, yarn or pnpm.
+        run: npm install
         working-directory: './savegame-editor'
 
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
-
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          releaseName: 'App Name v__VERSION__' # tauri-action replaces \_\_VERSION\_\_ with the app version.
+          releaseName: 'App Name v__VERSION__'
           releaseBody: 'See the assets to download and install this version.'
           releaseDraft: true
           prerelease: false
-  # # Deploy job
-  # deploy:
-  #   # Add a dependency to the build job
-  #   needs: release
 
-  #   # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
-  #   permissions:
-  #     pages: write      # to deploy to Pages
-  #     id-token: write   # to verify the deployment originates from an appropriate source
-
-  #   # Deploy to the github-pages environment
-  #   environment:
-  #     name: github-pages
-  #     url: ${{ steps.deployment.outputs.page_url }}
-
-  #   # Specify runner + deployment step
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Deploy to GitHub Pages
-  #       id: deployment
-  #       uses: actions/deploy-pages@v2 # or the latest "vX.X.X" version tag for this action
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: './savegame-editor/dist' # Adjust this path based on your Tauri app's build output
