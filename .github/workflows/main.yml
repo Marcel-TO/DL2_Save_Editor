@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - release
+    paths:
+      'savegame-editor/'
 
 jobs:
   publish-tauri:
