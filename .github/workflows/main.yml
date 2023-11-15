@@ -20,6 +20,7 @@ jobs:
           node-version: 20
       - name: get version
         run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+        working-directory: './savegame-editor'
       - name: create release
         id: create-release
         uses: actions/github-script@v6
@@ -89,31 +90,3 @@ jobs:
               draft: false,
               prerelease: false
             })
-
-  deploy:
-    # Add a dependency to the build job
-    needs: publish-release
-
-    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
-
-    # Deploy to the github-pages environment
-    environment:
-      name: github-pages
-      url: ${{ steps.publish-tauri.outputs.page_url }}
-
-    # Specify runner + deployment step
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: './savegame-editor/dist' # Adjust this path based on your Tauri app's build output
