@@ -63,7 +63,7 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: peaceiris/actions-gh-pages@v3
+        uses: actions/deploy-pages@v2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: './savegame-editor/dist' # Adjust this path based on your Tauri app's build output
