@@ -119,6 +119,24 @@ impl InventoryItem {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct InventoryItemRow {
+    pub name: String,
+    pub inventory_items: Vec<InventoryItem>,
+}
+
+impl InventoryItemRow {
+    pub fn new(
+        name: String,
+        inventory_items: Vec<InventoryItem>,
+    ) -> Self {
+        InventoryItemRow {
+            name,
+            inventory_items,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SkillItem {
     pub name: String,
     pub index: usize,
@@ -196,7 +214,7 @@ pub struct SaveFile {
     pub file_string: String,
     pub skills: Skills,
     pub unlockable_items: Vec<UnlockableItem>,
-    pub items: Vec<Vec<InventoryItem>>,
+    pub items: Vec<InventoryItemRow>,
 }
 
 impl SaveFile {
@@ -205,7 +223,7 @@ impl SaveFile {
         file_content: Vec<u8>,
         skills: Skills,
         unlockable_items: Vec<UnlockableItem>,
-        items: Vec<Vec<InventoryItem>>,
+        items: Vec<InventoryItemRow>,
     ) -> Self {
         SaveFile {
             path,

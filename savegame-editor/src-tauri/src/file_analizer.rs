@@ -5,7 +5,7 @@
 //! - Unlockable items (craftplans, toolskins, consumables)
 //! - Inventory items (weapons, gear, accesssories, etc)
 
-use std::{fs, io::Read, mem};
+use std::{fs, io::Read};
 use log::info;
 use std::error::Error;
 use regex::Regex;
@@ -19,6 +19,7 @@ use crate::struct_data::{
     UnlockableItem,
     ItemTypeEnum,
     InventoryItem,
+    InventoryItemRow,
     InventoryChunk,
     Mod,
 };
@@ -78,7 +79,7 @@ pub fn load_save_file(file_path: &str) -> SaveFile {
     let jump_offset = last_item.index + last_item.size +75;
 
     // Get all items within the inventory.
-    let items: Vec<Vec<InventoryItem>> = get_all_items(&file_content, jump_offset);
+    let items: Vec<InventoryItemRow> = get_all_items(&file_content, jump_offset);
 
     SaveFile::new(
         file_path.to_string(),
@@ -191,6 +192,9 @@ fn analize_skill_data(
         last_index = index;
     }
 
+    // Reset index for legend skills
+    last_index = 0;
+
     // Iterate through all legend skill matches.
     for legend_match in legend_matches {
         // Get needed data like bytes, index, point data.
@@ -284,9 +288,9 @@ fn analize_unlockable_items_data(content: &[u8]) -> Vec<UnlockableItem> {
 /// ### Returns `Vec<Vec<InventoryItem>>`
 /// The list of all different item sections.
 /// Each section contains a list of items, for example: gear, weapons, etc....
-fn get_all_items(content: &[u8], start_index: usize) -> Vec<Vec<InventoryItem>> {
+fn get_all_items(content: &[u8], start_index: usize) -> Vec<InventoryItemRow> {
     // Prepare data.
-    let mut items: Vec<Vec<InventoryItem>> = Vec::new();
+    let mut items: Vec<InventoryItemRow> = Vec::new();
     let mut index: usize = start_index;
 
     loop {
@@ -294,7 +298,6 @@ fn get_all_items(content: &[u8], start_index: usize) -> Vec<Vec<InventoryItem>> 
         let mut inner_item_list: Vec<InventoryItem> = Vec::new();
         // Find all data chunks for the section.
         let (chunks, new_index) = find_all_inventory_chunks(content, index);
-        info!("{:?}", chunks);
 
         // Check if there are no chunks left.
         if chunks.len() == 0 {
@@ -374,13 +377,44 @@ fn get_all_items(content: &[u8], start_index: usize) -> Vec<Vec<InventoryItem>> 
         ));
 
         // Add the inner section to the item list and fix the index by offset.
-        items.push(inner_item_list.clone());
+        items.push(create_item_row(inner_item_list.clone()));
         let last_mod: &Mod = &inner_item_list[inner_item_list.clone().len() - 1].mod_data[inner_item_list[inner_item_list.clone().len() - 1].mod_data.len() - 1];
         index = last_mod.index + last_mod.name.len();
         index += 75;
     }
 
     items
+}
+
+fn create_item_row(items: Vec<InventoryItem>) -> InventoryItemRow {
+    for item in items.iter() {
+        if item.name.contains("Token") || item.name.contains("Ticket") {
+            return InventoryItemRow::new("Tokens/Tickets".to_string(), items);
+        }
+        else if item.name.contains("Keyfinder") || item.name.contains("Binoculars") {
+            return InventoryItemRow::new("Equipment".to_string(), items);
+        }
+        else if item.name.contains("Outfit") || item.name.contains("Craft") || item.name.contains("Plant") {
+            return InventoryItemRow::new("Outfits/Craftresources".to_string(), items);
+        }
+        else if item.name.contains("Potion") || item.name.contains("Booster")  || item.name.contains("Medkit") || item.name.contains("Flare") {
+            return InventoryItemRow::new("Consumables".to_string(), items);
+        }
+        else if item.name.contains("KaDoom") || item.name.contains("Broom") || item.name.contains("Throwable") {
+            return InventoryItemRow::new("Accessories".to_string(), items);
+        }
+        else if item.name.contains("Quest") {
+            return InventoryItemRow::new("Quest Items".to_string(), items);
+        }
+        else if item.name.contains("Bullet") {
+            return InventoryItemRow::new("Ammunition".to_string(), items);
+        }
+        else if item.name.contains("wpn") {
+            return InventoryItemRow::new("Weapons".to_string(), items);
+        }
+    }
+
+    InventoryItemRow::new("Items".to_string(), items)
 }
 
 /// Represents a method for finding all SGD chunks inside the inventory.

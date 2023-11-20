@@ -35,29 +35,36 @@ const InventoryContent = ({ currentSaveFile }: { currentSaveFile: SaveFile | und
 
     return (
         <>
+        <Box sx={{display: 'flex', justifyContent: 'center', width: '100%'}}>
+
             <ThemeProvider theme={tabTheme}>
-                <Box sx={{ width: '100%', backgroundColor: '#00000070' }}>
-                    <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex', flexDirection: 'row', position: 'relative' }}>
-                        <Tabs value={tabIndex} onChange={handleChange}>
-                            {currentSaveFile?.items.map((_, index) => (
+                <Box sx={{backgroundColor: '#00000070' }}>
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex', flexDirection: 'row', position: 'relative', maxWidth: { xs: 320, sm: 2000 } }}>
+                        <Tabs 
+                            value={tabIndex} 
+                            onChange={handleChange}
+                            variant="scrollable"
+                            scrollButtons="auto"
+                            allowScrollButtonsMobile>
+                            {currentSaveFile?.items.map((itemrow, index) => (
                                 <StyledTab
                                     key={index}
                                     icon={<ConstructionRoundedIcon />}
                                     iconPosition="bottom"
-                                    label={`Tab ${index + 1}`}
+                                    label={itemrow.name}
                                     {...a11yProps(index)}
                                 />
                             ))}
                         </Tabs>
                     </Box>
-                    {currentSaveFile?.items.map((itemArray, index) => (
+                    {currentSaveFile?.items?.map((itemArray, index) => (
                         <CustomTabPanel key={index} value={tabIndex} index={index}>
                             <List
                                 sx={{ width: '100%', minWidth: 360, bgcolor: 'transparent' }}
                                 component="nav"
                                 aria-labelledby="nested-list-subheader"
                             >
-                                {itemArray.map((item, itemIndex) => (
+                                {/* {itemArray.items.map((item, itemIndex) => (
                                     <Fragment key={itemIndex}>
                                         <ListItemButton>
                                             <ListItemIcon>
@@ -134,7 +141,7 @@ const InventoryContent = ({ currentSaveFile }: { currentSaveFile: SaveFile | und
                                         </ListItemButton>
                                         <Divider />
                                     </Fragment>
-                                ))}
+                                ))} */}
                             </List>
                         </CustomTabPanel>
                     ))}
@@ -176,6 +183,7 @@ const InventoryContent = ({ currentSaveFile }: { currentSaveFile: SaveFile | und
                     </Menu>
                 </div>
             </ThemeProvider>
+        </Box>
         </>
     )
 }

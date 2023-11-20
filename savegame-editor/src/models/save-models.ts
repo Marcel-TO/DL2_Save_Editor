@@ -32,6 +32,11 @@ export interface InventoryItem {
     mod_data: Mod[]
 }
 
+export interface InventoryItemRow {
+    name: string,
+    items: InventoryItem[]
+}
+
 export interface SkillItem {
     name: string,
     index: number,
@@ -59,18 +64,5 @@ export interface SaveFile {
     file_string: string,
     skills: Skills,
     unlockable_items: UnlockableItem[],
-    items: InventoryItem[][],
-}
-
-export interface ItemTemplates {
-    templates: {
-        "inventory-items": {
-            "name": string,
-            "method-name": string
-        },
-        "skill-items": {
-            "name": string,
-            "method-name": string
-        }
-    }
+    items: InventoryItemRow[],
 }
