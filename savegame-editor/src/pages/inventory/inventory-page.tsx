@@ -298,7 +298,7 @@ const VirtualizedList = ({
       <>
       <Box sx={{ height: '100%', minWidth: minWidth }}>
         <FixedSizeList
-          height={650}
+          height={700}
           width='100%'
           itemSize={200}
           itemCount={items?.length || 0}

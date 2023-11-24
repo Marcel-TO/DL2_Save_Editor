@@ -1,6 +1,6 @@
 import './skill-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
-import { SaveFile } from '../../models/save-models'
+import { InventoryItem, SaveFile } from '../../models/save-models'
 import { Box, Divider, List, ListItemButton, ListItemIcon, ListItemText, Tab, Tabs, Typography, createTheme, styled } from '@mui/material'
 import { Fragment, useState } from 'react';
 import { ThemeProvider } from '@emotion/react';

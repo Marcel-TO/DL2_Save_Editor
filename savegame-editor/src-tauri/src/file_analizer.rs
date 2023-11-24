@@ -104,6 +104,24 @@ pub fn format_bytes_to_string(file_content: Vec<u8>) -> String {
                 .join(" ")
 }
 
+pub fn edit_skill(current_skill: SkillItem, current_skill_index: usize, is_base_skill: bool, new_value: u16, mut save_file: SaveFile) -> SaveFile {
+    let new_skill: SkillItem = SkillItem::new(
+        current_skill.name.clone(),
+        current_skill.index.clone(),
+        current_skill.size.clone(),
+        current_skill.sgd_data.clone(),
+        new_value.to_be_bytes().to_vec(),
+    );
+
+    if is_base_skill {
+        save_file.skills.base_skills[current_skill_index] = new_skill
+    } else {
+        save_file.skills.legend_skills[current_skill_index] = new_skill
+    }
+    
+    save_file
+}
+
 /// Represents the method for finding all base skills inside the save.
 /// 
 /// ### Parameter
