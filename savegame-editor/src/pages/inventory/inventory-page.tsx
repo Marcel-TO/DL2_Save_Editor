@@ -1,11 +1,12 @@
 import './inventory-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
-import { SaveFile } from '../../models/save-models'
+import { InventoryItem, SaveFile } from '../../models/save-models'
 import { Box, Button, Divider, List, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Tab, Tabs, Typography, createTheme, styled } from '@mui/material'
 import { Fragment, useState } from 'react';
 import { ThemeProvider } from '@emotion/react';
 import ConstructionRoundedIcon from '@mui/icons-material/ConstructionRounded';
 import template from '../../models/item-templates.json';
+import { FixedSizeList } from 'react-window';
 
 export const InventoryPage = ({ currentSaveFile }: { currentSaveFile: SaveFile | undefined }): JSX.Element => {
     return (
@@ -59,12 +60,13 @@ const InventoryContent = ({ currentSaveFile }: { currentSaveFile: SaveFile | und
                     </Box>
                     {currentSaveFile?.items?.map((itemArray, index) => (
                         <CustomTabPanel key={index} value={tabIndex} index={index}>
-                            <List
+                            <VirtualizedList items={itemArray.inventory_items} minWidth={360}/>
+                            {/* <List
                                 sx={{ width: '100%', minWidth: 360, bgcolor: 'transparent' }}
                                 component="nav"
                                 aria-labelledby="nested-list-subheader"
                             >
-                                {/* {itemArray.items.map((item, itemIndex) => (
+                                {itemArray.inventory_items.map((item, itemIndex) => (
                                     <Fragment key={itemIndex}>
                                         <ListItemButton>
                                             <ListItemIcon>
@@ -141,8 +143,8 @@ const InventoryContent = ({ currentSaveFile }: { currentSaveFile: SaveFile | und
                                         </ListItemButton>
                                         <Divider />
                                     </Fragment>
-                                ))} */}
-                            </List>
+                                ))}
+                            </List> */}
                         </CustomTabPanel>
                     ))}
                 </Box>
@@ -268,3 +270,122 @@ const listItemTheme = createTheme({
         }
     }
 });
+
+// Represents the collapsed nested list.
+// Using FixedSizedList instead of normal list to improve performance when opening a bracket.
+const VirtualizedList = ({
+    items,
+    minWidth,
+  }: {
+    items: InventoryItem[];
+    minWidth: number;
+  }): JSX.Element => {
+    // The Properties of the selected id.
+    interface SnackProps {
+      name: string,
+      isOpen: boolean,
+    }
+  
+    // The handled data
+    const [state, setState] = useState<SnackProps>({name: '', isOpen: false});
+  
+    // Handles the click event of the snackbar if an id is selected.
+    const handleClick = (props: SnackProps) => {
+      setState(props);
+    };
+  
+    return (
+      <>
+      <Box sx={{ height: '100%', minWidth: minWidth }}>
+        <FixedSizeList
+          height={650}
+          width='100%'
+          itemSize={200}
+          itemCount={items?.length || 0}
+          className='fixedSizeListContainer'
+        >
+          {({ index, style }) => (
+            <>
+              <Fragment key={index}>
+                <ListItemButton style={style} >
+                    <ListItemIcon>
+                        <ConstructionRoundedIcon sx={{ color: '#e9eecd' }} />
+                    </ListItemIcon>
+                    <ListItemText
+                        primary={items[index].name}
+                        secondary={
+                            <ThemeProvider theme={listItemTheme}>
+                                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                                    <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
+                                        <Typography
+                                            sx={{ minWidth: '100px' }}
+                                            variant="subtitle1">
+                                            {"Index: "}
+                                        </Typography>
+                                        <Typography
+                                            variant='body2'>
+                                            {items[index].chunk_data.index}
+                                        </Typography>
+                                    </Box>
+
+
+                                    <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
+                                        <Typography
+                                            sx={{ minWidth: '100px' }}
+                                            variant="subtitle1">
+                                            {"Level: "}
+                                        </Typography>
+                                        <Typography
+                                            variant='body2'>
+                                            {items[index].chunk_data.level_value}
+                                        </Typography>
+                                    </Box>
+
+                                    <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
+                                        <Typography
+                                            sx={{ minWidth: '100px' }}
+                                            variant="subtitle1">
+                                            {"Seed: "}
+                                        </Typography>
+                                        <Typography
+                                            variant='body2'>
+                                            {items[index].chunk_data.seed_value}
+                                        </Typography>
+                                    </Box>
+
+                                    <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
+                                        <Typography
+                                            sx={{ minWidth: '100px' }}
+                                            variant="subtitle1">
+                                            {"Amount: "}
+                                        </Typography>
+                                        <Typography
+                                            variant='body2'>
+                                            {items[index].chunk_data.amount_value}
+                                        </Typography>
+                                    </Box>
+
+                                    <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
+                                        <Typography
+                                            sx={{ minWidth: '100px' }}
+                                            variant="subtitle1">
+                                            {"Durability: "}
+                                        </Typography>
+                                        <Typography
+                                            variant='body2'>
+                                            {items[index].chunk_data.durability_value}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </ThemeProvider>
+                        } />
+                </ListItemButton>
+                <Divider />
+            </Fragment>
+            </>
+          )}
+        </FixedSizeList>
+      </Box>
+      </>
+    );
+  };

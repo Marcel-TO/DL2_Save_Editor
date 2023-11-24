@@ -34,7 +34,7 @@ export interface InventoryItem {
 
 export interface InventoryItemRow {
     name: string,
-    items: InventoryItem[]
+    inventory_items: InventoryItem[]
 }
 
 export interface SkillItem {

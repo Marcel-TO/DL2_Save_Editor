@@ -1,9 +1,10 @@
 import './main-page.css';
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer';
 import { IdData, SaveFile } from '../../models/save-models';
-import { Button, Card, CardActions, CardContent, CardHeader, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography, createTheme } from '@mui/material';
+import { Backdrop, Button, Card, CardActions, CardContent, CardHeader, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography, createTheme } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
-import { open } from '@tauri-apps/api/dialog';
+import { open, save } from '@tauri-apps/api/dialog';
+import { writeBinaryFile } from '@tauri-apps/api/fs';
 import { invoke } from "@tauri-apps/api/tauri";
 import { Fragment, useState } from 'react';
 
@@ -19,6 +20,7 @@ export const MainPage = ({currentSaveFile, setCurrentSaveFile, setIdData}: {curr
 
 const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function}): JSX.Element => {    
     const [isOpen, setOpen] = useState(false);
+    const [isLoadingSave, setLoadingSave] = useState(false);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -38,19 +40,38 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
     }
 
     async function handleCurrentSaveFile() {
+        setLoadingSave(true);
+
         let filepath = await open({
             multiple: false,
             filters: [{
               name: 'SAV File',
               extensions: ['sav']
             }],
-          });
+        });
       
-          if (filepath != null && !Array.isArray(filepath)) {
+        if (filepath != null && !Array.isArray(filepath)) {
             await setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: filepath}));
             await handleSetIdData();
-          }
+        };
+
+        setLoadingSave(false);
     };
+
+    async function saveCurrentSaveFile() {
+        let filePath = await save({
+            defaultPath: '/save_main_0.sav',
+            filters: [{
+              name: 'SAV File',
+              extensions: ['sav']
+            }],
+        });
+
+        if(filePath != null && currentSaveFile != undefined) {
+            // Save data to file
+            await writeBinaryFile(filePath, currentSaveFile.file_content);
+        }
+    }
 
     return (
         <>
@@ -96,10 +117,17 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
                             </Fragment>
 
                         <Button onClick={() => handleCurrentSaveFile()} variant='outlined'>Load Save</Button>
-                        <Button onClick={() => handleCurrentSaveFile()} variant='outlined' disabled={currentSaveFile !== undefined ? false : true}>Save current Changes</Button>
+                        <Button onClick={() => saveCurrentSaveFile()} variant='outlined' disabled={currentSaveFile !== undefined ? false : true}>Save current Changes</Button>
                     </CardActions>
                 </Card> 
             </ThemeProvider>
+
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={isLoadingSave}
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
         </>
     )
 }
