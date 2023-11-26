@@ -104,22 +104,110 @@ pub fn format_bytes_to_string(file_content: Vec<u8>) -> String {
                 .join(" ")
 }
 
-pub fn edit_skill(current_skill: SkillItem, current_skill_index: usize, is_base_skill: bool, new_value: u16, mut save_file: SaveFile) -> SaveFile {
+/// Represents a method for changing the value of a skill.
+/// 
+/// ### Parameter
+/// - `current_skill`: The selected skill.
+/// - `current_skill_index`: The list index of selected skill.
+/// - `is_base_skill`: Indicates whether the selected skill is a base skill or a legend skill.
+/// - `new_value`: The new value of the selected skill.
+/// - `save_file`: The current save file.
+/// 
+/// ### Returns `SaveFile`
+/// The new save file with all changes to the skill.
+pub fn edit_skill(
+    current_skill: SkillItem, 
+    current_skill_index: usize, 
+    is_base_skill: bool, 
+    new_value: u16, 
+    save_file: SaveFile
+) -> SaveFile {
+    // Creates the skill with the new value.
     let new_skill: SkillItem = SkillItem::new(
         current_skill.name.clone(),
         current_skill.index.clone(),
         current_skill.size.clone(),
         current_skill.sgd_data.clone(),
-        new_value.to_be_bytes().to_vec(),
+        new_value.to_le_bytes().to_vec(),
     );
 
+    // Creates a new save file with correct file content.
+    let mut new_save_file: SaveFile = SaveFile::new(
+        save_file.path,
+        replace_content_of_file(&new_skill.index + &new_skill.size, new_skill.points_data.clone(), save_file.file_content),
+        save_file.skills,
+        save_file.unlockable_items,
+        save_file.items
+    );
+
+    // Changes the current skill to the new one.
     if is_base_skill {
-        save_file.skills.base_skills[current_skill_index] = new_skill
+        new_save_file.skills.base_skills[current_skill_index] = new_skill.clone()
     } else {
-        save_file.skills.legend_skills[current_skill_index] = new_skill
+        new_save_file.skills.legend_skills[current_skill_index] = new_skill.clone()
     }
     
-    save_file
+    new_save_file
+}
+
+pub fn edit_inventory_item_chunk(
+    current_item: InventoryItem, 
+    current_item_row: InventoryItemRow,
+    current_item_index: usize,
+    new_level: u16,
+    new_seed: u16,
+    new_amount: u32,
+    new_durability: u32,
+    mut save_file: SaveFile
+) -> SaveFile {
+    let new_item_chunk: InventoryChunk = InventoryChunk::new(
+        new_level.to_le_bytes().to_vec(),
+        new_seed.to_le_bytes().to_vec(),
+        new_amount.to_le_bytes().to_vec(),
+        new_durability.to_le_bytes().to_vec(),
+        current_item.chunk_data.space,
+        current_item.chunk_data.index
+    );
+
+    let new_item: InventoryItem = InventoryItem::new(
+        current_item.name,
+        current_item.index,
+        current_item.size,
+        current_item.sgd_data,
+        new_item_chunk.clone(),
+        current_item.mod_data
+    );
+
+    let mut new_file_content: Vec<u8> = save_file.file_content;
+    
+    // Replace all new values.
+    new_file_content = replace_content_of_file(new_item_chunk.clone().index, new_item_chunk.clone().level, new_file_content);
+    new_file_content = replace_content_of_file(new_item_chunk.clone().index + 2, new_item_chunk.clone().seed, new_file_content);
+    new_file_content = replace_content_of_file(new_item_chunk.clone().index + 4, new_item_chunk.clone().amount, new_file_content);
+    new_file_content = replace_content_of_file(new_item_chunk.clone().index + 8, new_item_chunk.clone().durability, new_file_content);
+
+    let new_save_file: SaveFile = SaveFile::new(
+        save_file.path,
+        new_file_content,
+        save_file.skills,
+        save_file.unlockable_items,
+        save_file.items
+    );
+
+    new_save_file
+}
+
+fn replace_content_of_file(replace_index: usize, replace_value: Vec<u8>, mut content: Vec<u8>) -> Vec<u8> {
+    // Check if all indices are within bounds
+    if replace_index + replace_value.len() < content.len() {
+        for i in 0..replace_value.len() {
+            content[replace_index + i] = replace_value[i];
+        }
+
+        content
+    } else {
+        content
+    }
 }
 
 /// Represents the method for finding all base skills inside the save.

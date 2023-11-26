@@ -58,10 +58,4 @@ fn main() {
     // Uncomment the following line to if .env file should be selected.
     let file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
     let save_file = load_save_file(&file_path);
-
-    let changing_skill: &SkillItem = &save_file.skills.legend_skills.clone()[0];
-    let new_save_file: SaveFile = edit_skill(changing_skill.clone(), 0, false, 1, save_file);
-    info!("{:?}", changing_skill);
-    info!("{:?}", &new_save_file.skills.legend_skills[0]);
-    info!("Changed")
 }
