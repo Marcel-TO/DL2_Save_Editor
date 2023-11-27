@@ -6,9 +6,8 @@ mod id_fetcher;
 mod struct_data;
 
 use dotenv::dotenv;
-use file_analizer::{load_save_file, edit_skill};
-use log::info;
-use struct_data::{SaveFile, SkillItem};
+use file_analizer::{load_save_file, edit_skill, edit_inventory_item_chunk};
+use struct_data::{SaveFile, SkillItem, InventoryItem, InventoryItemRow};
 use id_fetcher::fetch_ids;
 use tauri::AppHandle;
 
@@ -41,21 +40,46 @@ fn handle_edit_skill(current_skill: SkillItem, current_skill_index: usize, is_ba
     new_save_file
 }
 
+#[tauri::command(rename_all = "snake_case")]
+fn handle_edit_item_chunk(
+    current_item: InventoryItem,
+    current_item_row: InventoryItemRow, 
+    current_item_index: usize, 
+    new_level: u16,
+    new_seed: u16,
+    new_amount: u32,
+    new_durability: u32,
+    save_file: SaveFile
+) -> SaveFile {
+    let new_save_file = edit_inventory_item_chunk(
+        current_item, 
+        current_item_row, 
+        current_item_index, 
+        new_level, 
+        new_seed, 
+        new_amount, 
+        new_durability, 
+        save_file
+    );
+
+    new_save_file
+}
 
 fn main() {
     dotenv().ok();
-    // // Comment tauri builder if debugging.
-    // tauri::Builder::default()
-    //     .plugin(tauri_plugin_log::Builder::default().build())
-    //     .invoke_handler(tauri::generate_handler![
-    //         get_ids,
-    //         load_save,
-    //         handle_edit_skill
-    //         ])
-    //     .run(tauri::generate_context!())
-    //     .expect("error while running tauri application");
+    // Comment tauri builder if debugging.
+    tauri::Builder::default()
+        .plugin(tauri_plugin_log::Builder::default().build())
+        .invoke_handler(tauri::generate_handler![
+            get_ids,
+            load_save,
+            handle_edit_skill,
+            handle_edit_item_chunk
+            ])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 
-    // Uncomment the following line to if .env file should be selected.
-    let file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
-    let save_file = load_save_file(&file_path);
+    // // Uncomment the following line to if .env file should be selected.
+    // let file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
+    // let save_file = load_save_file(&file_path);
 }

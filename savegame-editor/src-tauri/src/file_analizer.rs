@@ -158,24 +158,24 @@ pub fn edit_inventory_item_chunk(
     new_seed: u16,
     new_amount: u32,
     new_durability: u32,
-    mut save_file: SaveFile
+    save_file: SaveFile
 ) -> SaveFile {
     let new_item_chunk: InventoryChunk = InventoryChunk::new(
         new_level.to_le_bytes().to_vec(),
         new_seed.to_le_bytes().to_vec(),
         new_amount.to_le_bytes().to_vec(),
         new_durability.to_le_bytes().to_vec(),
-        current_item.chunk_data.space,
-        current_item.chunk_data.index
+        current_item.chunk_data.space.clone(),
+        current_item.chunk_data.index.clone()
     );
 
     let new_item: InventoryItem = InventoryItem::new(
-        current_item.name,
-        current_item.index,
-        current_item.size,
-        current_item.sgd_data,
+        current_item.name.clone(),
+        current_item.index.clone(),
+        current_item.size.clone(),
+        current_item.sgd_data.clone(),
         new_item_chunk.clone(),
-        current_item.mod_data
+        current_item.mod_data.clone()
     );
 
     let mut new_file_content: Vec<u8> = save_file.file_content;
@@ -186,13 +186,23 @@ pub fn edit_inventory_item_chunk(
     new_file_content = replace_content_of_file(new_item_chunk.clone().index + 4, new_item_chunk.clone().amount, new_file_content);
     new_file_content = replace_content_of_file(new_item_chunk.clone().index + 8, new_item_chunk.clone().durability, new_file_content);
 
-    let new_save_file: SaveFile = SaveFile::new(
+    let mut new_save_file: SaveFile = SaveFile::new(
         save_file.path,
         new_file_content,
         save_file.skills,
         save_file.unlockable_items,
         save_file.items
     );
+
+    for i in 0..new_save_file.items.len() {
+        if current_item_row.name == new_save_file.items[i].name 
+        && current_item_index < new_save_file.items[i].inventory_items.len() {
+            if current_item.name == new_save_file.items[i].inventory_items[current_item_index].name
+            && current_item.index == new_save_file.items[i].inventory_items[current_item_index].index {
+                new_save_file.items[i].inventory_items[current_item_index] = new_item.clone();
+            }
+        }
+    }
 
     new_save_file
 }
