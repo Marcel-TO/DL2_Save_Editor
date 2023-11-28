@@ -46,11 +46,24 @@ const SkillContent = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: S
     };
 
     const handleSelectedValue = (event: ChangeEvent<HTMLInputElement>) => {
+        const maxValue = 30000;
+
         // Allow only numbers
         var value = event.target.value.replace(/[^0-9]/g, '');
 
+        // Check Max Range
+        if (Number(value) > maxValue) {
+            value = maxValue.toString();
+        }
+
         // If the input is empty, set it to '0'
-        setCurrentSelectedSkillValue((value === '' || (value === '0' && event.target.selectionStart === 1)) ? '0' : value);    
+        if (value === '') {
+            setCurrentSelectedSkillValue('0');
+        } else if (value.charAt(0) === '0') {
+            setCurrentSelectedSkillValue(value.substring(1));
+        } else {
+            setCurrentSelectedSkillValue(value);
+        }
     }
 
     async function submitChangedValue() {
@@ -64,7 +77,7 @@ const SkillContent = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: S
         }
 
         setIsOpen(false);
-        submitSkillValue(skillValue);
+        submitSkillValue(skillValue)
     }
 
     async function submitSkillValue(skillValue: number) {
@@ -77,15 +90,15 @@ const SkillContent = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: S
         //     save_file: currentSaveFile
         // }));
 
-        // invoke("handle_edit_skill", {
-        //     current_skill: currentSkill,
-        //     current_skill_index: currentSkillIndex,
-        //     is_base_skill: currentTab === 0,
-        //     new_value: skillValue,
-        //     save_file: currentSaveFile
-        // }).then((new_save) => {
-        //     setCurrentSaveFile(new_save)
-        // });
+        invoke("handle_edit_skill", {
+            current_skill: currentSkill,
+            current_skill_index: currentSkillIndex,
+            is_base_skill: currentTab === 0,
+            new_value: skillValue,
+            save_file: currentSaveFile
+        }).then((new_save) => {
+            setCurrentSaveFile(new_save)
+        });
     }
     
     return (
@@ -198,34 +211,45 @@ const SkillContent = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: S
                     </CustomTabPanel>
                 </Box>
             </ThemeProvider>
+            
+            <ThemeProvider theme={selectedSkillCardTheme}>
+                <Backdrop
+                    sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                    open={isOpen}
+                    onClick={handleCloseSkill}
+                >
+                    <Card onClick={(e) => e.stopPropagation()} variant='outlined'>
+                        <CardContent sx={{
+                            display: 'flex',
+                            flexDirection: 'column'
+                        }}>
+                            <Typography gutterBottom variant="h5" component="div">
+                                {currentSkill?.name}
+                            </Typography>
 
-            <Backdrop
-                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-                open={isOpen}
-                onClick={handleCloseSkill}
-            >
-                <Card onClick={(e) => e.stopPropagation()} variant='outlined'>
-                    <CardContent>
-                        <Typography gutterBottom variant="h5" component="div">
-                            {currentSkill?.name}
-                        </Typography>
+                            <TextField
+                                label="Value"
+                                variant="outlined"
+                                type="text"
+                                value={currentSelectedSkillValue}
+                                onChange={handleSelectedValue}
+                                inputProps={{
+                                    inputMode: 'numeric',
+                                    pattern: '[0-9]*',
+                                }}
+                                InputLabelProps={{
+                                    sx: { 
+                                        color: "#899994", 
+                                        "&.Mui-focused": { color: "#e9eecd" }
+                                    },
+                                  }}
+                            />
 
-                        <TextField
-                            label="Value"
-                            variant="outlined"
-                            type="text"
-                            value={currentSelectedSkillValue}
-                            onChange={handleSelectedValue}
-                            inputProps={{
-                                inputMode: 'numeric',
-                                pattern: '[0-9]*',
-                            }}
-                        />
-
-                        <Button onClick={submitChangedValue}>Change</Button>
-                    </CardContent>
-                </Card>
-            </Backdrop>
+                            <Button onClick={submitChangedValue}>Change</Button>
+                        </CardContent>
+                    </Card>
+                </Backdrop>
+            </ThemeProvider>
         </>
     )
 }
@@ -305,6 +329,55 @@ const listItemTheme = createTheme({
             styleOverrides: {
                 root: {
                     color: 'white',
+                }
+            }
+        }
+    }
+});
+
+const selectedSkillCardTheme = createTheme({
+    palette: {
+        mode: 'dark',
+    },
+    components: {
+        MuiCard: {
+            styleOverrides: {
+                root: {
+                    color: '#e9eecd',
+                    borderColor: '#526264'
+                }
+            }
+        },
+        MuiTextField: {
+            styleOverrides: {
+                root: {
+                    color: 'red',
+                },
+            }
+        },
+        MuiOutlinedInput: {
+            styleOverrides: {
+                root: {
+                    color: '#e9eecd',
+                    "& fieldset": {
+                    borderColor: "#526264",
+                    },
+                    "&:hover fieldset": {
+                    borderColor: "#899994 !important"
+                    },
+                    "&.Mui-focused fieldset": {
+                    borderColor: "#e9eecd !important"
+                    }
+                }
+            }
+        },
+        MuiButton: {
+            styleOverrides: {
+                root: {
+                    color: '#899994',
+                    '&:hover': {
+                        color: '#e9eecd'
+                    }
                 }
             }
         }

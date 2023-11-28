@@ -24,7 +24,7 @@ function App() {
         (<Route path={'/'} element={<MainPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} setIdData={setCurrentIdDatas}/>}></Route>),
         (<Route path={'/skills'} element={<SkillPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile}/>}></Route>),
         (<Route path={'/experience'} element={<ExperiencePage/>}></Route>),
-        (<Route path={'/inventory'} element={<InventoryPage currentSaveFile={currentSaveFile}/>}></Route>),
+        (<Route path={'/inventory'} element={<InventoryPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile}/>}></Route>),
         (<Route path={'/backpack'} element={<BackpackPage/>}></Route>),
         (<Route path={'/campaign'} element={<CampaignPage/>}></Route>),
         (<Route path={'/player'} element={<PlayerPage/>}></Route>),
