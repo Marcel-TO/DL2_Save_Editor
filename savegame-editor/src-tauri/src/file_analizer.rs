@@ -516,7 +516,7 @@ fn create_item_row(items: Vec<InventoryItem>) -> InventoryItemRow {
         else if item.name.contains("Potion") || item.name.contains("Booster")  || item.name.contains("Medkit") || item.name.contains("Flare") {
             return InventoryItemRow::new("Consumables".to_string(), items);
         }
-        else if item.name.contains("KaDoom") || item.name.contains("Broom") || item.name.contains("Throwable") {
+        else if item.name.contains("KaDoom") || item.name.contains("Broom") || item.name.contains("Throwable") || (item.name.contains("wpn") && item.name.contains("challenge")) {
             return InventoryItemRow::new("Accessories".to_string(), items);
         }
         else if item.name.contains("Quest") {
@@ -525,7 +525,7 @@ fn create_item_row(items: Vec<InventoryItem>) -> InventoryItemRow {
         else if item.name.contains("Bullet") {
             return InventoryItemRow::new("Ammunition".to_string(), items);
         }
-        else if item.name.contains("wpn") {
+        else if item.name.contains("wpn") && !item.name.contains("challenge") {
             return InventoryItemRow::new("Weapons".to_string(), items);
         }
     }

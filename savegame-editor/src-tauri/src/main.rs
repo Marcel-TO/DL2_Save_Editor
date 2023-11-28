@@ -12,36 +12,36 @@ use id_fetcher::fetch_ids;
 use tauri::AppHandle;
 
 #[tauri::command(rename_all = "snake_case")]
-fn get_ids(app_handle: AppHandle) -> Vec<struct_data::IdData> {
+async fn get_ids(app_handle: AppHandle) -> Result<Vec<struct_data::IdData>, ()> {
     let resource_path = app_handle.path_resolver().resolve_resource("./IDs/").unwrap();
 
     match fetch_ids(&resource_path.display().to_string()) {
         Ok(id_datas) => {
-            id_datas
+            Ok(id_datas)
         }
         Err(_) => {
             let empty_vectory: Vec<struct_data::IdData> = Vec::new();
-            empty_vectory
+            Ok(empty_vectory)
         }
     }
 }
 
 #[tauri::command(rename_all = "snake_case")]
-fn load_save(file_path: &str) -> SaveFile {
+async fn load_save(file_path: &str) -> Result<SaveFile, ()> {
     let save_file = load_save_file(&file_path);
 
-    save_file
+    Ok(save_file)
 }
 
 #[tauri::command(rename_all = "snake_case")]
-fn handle_edit_skill(current_skill: SkillItem, current_skill_index: usize, is_base_skill: bool,  new_value: u16, save_file: SaveFile) -> SaveFile {
+async fn handle_edit_skill(current_skill: SkillItem, current_skill_index: usize, is_base_skill: bool,  new_value: u16, save_file: SaveFile) -> Result<SaveFile, ()> {
     let new_save_file = edit_skill(current_skill, current_skill_index, is_base_skill, new_value, save_file);
 
-    new_save_file
+    Ok(new_save_file)
 }
 
 #[tauri::command(rename_all = "snake_case")]
-fn handle_edit_item_chunk(
+async fn handle_edit_item_chunk(
     current_item: InventoryItem,
     current_item_row: InventoryItemRow, 
     current_item_index: usize, 
@@ -50,7 +50,7 @@ fn handle_edit_item_chunk(
     new_amount: u32,
     new_durability: u32,
     save_file: SaveFile
-) -> SaveFile {
+) -> Result<SaveFile, ()> {
     let new_save_file = edit_inventory_item_chunk(
         current_item, 
         current_item_row, 
@@ -62,7 +62,7 @@ fn handle_edit_item_chunk(
         save_file
     );
 
-    new_save_file
+    Ok(new_save_file)
 }
 
 fn main() {
@@ -82,4 +82,10 @@ fn main() {
     // // Uncomment the following line to if .env file should be selected.
     // let file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
     // let save_file = load_save_file(&file_path);
+
+    // let changing_skill = save_file.skills.legend_skills[0].clone();
+    // let new_save_file = edit_skill(changing_skill, 0, false, 5, save_file.clone());
+    
+    // println!("{:?}", save_file.clone().skills.legend_skills[0]);
+    // println!("{:?}", new_save_file.clone().skills.legend_skills[0]);
 }

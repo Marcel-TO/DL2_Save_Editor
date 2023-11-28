@@ -377,10 +377,10 @@ const VirtualizedList = ({
                                         </Typography>
                                     </Box>
                                 </Box>
+                                <Divider/>
                             </ThemeProvider>
                         } />
                 </ListItemButton>
-                <Divider />
             </Fragment>
             </>
           )}

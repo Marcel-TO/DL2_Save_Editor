@@ -27,6 +27,7 @@ const SkillContent = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: S
     const [currentSkill, setCurrentSkill] = useState<SkillItem>();
     const [currentSkillIndex, setCurrentSkillIndex] = useState(0);
     const [currentSelectedSkillValue, setCurrentSelectedSkillValue] = useState('');
+    const [displayedSaveFile, setDisplayedSaveFile] = useState<SaveFile | undefined>(currentSaveFile);
 
     const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
         setCurrentTab(newValue);
@@ -54,16 +55,37 @@ const SkillContent = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: S
 
     async function submitChangedValue() {
         let skillValue = Number(currentSelectedSkillValue);
-        
-        await setCurrentSaveFile(await invoke("handle_edit_skill", {
-            current_skill: currentSkill,
-            current_skill_index: currentSkillIndex,
-            is_base_skill: true,
-            new_value: skillValue,
-            save_file: currentSaveFile
-        }));
+
+        // Rewrite locally for performance reasons.
+        if (displayedSaveFile != undefined && currentTab === 0) {
+            displayedSaveFile.skills.base_skills[currentSkillIndex].points_value = skillValue;
+        } else if (displayedSaveFile != undefined && currentTab === 1){
+            displayedSaveFile.skills.legend_skills[currentSkillIndex].points_value = skillValue;
+        }
 
         setIsOpen(false);
+        submitSkillValue(skillValue);
+    }
+
+    async function submitSkillValue(skillValue: number) {
+        // Rewrite save file from backend
+        // await setCurrentSaveFile(await invoke("handle_edit_skill", {
+        //     current_skill: currentSkill,
+        //     current_skill_index: currentSkillIndex,
+        //     is_base_skill: currentTab === 0,
+        //     new_value: skillValue,
+        //     save_file: currentSaveFile
+        // }));
+
+        // invoke("handle_edit_skill", {
+        //     current_skill: currentSkill,
+        //     current_skill_index: currentSkillIndex,
+        //     is_base_skill: currentTab === 0,
+        //     new_value: skillValue,
+        //     save_file: currentSaveFile
+        // }).then((new_save) => {
+        //     setCurrentSaveFile(new_save)
+        // });
     }
     
     return (
@@ -81,7 +103,7 @@ const SkillContent = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: S
                             sx={{ width: '100%', minWidth: 360, bgcolor: 'transparent' }}
                             component="nav"
                             aria-labelledby="nested-list-subheader">
-                            {currentSaveFile?.skills.base_skills.map((item, index) => (
+                            {displayedSaveFile?.skills.base_skills.map((item, index) => (
                                 <Fragment key={item.name}>
                                     <ListItemButton onClick={() => handleSelectSkill(item, index)}>
                                         <ListItemIcon>
@@ -130,7 +152,7 @@ const SkillContent = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: S
                             sx={{ width: '100%', minWidth: 360, bgcolor: 'transparent' }}
                             component="nav"
                             aria-labelledby="nested-list-subheader">
-                            {currentSaveFile?.skills.legend_skills.map((item, index) => (
+                            {displayedSaveFile?.skills.legend_skills.map((item, index) => (
                                 <Fragment key={item.name}>
                                     <ListItemButton onClick={() => handleSelectSkill(item, index)}>
                                         <ListItemIcon>
@@ -169,6 +191,7 @@ const SkillContent = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: S
                                                 </ThemeProvider>
                                             }/>
                                     </ListItemButton>
+                                    <Divider/>
                                 </Fragment>
                             ))}
                         </List>
@@ -199,7 +222,7 @@ const SkillContent = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: S
                             }}
                         />
 
-                        <Button onClick={() => submitChangedValue}>Change</Button>
+                        <Button onClick={submitChangedValue}>Change</Button>
                     </CardContent>
                 </Card>
             </Backdrop>
