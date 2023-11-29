@@ -76,7 +76,7 @@ pub fn load_save_file(file_path: &str) -> SaveFile {
     let last_item: &UnlockableItem = unlockable_items.last().unwrap();
 
     // The space between the SGD IDs and chunk data.
-    let jump_offset = last_item.index + last_item.size +75;
+    let jump_offset = last_item.index +75;
 
     // Get all items within the inventory.
     let items: Vec<InventoryItemRow> = get_all_items(&file_content, jump_offset);

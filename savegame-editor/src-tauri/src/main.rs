@@ -67,25 +67,25 @@ async fn handle_edit_item_chunk(
 
 fn main() {
     dotenv().ok();
-    // Comment tauri builder if debugging.
-    tauri::Builder::default()
-        .plugin(tauri_plugin_log::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![
-            get_ids,
-            load_save,
-            handle_edit_skill,
-            handle_edit_item_chunk
-            ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+    // // Comment tauri builder if debugging.
+    // tauri::Builder::default()
+    //     .plugin(tauri_plugin_log::Builder::default().build())
+    //     .invoke_handler(tauri::generate_handler![
+    //         get_ids,
+    //         load_save,
+    //         handle_edit_skill,
+    //         handle_edit_item_chunk
+    //         ])
+    //     .run(tauri::generate_context!())
+    //     .expect("error while running tauri application");
 
-    // // Uncomment the following line to if .env file should be selected.
-    // let file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
-    // let save_file = load_save_file(&file_path);
+    // Uncomment the following line to if .env file should be selected.
+    let file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
+    let save_file = load_save_file(&file_path);
 
-    // let changing_skill = save_file.skills.legend_skills[0].clone();
-    // let new_save_file = edit_skill(changing_skill, 0, false, 5, save_file.clone());
-    
-    // println!("{:?}", save_file.clone().skills.legend_skills[0]);
-    // println!("{:?}", new_save_file.clone().skills.legend_skills[0]);
+    let changing_item = save_file.items[0].inventory_items[0].clone();
+    let new_save_file = edit_inventory_item_chunk(changing_item, save_file.items[0].clone(), 0, 3, 3, 3, 3, save_file.clone());
+
+    println!("{:?}", save_file.clone().items[0].inventory_items[0]);
+    println!("{:?}", new_save_file.clone().items[0].inventory_items[0]);
 }
