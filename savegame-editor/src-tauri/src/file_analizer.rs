@@ -179,13 +179,13 @@ pub fn edit_inventory_item_chunk(
     );
 
     let mut new_file_content: Vec<u8> = save_file.file_content;
-    
+        
     // Replace all new values.
     new_file_content = replace_content_of_file(new_item_chunk.clone().index, new_item_chunk.clone().level, new_file_content);
     new_file_content = replace_content_of_file(new_item_chunk.clone().index + 2, new_item_chunk.clone().seed, new_file_content);
     new_file_content = replace_content_of_file(new_item_chunk.clone().index + 4, new_item_chunk.clone().amount, new_file_content);
     new_file_content = replace_content_of_file(new_item_chunk.clone().index + 8, new_item_chunk.clone().durability, new_file_content);
-
+    
     let mut new_save_file: SaveFile = SaveFile::new(
         save_file.path,
         new_file_content,

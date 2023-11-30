@@ -90,14 +90,15 @@ const SkillContent = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: S
         //     save_file: currentSaveFile
         // }));
 
-        invoke("handle_edit_skill", {
-            current_skill: currentSkill,
+        invoke<string>("handle_edit_skill", {
+            current_skill: JSON.stringify(currentSkill),
             current_skill_index: currentSkillIndex,
             is_base_skill: currentTab === 0,
             new_value: skillValue,
-            save_file: currentSaveFile
+            save_file: JSON.stringify(currentSaveFile)
         }).then((new_save) => {
-            setCurrentSaveFile(new_save)
+            let convertedSave: SaveFile = JSON.parse(new_save);
+            setCurrentSaveFile(convertedSave);
         });
     }
     

@@ -1,6 +1,6 @@
 import './inventory-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
-import { InventoryItem, SaveFile, SkillItem } from '../../models/save-models'
+import { InventoryItem, InventoryItemRow, SaveFile, SkillItem } from '../../models/save-models'
 import { Backdrop, Box, Button, Card, CardContent, Divider, List, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Tab, Tabs, TextField, Typography, createTheme, styled } from '@mui/material'
 import { ChangeEvent, Fragment, useState } from 'react';
 import { ThemeProvider } from '@emotion/react';
@@ -8,6 +8,7 @@ import ConstructionRoundedIcon from '@mui/icons-material/ConstructionRounded';
 import template from '../../models/item-templates.json';
 import { FixedSizeList } from 'react-window';
 import { invoke } from '@tauri-apps/api';
+import { info } from 'tauri-plugin-log-api';
 
 export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function }): JSX.Element => {
     return (
@@ -62,7 +63,7 @@ const InventoryContent = ({ currentSaveFile, setCurrentSaveFile }: { currentSave
                         {currentSaveFile?.items?.map((itemArray, index) => (
                             <CustomTabPanel key={index} value={tabIndex} index={index}>
                                 <VirtualizedList 
-                                    items={itemArray.inventory_items}
+                                    itemRow={itemArray}
                                     itemIndex={index} 
                                     minWidth={360}
                                     currentSaveFile={currentSaveFile}
@@ -280,13 +281,13 @@ const listItemTheme = createTheme({
 // Represents the collapsed nested list.
 // Using FixedSizedList instead of normal list to improve performance when opening a bracket.
 const VirtualizedList = ({
-    items,
+    itemRow,
     itemIndex,
     minWidth,
     currentSaveFile, 
     setCurrentSaveFile,
 }: {
-    items: InventoryItem[],
+    itemRow: InventoryItemRow,
     itemIndex: number,
     minWidth: number,
     currentSaveFile: SaveFile | undefined, 
@@ -294,9 +295,10 @@ const VirtualizedList = ({
 }): JSX.Element => {
     const [isOpen, setIsOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState<InventoryItem>();
-    const [currentItemIndex, setCurrentItemIndex] = useState(0);
-    const [displayedSaveFile, setDisplayedSaveFile] = useState<SaveFile | undefined>(currentSaveFile);
+    const [currentItemIndex, setCurrentItemIndex] = useState(itemIndex);
+    const [items, setItems] = useState<InventoryItem[]>(itemRow.inventory_items);
 
+    
     const [currentSelectedItemLevel, setCurrentSelectedItemLevel] = useState('');
     const [currentSelectedItemSeed, setCurrentSelectedItemSeed] = useState('');
     const [currentSelectedItemAmount, setCurrentSelectedItemAmount] = useState('');
@@ -405,7 +407,9 @@ const VirtualizedList = ({
         let levelValue = Number(currentSelectedItemLevel);
         let seedValue = Number(currentSelectedItemSeed);
         let amountValue = Number(currentSelectedItemAmount);
+        amountValue = amountValue < 0 ? 0 : amountValue;
         let durabilityValue = Number(currentSelectedItemDurability);
+        durabilityValue = durabilityValue < 0 ? 0 : durabilityValue;
 
         // Rewrite locally for performance reasons.
         if (items != undefined) {
@@ -413,6 +417,7 @@ const VirtualizedList = ({
             items[currentItemIndex].chunk_data.seed_value = seedValue;
             items[currentItemIndex].chunk_data.amount_value = amountValue;
             items[currentItemIndex].chunk_data.durability_value = durabilityValue;
+            setItems(items);
         }
 
         // setIsOpen(false);
@@ -420,17 +425,19 @@ const VirtualizedList = ({
     }
 
     async function submitItemValues(levelValue: number, seedValue: number, amountValue: number, durabilityValue: number) {
-        invoke("handle_edit_item_chunk", {
-            current_item: currentItem,
-            current_item_row: items,
+        invoke<string>("handle_edit_item_chunk", {
+            current_item: JSON.stringify(currentItem),
+            current_item_row: JSON.stringify(itemRow),
             current_item_index: currentItemIndex,
             new_level: levelValue,
             new_seed: seedValue,
             new_amount: amountValue,
             new_durability: durabilityValue,
-            save_file: currentSaveFile
+            save_file: JSON.stringify(currentSaveFile)
         }).then((new_save) => {
-            setCurrentSaveFile(new_save)
+            let convertedSave: SaveFile = JSON.parse(new_save);
+            console.log(convertedSave)
+            setCurrentSaveFile(convertedSave);
         })
     }
 
