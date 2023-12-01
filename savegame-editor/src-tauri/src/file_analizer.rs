@@ -6,8 +6,8 @@
 //! - Inventory items (weapons, gear, accesssories, etc)
 
 use std::{fs, io::Read};
-use log::info;
 use std::error::Error;
+use log::info;
 use regex::Regex;
 
 
@@ -150,63 +150,50 @@ pub fn edit_skill(
     new_save_file
 }
 
+/// Represents a method for changing the values of a the item chunks
+/// 
+/// ### Parameter
+/// - `current_item_chunk_index`: The index on where the chunk starts.
+/// - `new_level`: The new level value.
+/// - `new_seed`: The new seed value.
+/// - `new_amount`: The new amount value.
+/// - `new_durability`: The new durability value.
+/// - `save_file_content`: The content of the save file.
+/// 
+/// ### Returns `Vec<u8>`
+/// The new content of the save file.
 pub fn edit_inventory_item_chunk(
-    current_item: InventoryItem, 
-    current_item_row: InventoryItemRow,
-    current_item_index: usize,
+    current_item_chunk_index: usize,
     new_level: u16,
     new_seed: u16,
     new_amount: u32,
-    new_durability: u32,
-    save_file: SaveFile
-) -> SaveFile {
-    let new_item_chunk: InventoryChunk = InventoryChunk::new(
-        new_level.to_le_bytes().to_vec(),
-        new_seed.to_le_bytes().to_vec(),
-        new_amount.to_le_bytes().to_vec(),
-        new_durability.to_le_bytes().to_vec(),
-        current_item.chunk_data.space.clone(),
-        current_item.chunk_data.index.clone()
-    );
+    new_durability: f32,
+    mut save_file_content: Vec<u8>
+) -> Vec<u8> {
 
-    let new_item: InventoryItem = InventoryItem::new(
-        current_item.name.clone(),
-        current_item.index.clone(),
-        current_item.size.clone(),
-        current_item.sgd_data.clone(),
-        new_item_chunk.clone(),
-        current_item.mod_data.clone()
-    );
-
-    let mut new_file_content: Vec<u8> = save_file.file_content;
+    let level_bytes = new_level.to_le_bytes().to_vec();
+    let seed_bytes = new_seed.to_le_bytes().to_vec();
+    let amount_bytes = new_amount.to_le_bytes().to_vec();
+    let durability_bytes = new_durability.to_le_bytes().to_vec();
         
     // Replace all new values.
-    new_file_content = replace_content_of_file(new_item_chunk.clone().index, new_item_chunk.clone().level, new_file_content);
-    new_file_content = replace_content_of_file(new_item_chunk.clone().index + 2, new_item_chunk.clone().seed, new_file_content);
-    new_file_content = replace_content_of_file(new_item_chunk.clone().index + 4, new_item_chunk.clone().amount, new_file_content);
-    new_file_content = replace_content_of_file(new_item_chunk.clone().index + 8, new_item_chunk.clone().durability, new_file_content);
-    
-    let mut new_save_file: SaveFile = SaveFile::new(
-        save_file.path,
-        new_file_content,
-        save_file.skills,
-        save_file.unlockable_items,
-        save_file.items
-    );
+    save_file_content = replace_content_of_file(current_item_chunk_index, level_bytes, save_file_content);
+    save_file_content = replace_content_of_file(current_item_chunk_index + 2, seed_bytes, save_file_content);
+    save_file_content = replace_content_of_file(current_item_chunk_index + 4, amount_bytes, save_file_content);
+    save_file_content = replace_content_of_file(current_item_chunk_index + 8, durability_bytes, save_file_content);
 
-    for i in 0..new_save_file.items.len() {
-        if current_item_row.name == new_save_file.items[i].name 
-        && current_item_index < new_save_file.items[i].inventory_items.len() {
-            if current_item.name == new_save_file.items[i].inventory_items[current_item_index].name
-            && current_item.index == new_save_file.items[i].inventory_items[current_item_index].index {
-                new_save_file.items[i].inventory_items[current_item_index] = new_item.clone();
-            }
-        }
-    }
-
-    new_save_file
+    save_file_content
 }
 
+/// Represents a method for replacing the file content.
+/// 
+/// ### Parameter
+/// - `replace_index`: The index on where the value is beeing replaced.
+/// - `replace_value`: The new value.
+/// - `content`: The content of the current file.
+/// 
+/// ### Returns `Vec<u8>`
+/// The new content of the save file.
 fn replace_content_of_file(replace_index: usize, replace_value: Vec<u8>, mut content: Vec<u8>) -> Vec<u8> {
     // Check if all indices are within bounds
     if replace_index + replace_value.len() < content.len() {

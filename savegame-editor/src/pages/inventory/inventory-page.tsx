@@ -1,6 +1,6 @@
 import './inventory-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
-import { InventoryItem, InventoryItemRow, SaveFile, SkillItem } from '../../models/save-models'
+import { IdData, InventoryItem, InventoryItemRow, SaveFile, SkillItem } from '../../models/save-models'
 import { Backdrop, Box, Button, Card, CardContent, Divider, List, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Tab, Tabs, TextField, Typography, createTheme, styled } from '@mui/material'
 import { ChangeEvent, Fragment, useState } from 'react';
 import { ThemeProvider } from '@emotion/react';
@@ -8,19 +8,18 @@ import ConstructionRoundedIcon from '@mui/icons-material/ConstructionRounded';
 import template from '../../models/item-templates.json';
 import { FixedSizeList } from 'react-window';
 import { invoke } from '@tauri-apps/api';
-import { info } from 'tauri-plugin-log-api';
 
-export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function }): JSX.Element => {
+export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, idDatas: IdData[] }): JSX.Element => {
     return (
         <>
             <div className="container">
-                <NavbarDrawer pagename={"Inventory"} pagecontent={<InventoryContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} />}></NavbarDrawer>
+                <NavbarDrawer pagename={"Inventory"} pagecontent={<InventoryContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} idDatas={idDatas} />}></NavbarDrawer>
             </div>
         </>
     )
 }
 
-const InventoryContent = ({ currentSaveFile, setCurrentSaveFile }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function }) => {
+const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, idDatas: IdData[] }) => {
     const [tabIndex, setValue] = useState(0);
 
     const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
@@ -67,91 +66,8 @@ const InventoryContent = ({ currentSaveFile, setCurrentSaveFile }: { currentSave
                                     itemIndex={index} 
                                     minWidth={360}
                                     currentSaveFile={currentSaveFile}
-                                    setCurrentSaveFile={setCurrentSaveFile} />
-                                {/* <List
-                                sx={{ width: '100%', minWidth: 360, bgcolor: 'transparent' }}
-                                component="nav"
-                                aria-labelledby="nested-list-subheader"
-                            >
-                                {itemArray.inventory_items.map((item, itemIndex) => (
-                                    <Fragment key={itemIndex}>
-                                        <ListItemButton>
-                                            <ListItemIcon>
-                                                <ConstructionRoundedIcon sx={{ color: '#e9eecd' }} />
-                                            </ListItemIcon>
-                                            <ListItemText
-                                                primary={item.name}
-                                                secondary={
-                                                    <ThemeProvider theme={listItemTheme}>
-                                                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                                                            <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
-                                                                <Typography
-                                                                    sx={{ minWidth: '100px' }}
-                                                                    variant="subtitle1">
-                                                                    {"Index: "}
-                                                                </Typography>
-                                                                <Typography
-                                                                    variant='body2'>
-                                                                    {item.chunk_data.index}
-                                                                </Typography>
-                                                            </Box>
-
-
-                                                            <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
-                                                                <Typography
-                                                                    sx={{ minWidth: '100px' }}
-                                                                    variant="subtitle1">
-                                                                    {"Level: "}
-                                                                </Typography>
-                                                                <Typography
-                                                                    variant='body2'>
-                                                                    {item.chunk_data.level_value}
-                                                                </Typography>
-                                                            </Box>
-
-                                                            <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
-                                                                <Typography
-                                                                    sx={{ minWidth: '100px' }}
-                                                                    variant="subtitle1">
-                                                                    {"Seed: "}
-                                                                </Typography>
-                                                                <Typography
-                                                                    variant='body2'>
-                                                                    {item.chunk_data.seed_value}
-                                                                </Typography>
-                                                            </Box>
-
-                                                            <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
-                                                                <Typography
-                                                                    sx={{ minWidth: '100px' }}
-                                                                    variant="subtitle1">
-                                                                    {"Amount: "}
-                                                                </Typography>
-                                                                <Typography
-                                                                    variant='body2'>
-                                                                    {item.chunk_data.amount_value}
-                                                                </Typography>
-                                                            </Box>
-
-                                                            <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
-                                                                <Typography
-                                                                    sx={{ minWidth: '100px' }}
-                                                                    variant="subtitle1">
-                                                                    {"Durability: "}
-                                                                </Typography>
-                                                                <Typography
-                                                                    variant='body2'>
-                                                                    {item.chunk_data.durability_value}
-                                                                </Typography>
-                                                            </Box>
-                                                        </Box>
-                                                    </ThemeProvider>
-                                                } />
-                                        </ListItemButton>
-                                        <Divider />
-                                    </Fragment>
-                                ))}
-                            </List> */}
+                                    setCurrentSaveFile={setCurrentSaveFile}
+                                    idDatas={idDatas} />
                             </CustomTabPanel>
                         ))}
                     </Box>
@@ -286,12 +202,14 @@ const VirtualizedList = ({
     minWidth,
     currentSaveFile, 
     setCurrentSaveFile,
+    idDatas,
 }: {
     itemRow: InventoryItemRow,
     itemIndex: number,
     minWidth: number,
     currentSaveFile: SaveFile | undefined, 
-    setCurrentSaveFile: Function
+    setCurrentSaveFile: Function,
+    idDatas: IdData[],
 }): JSX.Element => {
     const [isOpen, setIsOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState<InventoryItem>();
@@ -303,20 +221,40 @@ const VirtualizedList = ({
     const [currentSelectedItemSeed, setCurrentSelectedItemSeed] = useState('');
     const [currentSelectedItemAmount, setCurrentSelectedItemAmount] = useState('');
     const [currentSelectedItemDurability, setCurrentSelectedItemDurability] = useState('');
+    const [possibleIDs, setPossibleIDs] = useState<string[]>([]);
     
     const handleSelectedItem = (selectedItem: InventoryItem, index: number) => {
+        console.log(selectedItem.size)
         setCurrentItem(selectedItem);
         setCurrentItemIndex(index);
         setCurrentSelectedItemLevel(selectedItem.chunk_data.level_value.toString());
         setCurrentSelectedItemSeed(selectedItem.chunk_data.seed_value.toString());
         setCurrentSelectedItemAmount(selectedItem.chunk_data.amount_value.toString());
         setCurrentSelectedItemDurability(selectedItem.chunk_data.durability_value.toString());
+        handlePossibleIDs(selectedItem.size);
         setIsOpen(true);
     }
 
     const handleCloseItem = () => {
         setCurrentItem(undefined);
         setIsOpen(false);
+    }
+
+    const handlePossibleIDs = (size: number) => {
+        let iDs: string[] = [];
+
+        if (itemRow.name == "Weapons") {
+            for (let i = 0; i < idDatas.length; i++) {
+                if (idDatas[i].filename == "Melee") {
+                    for (let m = 0; m < idDatas[i].ids.length; m++) {
+                        if (idDatas[i].ids[m].length <= size)
+                        iDs.push(idDatas[i].ids[m]);
+                    }
+                }
+            }
+
+            setPossibleIDs(iDs);
+        }
     }
 
     const handleLevelValue = (event: ChangeEvent<HTMLInputElement>) => {
@@ -386,7 +324,7 @@ const VirtualizedList = ({
         const maxValue = 9999;
 
         // Allow only numbers
-        var value = event.target.value.replace(/[^0-9]/g, '');
+        var value = event.target.value.replace(/[^-0-9]/g, '');
 
         // Check Max Range
         if (Number(value) > maxValue) {
@@ -407,9 +345,7 @@ const VirtualizedList = ({
         let levelValue = Number(currentSelectedItemLevel);
         let seedValue = Number(currentSelectedItemSeed);
         let amountValue = Number(currentSelectedItemAmount);
-        amountValue = amountValue < 0 ? 0 : amountValue;
         let durabilityValue = Number(currentSelectedItemDurability);
-        durabilityValue = durabilityValue < 0 ? 0 : durabilityValue;
 
         // Rewrite locally for performance reasons.
         if (items != undefined) {
@@ -425,19 +361,27 @@ const VirtualizedList = ({
     }
 
     async function submitItemValues(levelValue: number, seedValue: number, amountValue: number, durabilityValue: number) {
-        invoke<string>("handle_edit_item_chunk", {
-            current_item: JSON.stringify(currentItem),
-            current_item_row: JSON.stringify(itemRow),
-            current_item_index: currentItemIndex,
+        invoke<Uint8Array>("handle_edit_item_chunk", {
+            current_item_chunk_index: currentItem?.chunk_data.index,
             new_level: levelValue,
             new_seed: seedValue,
             new_amount: amountValue,
             new_durability: durabilityValue,
-            save_file: JSON.stringify(currentSaveFile)
-        }).then((new_save) => {
-            let convertedSave: SaveFile = JSON.parse(new_save);
-            console.log(convertedSave)
-            setCurrentSaveFile(convertedSave);
+            save_file_content: currentSaveFile?.file_content
+        }).then((new_save_content) => {
+            if (currentSaveFile != null) {
+                currentSaveFile.file_content = new_save_content;
+                itemRow.inventory_items = items;
+
+                for (let i = 0; i < currentSaveFile.items.length; i++) {
+                    if (itemRow.name == currentSaveFile.items[i].name &&
+                        itemRow.inventory_items.length == currentSaveFile.items[i].inventory_items.length) {
+                            currentSaveFile.items[i] = itemRow;
+                            setCurrentSaveFile(currentSaveFile);
+                            return;
+                    }
+                }
+            }
         })
     }
 
