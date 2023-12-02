@@ -1,13 +1,15 @@
 import './inventory-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
 import { IdData, InventoryItem, InventoryItemRow, SaveFile, SkillItem } from '../../models/save-models'
-import { Backdrop, Box, Button, Card, CardContent, Divider, List, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Tab, Tabs, TextField, Typography, createTheme, styled } from '@mui/material'
+import { Autocomplete, Backdrop, Box, Button, Card, CardContent, Divider, List, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Tab, Tabs, TextField, Typography, createTheme, styled } from '@mui/material'
 import { ChangeEvent, Fragment, useState } from 'react';
 import { ThemeProvider } from '@emotion/react';
 import ConstructionRoundedIcon from '@mui/icons-material/ConstructionRounded';
+import BorderColorIcon from '@mui/icons-material/BorderColor';
 import template from '../../models/item-templates.json';
 import { FixedSizeList } from 'react-window';
 import { invoke } from '@tauri-apps/api';
+import AsyncAutocomplete from '../../components/async-autocomplete/async-autocomplete';
 
 export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, idDatas: IdData[] }): JSX.Element => {
     return (
@@ -216,17 +218,24 @@ const VirtualizedList = ({
     const [currentItemIndex, setCurrentItemIndex] = useState(itemIndex);
     const [items, setItems] = useState<InventoryItem[]>(itemRow.inventory_items);
 
-    
+    const [currentSelectedID, setCurrentSelectedID] = useState('');
     const [currentSelectedItemLevel, setCurrentSelectedItemLevel] = useState('');
     const [currentSelectedItemSeed, setCurrentSelectedItemSeed] = useState('');
     const [currentSelectedItemAmount, setCurrentSelectedItemAmount] = useState('');
     const [currentSelectedItemDurability, setCurrentSelectedItemDurability] = useState('');
     const [possibleIDs, setPossibleIDs] = useState<string[]>([]);
     
+    const [changeItemIsOpen, setChangeItemIsOpen] = useState(false);
+    
+    const handleCLickChangeItem = () => {
+        setChangeItemIsOpen(!changeItemIsOpen);
+    };
+
     const handleSelectedItem = (selectedItem: InventoryItem, index: number) => {
         console.log(selectedItem.size)
         setCurrentItem(selectedItem);
         setCurrentItemIndex(index);
+        setCurrentSelectedID(selectedItem.name);
         setCurrentSelectedItemLevel(selectedItem.chunk_data.level_value.toString());
         setCurrentSelectedItemSeed(selectedItem.chunk_data.seed_value.toString());
         setCurrentSelectedItemAmount(selectedItem.chunk_data.amount_value.toString());
@@ -349,6 +358,7 @@ const VirtualizedList = ({
 
         // Rewrite locally for performance reasons.
         if (items != undefined) {
+            items[currentItemIndex].name = currentSelectedID;
             items[currentItemIndex].chunk_data.level_value = levelValue;
             items[currentItemIndex].chunk_data.seed_value = seedValue;
             items[currentItemIndex].chunk_data.amount_value = amountValue;
@@ -362,6 +372,8 @@ const VirtualizedList = ({
 
     async function submitItemValues(levelValue: number, seedValue: number, amountValue: number, durabilityValue: number) {
         invoke<Uint8Array>("handle_edit_item_chunk", {
+            current_item_index: currentItem?.index,
+            new_id: currentSelectedID,
             current_item_chunk_index: currentItem?.chunk_data.index,
             new_level: levelValue,
             new_seed: seedValue,
@@ -489,9 +501,43 @@ const VirtualizedList = ({
                             display: 'flex',
                             flexDirection: 'column'
                         }}>
-                            <Typography gutterBottom variant="h5" component="div">
-                                {currentItem?.name}
-                            </Typography>
+
+                            <Box sx={{
+                                display: 'flex', 
+                                flexDirection: 'row',
+                                justifyContent: 'center',
+                                marginTop: '20px'
+                            }}>
+                                <Box>
+                                    {changeItemIsOpen ? (
+                                        <AsyncAutocomplete 
+                                            currentID={currentSelectedID}
+                                            iDs={possibleIDs}
+                                            changeCurrentID={setCurrentSelectedID}
+                                        />
+                                    ) : (
+                                        <Typography gutterBottom variant="h5" component="div">
+                                        {currentItem?.name}
+                                        </Typography>
+                                    )}
+                                </Box>
+
+                                
+
+                                <Button 
+                                    sx={{
+                                        marginLeft: '10px',
+                                        cursor: 'pointer',
+                                        "&:hover": {
+                                            backgroundColor: '#52626450'
+                                        }
+                                    }}
+                                    onClick={handleCLickChangeItem}
+                                        >
+                                    <BorderColorIcon/>
+                                </Button>
+
+                            </Box>
                             
                             <Box sx={{
                                 display: 'flex', 
@@ -605,8 +651,6 @@ const VirtualizedList = ({
                                 handleChangeValues();
                                 setIsOpen(false);
                             }}>Change All</Button>
-
-
                         </CardContent>
                     </Card>
                 </Backdrop>

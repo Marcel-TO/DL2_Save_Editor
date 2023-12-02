@@ -46,6 +46,8 @@ async fn handle_edit_skill(current_skill: String, current_skill_index: usize, is
 
 #[tauri::command(rename_all = "snake_case")]
 async fn handle_edit_item_chunk(
+    current_item_index: usize,
+    new_id: String,
     current_item_chunk_index: usize,
     new_level: u16,
     new_seed: u16,
@@ -54,6 +56,8 @@ async fn handle_edit_item_chunk(
     save_file_content: Vec<u8>
 ) -> Result<Vec<u8>, ()> {
     let new_save_content = edit_inventory_item_chunk(
+        current_item_index,
+        new_id,
         current_item_chunk_index,
         new_level,
         new_seed,

@@ -135,9 +135,9 @@ const itemPages: [string, JSX.Element, string, boolean][] = [
   ['Backpack', <BackpackRoundedIcon/>, '/backpack', true], 
   ['Campaign', <AssignmentLateRoundedIcon/>, '/campaign', true],
 ];
-const otherPages: [string, JSX.Element, string][] = [
-  ['Player', <AccountCircleOutlinedIcon/>, '/player'],
-  ['IDs', <FingerprintIcon/>, '/ids'], 
+const otherPages: [string, JSX.Element, string, boolean][] = [
+  ['Player', <AccountCircleOutlinedIcon/>, '/player', true],
+  ['IDs', <FingerprintIcon/>, '/ids', false], 
 ];
 const infoPages: [string, JSX.Element, string][] = [
   ['Home', <HomeRoundedIcon/>, '/'],
@@ -279,7 +279,7 @@ export const NavbarDrawer = ({pagename, pagecontent}: NavbarDrawerProps): JSX.El
                 </List>
                 <Divider sx={{ backgroundColor: '#e9eecd60' }} />
                 <List>
-                  {otherPages.map(([text, icon, link]) => (
+                  {otherPages.map(([text, icon, link, isDisabled]) => (
                     <ListItem key={text} disablePadding sx={{
                       display: 'block',
                       color: '#e9eecd',
@@ -295,6 +295,7 @@ export const NavbarDrawer = ({pagename, pagecontent}: NavbarDrawerProps): JSX.El
                           },
                         }}
                         component={Link} to={link}
+                        disabled={isDisabled}
                       >
                         <ListItemIcon
                           sx={{

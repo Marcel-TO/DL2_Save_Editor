@@ -163,6 +163,8 @@ pub fn edit_skill(
 /// ### Returns `Vec<u8>`
 /// The new content of the save file.
 pub fn edit_inventory_item_chunk(
+    current_item_index: usize,
+    new_id: String,
     current_item_chunk_index: usize,
     new_level: u16,
     new_seed: u16,
@@ -171,12 +173,14 @@ pub fn edit_inventory_item_chunk(
     mut save_file_content: Vec<u8>
 ) -> Vec<u8> {
 
+    let new_id_bytes = new_id.as_bytes().to_vec();
     let level_bytes = new_level.to_le_bytes().to_vec();
     let seed_bytes = new_seed.to_le_bytes().to_vec();
     let amount_bytes = new_amount.to_le_bytes().to_vec();
     let durability_bytes = new_durability.to_le_bytes().to_vec();
         
     // Replace all new values.
+    save_file_content = replace_content_of_file(current_item_index, new_id_bytes, save_file_content);
     save_file_content = replace_content_of_file(current_item_chunk_index, level_bytes, save_file_content);
     save_file_content = replace_content_of_file(current_item_chunk_index + 2, seed_bytes, save_file_content);
     save_file_content = replace_content_of_file(current_item_chunk_index + 4, amount_bytes, save_file_content);
