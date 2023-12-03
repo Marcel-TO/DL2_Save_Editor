@@ -164,27 +164,37 @@ pub fn edit_skill(
 /// The new content of the save file.
 pub fn edit_inventory_item_chunk(
     current_item_index: usize,
-    new_id: String,
+    mut new_id: String,
     current_item_chunk_index: usize,
+    current_item_size: usize,
     new_level: u16,
     new_seed: u16,
     new_amount: u32,
     new_durability: f32,
     mut save_file_content: Vec<u8>
 ) -> Vec<u8> {
+    // Check if the string ends with "SGDs"
+    if !new_id.ends_with("SGDs") {
+        // If it doesn't end with "SGDs", add it to the string
+        new_id.push_str("SGDs");
+    }
 
-    let new_id_bytes = new_id.as_bytes().to_vec();
-    let level_bytes = new_level.to_le_bytes().to_vec();
-    let seed_bytes = new_seed.to_le_bytes().to_vec();
-    let amount_bytes = new_amount.to_le_bytes().to_vec();
-    let durability_bytes = new_durability.to_le_bytes().to_vec();
+    let zero_bytes: Vec<u8> = vec![0; current_item_size]; // -4 because of leaving the old SGDs
+    let new_id_bytes: Vec<u8> = new_id.as_bytes().to_vec();
+    let level_bytes: Vec<u8> = new_level.to_le_bytes().to_vec();
+    let seed_bytes: Vec<u8> = new_seed.to_le_bytes().to_vec();
+    let amount_bytes: Vec<u8> = new_amount.to_le_bytes().to_vec();
+    let durability_bytes: Vec<u8> = new_durability.to_le_bytes().to_vec();
         
     // Replace all new values.
-    save_file_content = replace_content_of_file(current_item_index, new_id_bytes, save_file_content);
     save_file_content = replace_content_of_file(current_item_chunk_index, level_bytes, save_file_content);
     save_file_content = replace_content_of_file(current_item_chunk_index + 2, seed_bytes, save_file_content);
     save_file_content = replace_content_of_file(current_item_chunk_index + 4, amount_bytes, save_file_content);
     save_file_content = replace_content_of_file(current_item_chunk_index + 8, durability_bytes, save_file_content);
+    
+    // First empty 
+    save_file_content = replace_content_of_file(current_item_index, zero_bytes, save_file_content);
+    save_file_content = replace_content_of_file(current_item_index, new_id_bytes, save_file_content);
 
     save_file_content
 }

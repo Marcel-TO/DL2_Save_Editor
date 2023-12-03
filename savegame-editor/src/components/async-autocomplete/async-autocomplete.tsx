@@ -46,7 +46,7 @@ export default function AsyncAutocomplete({currentID, iDs, changeCurrentID}: {cu
   return (
     <Autocomplete
       id="asynchronous-demo"
-      sx={{ width: 300 }}
+      sx={{ width: '100%' }}
       open={open}
       onOpen={() => {
         setOpen(true);
@@ -59,7 +59,7 @@ export default function AsyncAutocomplete({currentID, iDs, changeCurrentID}: {cu
       options={options}
       loading={loading}
       onChange={(event: any, newValue: string | null) => {
-        changeCurrentID(newValue);
+        changeCurrentID(newValue + 'SGDs');
       }}
       inputValue={inputValue}
       value={currentID}

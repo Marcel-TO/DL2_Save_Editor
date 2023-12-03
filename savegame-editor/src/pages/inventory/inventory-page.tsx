@@ -226,13 +226,20 @@ const VirtualizedList = ({
     const [possibleIDs, setPossibleIDs] = useState<string[]>([]);
     
     const [changeItemIsOpen, setChangeItemIsOpen] = useState(false);
+
+    const idMapping: [string, string[]][] = [
+        ['Weapons', ['Melee']],
+        ['Outfits/Craftresources', ['CraftComponent', 'OutfitPart', 'LootPack']],
+        ['Consumables', ['Medkit', 'Powerup']],
+        ['Accessories', ['Throwable', 'ThrowableLiquid']],
+        ['Ammunition', ['Ammo']],
+    ];
     
     const handleCLickChangeItem = () => {
         setChangeItemIsOpen(!changeItemIsOpen);
     };
 
     const handleSelectedItem = (selectedItem: InventoryItem, index: number) => {
-        console.log(selectedItem.size)
         setCurrentItem(selectedItem);
         setCurrentItemIndex(index);
         setCurrentSelectedID(selectedItem.name);
@@ -251,20 +258,23 @@ const VirtualizedList = ({
 
     const handlePossibleIDs = (size: number) => {
         let iDs: string[] = [];
-
-        if (itemRow.name == "Weapons") {
-            for (let i = 0; i < idDatas.length; i++) {
-                if (idDatas[i].filename == "Melee") {
-                    for (let m = 0; m < idDatas[i].ids.length; m++) {
-                        if (idDatas[i].ids[m].length <= size)
-                        iDs.push(idDatas[i].ids[m]);
-                    }
+    
+        idMapping.forEach(([rowName, idNames]) => {
+            if (itemRow.name === rowName) {
+                const matchingIdDatas = idDatas.filter((idData) => idNames.indexOf(idData.filename) > -1);
+    
+                for (let i = 0; i < matchingIdDatas.length; i++) {
+                    matchingIdDatas[i].ids.forEach((id) => {
+                        if (id.length <= size) {
+                            iDs.push(id);
+                        }
+                    });
                 }
+                
+                setPossibleIDs(iDs);
             }
-
-            setPossibleIDs(iDs);
-        }
-    }
+        });
+    };
 
     const handleLevelValue = (event: ChangeEvent<HTMLInputElement>) => {
         const maxValue = 6999;
@@ -375,6 +385,7 @@ const VirtualizedList = ({
             current_item_index: currentItem?.index,
             new_id: currentSelectedID,
             current_item_chunk_index: currentItem?.chunk_data.index,
+            current_item_size: currentItem?.size,
             new_level: levelValue,
             new_seed: seedValue,
             new_amount: amountValue,
@@ -427,7 +438,7 @@ const VirtualizedList = ({
                                                         </Typography>
                                                         <Typography
                                                             variant='body2'>
-                                                            {items[index].chunk_data.index}
+                                                            {items[index].index}
                                                         </Typography>
                                                     </Box>
 
@@ -508,7 +519,7 @@ const VirtualizedList = ({
                                 justifyContent: 'center',
                                 marginTop: '20px'
                             }}>
-                                <Box>
+                                <Box sx={{width:'500px'}}>
                                     {changeItemIsOpen ? (
                                         <AsyncAutocomplete 
                                             currentID={currentSelectedID}
@@ -523,19 +534,35 @@ const VirtualizedList = ({
                                 </Box>
 
                                 
-
-                                <Button 
-                                    sx={{
-                                        marginLeft: '10px',
-                                        cursor: 'pointer',
-                                        "&:hover": {
-                                            backgroundColor: '#52626450'
-                                        }
-                                    }}
-                                    onClick={handleCLickChangeItem}
-                                        >
-                                    <BorderColorIcon/>
-                                </Button>
+                                {possibleIDs.length > 0 ? (
+                                    <Button 
+                                        sx={{
+                                            marginLeft: '10px',
+                                            cursor: 'pointer',
+                                            "&:hover": {
+                                                backgroundColor: '#52626450'
+                                            }
+                                        }}
+                                        onClick={handleCLickChangeItem}
+                                            >
+                                        <BorderColorIcon/>
+                                    </Button>
+                                ) : (
+                                    <Button 
+                                        sx={{
+                                            marginLeft: '10px',
+                                            cursor: 'pointer',
+                                            "&:hover": {
+                                                backgroundColor: '#52626450'
+                                            }
+                                        }}
+                                        onClick={handleCLickChangeItem}
+                                        disabled={true}
+                                            >
+                                        <BorderColorIcon/>
+                                    </Button>
+                                )}
+                                
 
                             </Box>
                             
