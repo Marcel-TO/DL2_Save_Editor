@@ -277,7 +277,7 @@ const VirtualizedList = ({
     };
 
     const handleLevelValue = (event: ChangeEvent<HTMLInputElement>) => {
-        const maxValue = 6999;
+        const maxValue = 65535;
 
         // Allow only numbers
         var value = event.target.value.replace(/[^0-9]/g, '');
@@ -298,7 +298,7 @@ const VirtualizedList = ({
     }
 
     const handleSeedValue = (event: ChangeEvent<HTMLInputElement>) => {
-        const maxValue = 99999;
+        const maxValue = 65535;
 
         // Allow only numbers
         var value = event.target.value.replace(/[^0-9]/g, '');
@@ -383,7 +383,7 @@ const VirtualizedList = ({
     async function submitItemValues(levelValue: number, seedValue: number, amountValue: number, durabilityValue: number) {
         invoke<Uint8Array>("handle_edit_item_chunk", {
             current_item_index: currentItem?.index,
-            new_id: currentSelectedID,
+            new_id: currentSelectedID.slice(0, -4),
             current_item_chunk_index: currentItem?.chunk_data.index,
             current_item_size: currentItem?.size,
             new_level: levelValue,

@@ -173,13 +173,7 @@ pub fn edit_inventory_item_chunk(
     new_durability: f32,
     mut save_file_content: Vec<u8>
 ) -> Vec<u8> {
-    // Check if the string ends with "SGDs"
-    if !new_id.ends_with("SGDs") {
-        // If it doesn't end with "SGDs", add it to the string
-        new_id.push_str("SGDs");
-    }
-
-    let zero_bytes: Vec<u8> = vec![0; current_item_size]; // -4 because of leaving the old SGDs
+    let zero_bytes: Vec<u8> = vec![0; current_item_size - 4]; // -4 because of leaving the old SGDs
     let new_id_bytes: Vec<u8> = new_id.as_bytes().to_vec();
     let level_bytes: Vec<u8> = new_level.to_le_bytes().to_vec();
     let seed_bytes: Vec<u8> = new_seed.to_le_bytes().to_vec();
@@ -617,12 +611,23 @@ fn get_sgd_matches(content: &[u8], start_index: usize) -> (Vec<String>, Vec<usiz
     // Defines the regex instance.
     let re: Regex = Regex::new(pattern).unwrap();
     let mut match_iter = re.find_iter(&string_data);
+    let mut curr_index = start_index;
 
     // iterate through each match.
     while let Some(mat) = match_iter.next() {
         // Looking for all SGDs inside the current chunk.
         if mat.end() - mat.start() == 4 {
-            match_values.push(mat.as_str().to_string());
+            let tmp_match_value = mat.as_str().to_string();
+            let match_index = get_index_from_sequence(content, &curr_index, tmp_match_value.as_bytes(), true);
+            let previous_distance_for_sgds_1 = &content[match_index - 116..match_index - 112];
+            let previous_distance_for_sgds_2 = &content[match_index - 180..match_index - 176];
+
+            if String::from_utf8_lossy(previous_distance_for_sgds_1) == "SGDs" || String::from_utf8_lossy(previous_distance_for_sgds_2) == "SGDs" {
+                curr_index = match_index + 4;
+                match_values.push(tmp_match_value);
+            } else {
+                break;
+            }
         } else {
             break;
         }
@@ -677,7 +682,8 @@ fn find_amount_of_matches(content: &[u8], start_index: usize, amount: usize) -> 
     let string_data = String::from_utf8_lossy(&content[start_index..]);
 
     // The Regex pattern to match the sgds.
-    let pattern: &str = r"[a-zA-Z0-9_]*SGDs";
+    // let pattern: &str = r"[a-zA-Z0-9_]{4,}";
+    let pattern: &str = r"(?:[a-zA-Z0-9_]{4,}(?:\x00*))*SGDs";
     // The patterns that need to be checked.
 
     // Defines the regex instances.
@@ -693,9 +699,30 @@ fn find_amount_of_matches(content: &[u8], start_index: usize, amount: usize) -> 
             if !mat.as_str().contains("Mod") && !mat.as_str().contains("charm") &&
                 mat.as_str() != "NoneSGDs" && mat.as_str() != "SGDs" {
                     // Check if the bullet acts as item or mod.
-                    if (mat.as_str().contains("Bullet") && mod_counter > 0 && mod_counter <= 4) || mod_counter == 4 {
-                        match_values.push(mat.as_str().to_string());
-                        mod_counter += 1;
+                    if (mat.as_str().contains("Bullet") && mod_counter > 0 && mod_counter <= 4) || mod_counter == 4 {                        
+                        let tmp_matching_value = mat.as_str().to_string();
+                        let index = get_index_from_sequence(content, &start_index, &tmp_matching_value.as_bytes(), true);
+                        let size_bytes = &content[index - 2..index].to_vec();
+                        let size = u16::from_le_bytes(size_bytes.clone().try_into().unwrap()) as usize;
+
+                        if size > 0 {
+                            if tmp_matching_value.clone().ends_with("SGDs") && size + 4 == tmp_matching_value.clone().len() {
+                                match_values.push(tmp_matching_value.clone());
+                                mod_counter += 1;
+                            } else if !tmp_matching_value.clone().ends_with("SGDs") && size > tmp_matching_value.clone().len() {
+                                let longer_match_value = String::from_utf8_lossy(&content[index..index + size + 4]);
+
+                                if longer_match_value.ends_with("SGDs") {
+                                    match_values.push(longer_match_value.to_string());
+                                    mod_counter += 1;
+                                } else {
+                                    continue;
+                                }
+                            }
+                        } else {
+                            continue;
+                        }
+
                         continue;
                     }
 
@@ -722,9 +749,28 @@ fn find_amount_of_matches(content: &[u8], start_index: usize, amount: usize) -> 
                     continue;
                 }
 
-                // Add the match to the values and update counter.
-                match_values.push(mat.as_str().to_string());
-                mod_counter += 1;
+                let tmp_matching_value = mat.as_str().to_string();
+                let index = get_index_from_sequence(content, &start_index, &tmp_matching_value.as_bytes(), true);
+                let size_bytes = &content[index - 2..index].to_vec();
+                let size = u16::from_le_bytes(size_bytes.clone().try_into().unwrap()) as usize;
+
+                if size > 0 {
+                    if tmp_matching_value.clone().ends_with("SGDs") && size + 4 == tmp_matching_value.clone().len() {
+                        match_values.push(tmp_matching_value.clone());
+                        mod_counter += 1;
+                    } else if !tmp_matching_value.clone().ends_with("SGDs") && size > tmp_matching_value.clone().len() {
+                        let longer_match_value = String::from_utf8_lossy(&content[index..index + size + 4]);
+
+                        if longer_match_value.ends_with("SGDs") {
+                            match_values.push(longer_match_value.to_string());
+                            mod_counter += 1;
+                        } else {
+                            continue;
+                        }
+                    }
+                } else {
+                    continue;
+                }
         } else {
             break;
         }
