@@ -1,7 +1,7 @@
 import './inventory-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
-import { IdData, InventoryItem, InventoryItemRow, SaveFile, SkillItem } from '../../models/save-models'
-import { Autocomplete, Backdrop, Box, Button, Card, CardContent, Divider, List, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Tab, Tabs, TextField, Typography, createTheme, styled } from '@mui/material'
+import { IdData, InventoryItem, InventoryItemRow, SaveFile } from '../../models/save-models'
+import { Backdrop, Box, Button, Card, CardContent, Divider, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Tab, Tabs, TextField, Typography, createTheme, styled } from '@mui/material'
 import { ChangeEvent, Fragment, useState } from 'react';
 import { ThemeProvider } from '@emotion/react';
 import ConstructionRoundedIcon from '@mui/icons-material/ConstructionRounded';

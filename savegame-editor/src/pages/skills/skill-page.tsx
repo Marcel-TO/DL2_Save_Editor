@@ -1,14 +1,13 @@
 import './skill-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
-import { InventoryItem, SaveFile, SkillItem } from '../../models/save-models'
-import { Backdrop, Box, Button, Card, CardContent, CardHeader, Divider, List, ListItemButton, ListItemIcon, ListItemText, Tab, Tabs, TextField, Typography, createTheme, styled } from '@mui/material'
+import { SaveFile, SkillItem } from '../../models/save-models'
+import { Backdrop, Box, Button, Card, CardContent, Divider, List, ListItemButton, ListItemIcon, ListItemText, Tab, Tabs, TextField, Typography, createTheme, styled } from '@mui/material'
 import { ChangeEvent, Fragment, useState } from 'react';
 import { ThemeProvider } from '@emotion/react';
 import AccountTreeRoundedIcon from '@mui/icons-material/AccountTreeRounded';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { invoke } from '@tauri-apps/api';
-import { info } from 'tauri-plugin-log-api';
 
 
 export const SkillPage = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function}): JSX.Element => {    
@@ -27,7 +26,7 @@ const SkillContent = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: S
     const [currentSkill, setCurrentSkill] = useState<SkillItem>();
     const [currentSkillIndex, setCurrentSkillIndex] = useState(0);
     const [currentSelectedSkillValue, setCurrentSelectedSkillValue] = useState('');
-    const [displayedSaveFile, setDisplayedSaveFile] = useState<SaveFile | undefined>(currentSaveFile);
+    const [displayedSaveFile] = useState<SaveFile | undefined>(currentSaveFile);
 
     const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
         setCurrentTab(newValue);

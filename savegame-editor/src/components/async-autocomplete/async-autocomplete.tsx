@@ -58,12 +58,12 @@ export default function AsyncAutocomplete({currentID, iDs, changeCurrentID}: {cu
       getOptionLabel={(option) => option}
       options={options}
       loading={loading}
-      onChange={(event: any, newValue: string | null) => {
+      onChange={(_event: any, newValue: string | null) => {
         changeCurrentID(newValue + 'SGDs');
       }}
       inputValue={inputValue}
       value={currentID}
-      onInputChange={(event, newInputValue) => {
+      onInputChange={(_event, newInputValue) => {
         setInputValue(newInputValue);
       }}
       renderInput={(params) => (

@@ -1,6 +1,6 @@
 {
   "homepage": "http://marcel-to.github.io/DL2_Save_Editor",
-  "name": "Dying Light 2 Save Editor",
+  "name": "dying_light_2_save_editor",
   "private": true,
   "version": "1.0.0",
   "type": "module",
