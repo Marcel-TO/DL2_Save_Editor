@@ -164,7 +164,7 @@ pub fn edit_skill(
 /// The new content of the save file.
 pub fn edit_inventory_item_chunk(
     current_item_index: usize,
-    mut new_id: String,
+    new_id: String,
     current_item_chunk_index: usize,
     current_item_size: usize,
     new_level: u16,
@@ -654,6 +654,10 @@ fn get_sgd_matches(content: &[u8], start_index: usize) -> (Vec<String>, Vec<usiz
 }
 
 fn is_savegame_between(content: &[u8], start_index: usize, end_index: usize) -> bool {
+    if start_index >= end_index {
+        return true;
+    }
+    
     let target_data: &[u8] = &content[start_index..end_index];
     let index: usize = get_index_from_sequence(target_data, &0, "Savegame".as_bytes(), true);
 
@@ -682,9 +686,7 @@ fn find_amount_of_matches(content: &[u8], start_index: usize, amount: usize) -> 
     let string_data = String::from_utf8_lossy(&content[start_index..]);
 
     // The Regex pattern to match the sgds.
-    // let pattern: &str = r"[a-zA-Z0-9_]{4,}";
     let pattern: &str = r"(?:[a-zA-Z0-9_]{4,}(?:\x00*))*SGDs";
-    // The patterns that need to be checked.
 
     // Defines the regex instances.
     let re: Regex = Regex::new(pattern).expect("Invalid regex pattern.");
@@ -700,16 +702,19 @@ fn find_amount_of_matches(content: &[u8], start_index: usize, amount: usize) -> 
                 mat.as_str() != "NoneSGDs" && mat.as_str() != "SGDs" {
                     // Check if the bullet acts as item or mod.
                     if (mat.as_str().contains("Bullet") && mod_counter > 0 && mod_counter <= 4) || mod_counter == 4 {                        
+                        // Check if the current SGD is valid
                         let tmp_matching_value = mat.as_str().to_string();
                         let index = get_index_from_sequence(content, &start_index, &tmp_matching_value.as_bytes(), true);
                         let size_bytes = &content[index - 2..index].to_vec();
                         let size = u16::from_le_bytes(size_bytes.clone().try_into().unwrap()) as usize;
 
+                        // Compares if the SGDs have the correct size
                         if size > 0 {
                             if tmp_matching_value.clone().ends_with("SGDs") && size + 4 == tmp_matching_value.clone().len() {
                                 match_values.push(tmp_matching_value.clone());
                                 mod_counter += 1;
                             } else if !tmp_matching_value.clone().ends_with("SGDs") && size > tmp_matching_value.clone().len() {
+                                // Include spaces between item name and SGDs
                                 let longer_match_value = String::from_utf8_lossy(&content[index..index + size + 4]);
 
                                 if longer_match_value.ends_with("SGDs") {

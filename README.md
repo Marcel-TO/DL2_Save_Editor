@@ -59,7 +59,7 @@ After all prerequisites are fulfilled it is possible to start the application wi
 
 
 ## Contributers
-Currently there are 2 contributers that work hard to increase the experience of Dying Light 2. With the help of Caz`s incredible knowledge of savegamefiles and the coding experience of Marcel, the Editor is not only extremely useful, but has a modern UI with Dying Light 2 themed content.
+Currently there are 2 contributers that work hard to increase the experience of Dying Light 2. With the help of Caz`s incredible knowledge of savegamefiles and the coding experience of Marcel, the Editor is not only extremely useful, but has a modern UI with Dying Light 2 themed content. A special thanks to Batang as well. He supported us all the time and played a crucial role for the completion of this editor.
 
 
 <p>
@@ -72,3 +72,9 @@ Currently there are 2 contributers that work hard to increase the experience of 
     <img src="https://img.shields.io/badge/Github-zCazual-526264"/>
   </a>
 </p>
+<p>
+  <a href="https://github.com/B-a-t-a-n-g">
+    <img src="https://img.shields.io/badge/Github-Batang-2f4045"/>
+  </a>
+</p>
+

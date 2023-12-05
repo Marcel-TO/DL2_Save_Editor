@@ -82,7 +82,7 @@ const infoDetails = (): JSX.Element => {
                     Contributors
                 </Typography>
                 <Typography paragraph align='center'>
-                Currently there are 2 contributers that work hard to increase the experience of Dying Light 2. With the help of Caz`s incredible knowledge of savegamefiles and the coding experience of Marcel, the Editor is not only extremely useful, but has a modern UI with Dying Light 2 themed content.
+                Currently there are 2 contributers that work hard to increase the experience of Dying Light 2. With the help of Caz`s incredible knowledge of savegamefiles and the coding experience of Marcel, the Editor is not only extremely useful, but has a modern UI with Dying Light 2 themed content. A special thanks to Batang as well. He supported us all the time and played a crucial role for the completion of this editor.
                 </Typography>
                 <ContributorsAvatar/>
             </Box>

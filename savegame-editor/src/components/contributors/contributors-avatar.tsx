@@ -78,6 +78,20 @@ export default function ContributorsAvatar() {
                     </StyledBadge>
                 </a>
             </CustomToolTip>
+            <CustomToolTip title="Batang">
+                <a href='https://github.com/B-a-t-a-n-g' target='_blank'>
+                    <StyledBadge
+                        overlap="circular"
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                        badgeContent=" ">                    
+                        <Avatar 
+                          alt="Caz" 
+                          sx={{ width: 56, height: 56, backgroundColor: '#e9eecd' }} >
+                         <div className="contributor-batang-image"></div>
+                        </Avatar>
+                    </StyledBadge>
+                </a>
+            </CustomToolTip>
     </AvatarGroup>
     </Stack>
   );
