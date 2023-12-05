@@ -422,8 +422,8 @@ fn get_all_items(content: &[u8], start_index: usize) -> Vec<InventoryItemRow> {
         let mut mod_counter: usize = 0;
         let mut current_item_id: String = String::new();
         let mut current_item_index: usize = 0;
-        let mut chunk_counter: usize = 0;
-        let mut current_inv_chunk: InventoryChunk = chunks[0].clone();
+        let mut chunk_counter: usize = chunks.len() - 1;
+        let mut current_inv_chunk: InventoryChunk = chunks[chunk_counter].clone();
         let mut match_bytes: &[u8] = current_item_id.as_bytes();
         let mut mods: Vec<Mod> = Vec::new();
 
@@ -463,7 +463,10 @@ fn get_all_items(content: &[u8], start_index: usize) -> Vec<InventoryItemRow> {
                 match_bytes = current_item_ids[i].as_bytes();
                 current_item_index = current_item_indices[i];
                 current_inv_chunk = chunks[chunk_counter].clone();
-                chunk_counter += 1;
+                
+                if chunk_counter > 0 {
+                    chunk_counter -= 1;
+                }
             }
             // Add mod to mods list
             else {

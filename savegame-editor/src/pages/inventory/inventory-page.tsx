@@ -444,6 +444,18 @@ const VirtualizedList = ({
                                                         </Typography>
                                                     </Box>
 
+                                                    <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
+                                                        <Typography
+                                                            sx={{ minWidth: '100px' }}
+                                                            variant="subtitle1">
+                                                            {"Chunk Index: "}
+                                                        </Typography>
+                                                        <Typography
+                                                            variant='body2'>
+                                                            {items[index].chunk_data.index}
+                                                        </Typography>
+                                                    </Box>
+
 
                                                     <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
                                                         <Typography
