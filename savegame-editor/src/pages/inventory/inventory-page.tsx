@@ -104,9 +104,11 @@ const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { cu
                                 'aria-labelledby': 'basic-button',
                             }}
                         >
+                            <MenuItem onClick={handleClose}>Coming soon!</MenuItem>
                             {template['inventory-items'].map((item) => (
-                                <MenuItem onClick={handleClose}>{`Execute: ${item.name}`}</MenuItem>
+                                <MenuItem disabled onClick={handleClose}>{`Execute: ${item.name}`}</MenuItem>
                             ))}
+                            
                         </Menu>
                     </div>
                 </ThemeProvider>
@@ -319,7 +321,7 @@ const VirtualizedList = ({
     }
 
     const handleAmountValue = (event: ChangeEvent<HTMLInputElement>) => {
-        const maxValue = 9999;
+        const maxValue = 9999999;
 
         // Allow only numbers
         var value = event.target.value.replace(/[^0-9]/g, '');
@@ -340,7 +342,7 @@ const VirtualizedList = ({
     }
 
     const handleDurabilityValue = (event: ChangeEvent<HTMLInputElement>) => {
-        const maxValue = 9999;
+        const maxValue = 9999999;
 
         // Allow only numbers
         var value = event.target.value.replace(/[^-0-9]/g, '');

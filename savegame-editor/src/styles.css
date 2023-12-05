@@ -87,10 +87,10 @@ button {
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  /* :root {
     color: #f6f6f6;
     background-color: #2f2f2f;
-  }
+  } */
 
   a:hover {
     color: #24c8db;
