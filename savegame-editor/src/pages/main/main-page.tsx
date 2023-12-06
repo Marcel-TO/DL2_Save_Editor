@@ -6,7 +6,8 @@ import { ThemeProvider } from '@emotion/react';
 import { open, save } from '@tauri-apps/api/dialog';
 import { writeBinaryFile } from '@tauri-apps/api/fs';
 import { invoke } from "@tauri-apps/api/tauri";
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
+import { listen } from '@tauri-apps/api/event';
 
 export const MainPage = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function}): JSX.Element => {    
     return (
@@ -21,6 +22,7 @@ export const MainPage = ({currentSaveFile, setCurrentSaveFile, setIdData}: {curr
 const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function}): JSX.Element => {    
     const [isOpen, setOpen] = useState(false);
     const [isLoadingSave, setLoadingSave] = useState(false);
+    const [currentSavePath, setCurrentSavePath] = useState('');
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -32,6 +34,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
     
     const handleResetSave = () => {
         setCurrentSaveFile(undefined);
+        setCurrentSavePath('');
         handleClose();
     };
 
@@ -39,9 +42,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
         await setIdData(await invoke<IdData>("get_ids", {}))
     }
 
-    async function handleCurrentSaveFile() {
-        setLoadingSave(true);
-
+    async function selectCurrentSaveFile() {
         let filepath = await open({
             multiple: false,
             filters: [{
@@ -56,7 +57,31 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
         };
 
         setLoadingSave(false);
+    }
+
+    async function handleCurrentSaveFile() {
+        setLoadingSave(true);
+        listenDragDrop()
     };
+
+    async function listenDragDrop() {
+        listen<string>('tauri://file-drop', async event => {
+            let filepath = event.payload[0];
+
+            setCurrentSavePath(filepath);
+        })
+    }
+
+    async function continueWithCurrentFile() {
+        if (currentSavePath.length == 0) {
+            return;
+        }
+        
+        setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: currentSavePath}));
+        await handleSetIdData();
+
+        setLoadingSave(false);
+    }
 
     async function saveCurrentSaveFile() {
         let filePath = await save({
@@ -71,6 +96,8 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
             // Save data to file
             await writeBinaryFile(filePath, currentSaveFile.file_content);
         }
+
+        setLoadingSave(false);
     }
 
     return (
@@ -122,12 +149,39 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
                 </Card> 
             </ThemeProvider>
 
-            <Backdrop
-                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-                open={isLoadingSave}
-            >
-                <CircularProgress color="inherit" />
-            </Backdrop>
+
+            <ThemeProvider theme={loadSaveCardTheme}>
+                <Backdrop
+                    sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                    open={isLoadingSave}
+                    onClick={handleClose}
+                >
+                    <CircularProgress color="inherit" />
+                    <Card onClick={(e) => e.stopPropagation} variant='outlined'>
+                        <CardContent sx={{
+                            display: 'flex',
+                            flexDirection: 'column'
+                        }}>
+                            <Card>
+                                <CardContent>
+                                    <Typography gutterBottom variant="h5" component="div">
+                                        Drag your <strong>.sav</strong> file here 
+                                    </Typography>
+
+                                    <Typography gutterBottom variant="body1" component="div">
+                                        {currentSavePath}
+                                    </Typography>
+                                    
+                                    <Button onClick={selectCurrentSaveFile}>Pick a Save manually</Button>
+                                </CardContent>
+
+                                <Button disabled={currentSavePath == '' ? true : false} onClick={continueWithCurrentFile}>Continue with selected Save</Button>
+                            </Card>
+                        </CardContent>
+                    </Card>
+                </Backdrop>
+
+            </ThemeProvider>
         </>
     )
 }
@@ -217,3 +271,52 @@ const dialogButtonTheme = createTheme({
         },
     }
 });
+
+const loadSaveCardTheme = createTheme({
+    palette: {
+        mode: 'dark',
+    },
+    components: {
+        MuiCard: {
+            styleOverrides: {
+                root: {
+                    color: '#e9eecd',
+                    borderColor: '#526264'
+                }
+            }
+        },
+        MuiTextField: {
+            styleOverrides: {
+                root: {
+                    color: 'red',
+                },
+            }
+        },
+        MuiOutlinedInput: {
+            styleOverrides: {
+                root: {
+                    color: '#e9eecd',
+                    "& fieldset": {
+                    borderColor: "#526264",
+                    },
+                    "&:hover fieldset": {
+                    borderColor: "#899994 !important"
+                    },
+                    "&.Mui-focused fieldset": {
+                    borderColor: "#e9eecd !important"
+                    }
+                }
+            }
+        },
+        MuiButton: {
+            styleOverrides: {
+                root: {
+                    color: '#899994',
+                    '&:hover': {
+                        color: '#e9eecd'
+                    }
+                }
+            }
+        }
+    }
+})

@@ -267,7 +267,7 @@ const VirtualizedList = ({
     
                 for (let i = 0; i < matchingIdDatas.length; i++) {
                     matchingIdDatas[i].ids.forEach((id) => {
-                        if (id.length <= size) {
+                        if (id.length <= size - 4) {
                             iDs.push(id);
                         }
                     });
