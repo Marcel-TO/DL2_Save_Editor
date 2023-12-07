@@ -1,22 +1,34 @@
 {
-    "inventory-items": [
+    "weapon-items": [
         {
             "name": "Max Amount",
-            "method-name": "change_items_amount"
+            "methodName": "change_items_amount_max"
+        },
+        {
+            "name": "1 Amount",
+            "methodName": "change_items_amount_1"
         },
         {
             "name": "Max Durability",
-            "method-name": "change_items_durability"
+            "methodName": "change_items_durability_max"
+        },
+        {
+            "name": "1 Durability",
+            "methodName": "change_items_durability_1"
+        },
+        {
+            "name": "-1.0 Durability",
+            "methodName": "change_items_durability_1_negative"
         }
     ],
     "skill-items": [
         {
             "name": "Max Base Skills",
-            "method-name": "change_skills_base_max"
+            "methodName": "change_skills_base_max"
         },
         {
             "name": "Max Legend Skills",
-            "method-name": "change_skills_legend_max"
+            "methodName": "change_skills_legend_max"
         }
     ]
 }

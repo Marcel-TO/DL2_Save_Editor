@@ -6,8 +6,8 @@ mod id_fetcher;
 mod struct_data;
 
 use dotenv::dotenv;
-use file_analizer::{load_save_file, edit_skill, edit_inventory_item_chunk};
-use struct_data::SaveFile;
+use file_analizer::{load_save_file, edit_skill, edit_inventory_item_chunk, change_items_durability, change_items_amount};
+use struct_data::{SaveFile, InventoryChunk};
 use id_fetcher::fetch_ids;
 use tauri::AppHandle;
 
@@ -71,6 +71,76 @@ async fn handle_edit_item_chunk(
     Ok(new_save_content)
 }
 
+#[tauri::command(rename_all = "snake_case")]
+async fn change_items_durability_max(
+    item_chunks: Vec<InventoryChunk>,
+    save_file_content: Vec<u8>,
+) -> Result<(Vec<InventoryChunk>, Vec<u8>), ()> {
+    let new_save_data = change_items_durability(
+        item_chunks, 
+        9999999.0,
+        save_file_content,
+    );
+
+    Ok(new_save_data)
+}
+
+#[tauri::command(rename_all = "snake_case")]
+async fn change_items_durability_1(
+    item_chunks: Vec<InventoryChunk>,
+    save_file_content: Vec<u8>,
+) -> Result<(Vec<InventoryChunk>, Vec<u8>), ()> {
+    let new_save_data = change_items_durability(
+        item_chunks, 
+        1.0,
+        save_file_content,
+    );
+
+    Ok(new_save_data)
+}
+
+#[tauri::command(rename_all = "snake_case")]
+async fn change_items_durability_1_negative(
+    item_chunks: Vec<InventoryChunk>,
+    save_file_content: Vec<u8>,
+) -> Result<(Vec<InventoryChunk>, Vec<u8>), ()> {
+    let new_save_data = change_items_durability(
+        item_chunks, 
+        -1.0,
+        save_file_content,
+    );
+
+    Ok(new_save_data)
+}
+
+#[tauri::command(rename_all = "snake_case")]
+async fn change_items_amount_max(
+    item_chunks: Vec<InventoryChunk>,
+    save_file_content: Vec<u8>,
+) -> Result<(Vec<InventoryChunk>, Vec<u8>), ()> {
+    let new_save_data = change_items_amount(
+        item_chunks, 
+        9999999,
+        save_file_content,
+    );
+
+    Ok(new_save_data)
+}
+
+#[tauri::command(rename_all = "snake_case")]
+async fn change_items_amount_1(
+    item_chunks: Vec<InventoryChunk>,
+    save_file_content: Vec<u8>,
+) -> Result<(Vec<InventoryChunk>, Vec<u8>), ()> {
+    let new_save_data = change_items_amount(
+        item_chunks, 
+        1,
+        save_file_content,
+    );
+
+    Ok(new_save_data)
+}
+
 fn main() {
     dotenv().ok();
     // Comment tauri builder if debugging.
@@ -80,7 +150,12 @@ fn main() {
             get_ids,
             load_save,
             handle_edit_skill,
-            handle_edit_item_chunk
+            handle_edit_item_chunk,
+            change_items_durability_max,
+            change_items_durability_1,
+            change_items_durability_1_negative,
+            change_items_amount_max,
+            change_items_amount_1,
             ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

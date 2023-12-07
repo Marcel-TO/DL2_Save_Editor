@@ -1,12 +1,12 @@
 import './inventory-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
-import { IdData, InventoryItem, InventoryItemRow, SaveFile } from '../../models/save-models'
-import { Backdrop, Box, Button, Card, CardContent, Divider, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Tab, Tabs, TextField, Typography, createTheme, styled } from '@mui/material'
+import { IdData, InventoryChunk, InventoryItem, InventoryItemRow, SaveFile } from '../../models/save-models'
+import { Backdrop, Box, Button, Card, CardContent, CircularProgress, Divider, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Tab, Tabs, TextField, Typography, createTheme, styled } from '@mui/material'
 import { ChangeEvent, Fragment, useState } from 'react';
 import { ThemeProvider } from '@emotion/react';
 import ConstructionRoundedIcon from '@mui/icons-material/ConstructionRounded';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
-import template from '../../models/item-templates.json';
+import templates from '../../models/item-templates.json';
 import { FixedSizeList } from 'react-window';
 import { invoke } from '@tauri-apps/api';
 import AsyncAutocomplete from '../../components/async-autocomplete/async-autocomplete';
@@ -23,8 +23,16 @@ export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile, idDatas }: 
 
 const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, idDatas: IdData[] }) => {
     const [tabIndex, setValue] = useState(0);
+    const [isTemplateVisible, setIsTemplateVisible] = useState(false);
+    const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
 
     const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
+        if (currentSaveFile?.items[newValue].name == "Weapons") {
+            setIsTemplateVisible(true);
+        } else {
+            setIsTemplateVisible(false);
+        }
+        
         setValue(newValue);
     };
 
@@ -35,7 +43,38 @@ const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { cu
     };
     const handleClose = () => {
         setAnchorEl(null);
+        setIsLoadingTemplate(false);
     };
+
+    async function handleExecuteTemplate(methodName: string) {
+        setIsLoadingTemplate(true);
+
+        let itemRow = currentSaveFile?.items[tabIndex];
+        let allChunkDatas: InventoryChunk[] = [];
+
+        if (itemRow != undefined && currentSaveFile != undefined) {
+            for (let i = 0; i < itemRow.inventory_items.length; i++) {
+                allChunkDatas.push(itemRow.inventory_items[i].chunk_data);
+            }
+
+            invoke<[InventoryChunk[], Uint8Array]>(methodName, {
+                item_chunks: allChunkDatas,
+                save_file_content: currentSaveFile.file_content,
+            }).then((new_save_content) => {
+                if (itemRow != undefined) {
+                    for (let i = 0; i < new_save_content[0].length; i++) {
+                        itemRow.inventory_items[i].chunk_data = new_save_content[0][i];
+                    }
+                    
+                    currentSaveFile.items[tabIndex] = itemRow
+                }
+
+                currentSaveFile.file_content = new_save_content[1];
+                setCurrentSaveFile(currentSaveFile);
+                handleClose();
+            })
+        }
+    }
 
     return (
         <>
@@ -74,44 +113,73 @@ const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { cu
                         ))}
                     </Box>
 
-                    <div className='template-button'>
-                        <Button
-                            id="basic-button"
-                            aria-controls={isOpen ? 'basic-menu' : undefined}
-                            aria-haspopup="true"
-                            aria-expanded={isOpen ? 'true' : undefined}
-                            onClick={handleClick}
-                            variant='outlined'
-                            sx={{
-                                borderColor: '#e9eecd',
-                                color: '#e9eecd',
-                                backgroundColor: '#52626450',
-                                '&:hover': {
-                                    backgroundColor: '#e9eecd',
-                                    color: '#526264',
-                                    borderColor: '#526264',
-                                }
-                            }}
-                        >
-                            Templates
-                        </Button>
-                        <Menu
-                            id="basic-menu"
-                            anchorEl={anchorEl}
-                            open={isOpen}
-                            onClose={handleClose}
-                            MenuListProps={{
-                                'aria-labelledby': 'basic-button',
-                            }}
-                        >
-                            <MenuItem onClick={handleClose}>Coming soon!</MenuItem>
-                            {template['inventory-items'].map((item) => (
-                                <MenuItem disabled onClick={handleClose}>{`Execute: ${item.name}`}</MenuItem>
-                            ))}
-                            
-                        </Menu>
-                    </div>
+                    {isTemplateVisible ? (
+                        <div className='template-button'>
+                            <Button
+                                id="basic-button"
+                                aria-controls={isOpen ? 'basic-menu' : undefined}
+                                aria-haspopup="true"
+                                aria-expanded={isOpen ? 'true' : undefined}
+                                onClick={handleClick}
+                                variant='outlined'
+                                sx={{
+                                    borderColor: '#e9eecd',
+                                    color: '#e9eecd',
+                                    backgroundColor: '#52626450',
+                                    '&:hover': {
+                                        backgroundColor: '#e9eecd',
+                                        color: '#526264',
+                                        borderColor: '#526264',
+                                    }
+                                }}
+                            >
+                                Templates
+                            </Button>
+                            <Menu
+                                id="basic-menu"
+                                anchorEl={anchorEl}
+                                open={isOpen}
+                                onClose={handleClose}
+                                MenuListProps={{
+                                    'aria-labelledby': 'basic-button',
+                                }}
+                            >
+                                {templates['weapon-items'].map((item) => (
+                                    <MenuItem onClick={() => handleExecuteTemplate(item.methodName)}>{`Execute: ${item.name}`}</MenuItem>
+                                ))}
+                                
+                            </Menu>
+                        </div>
+                    ) : (
+                        <div className='template-button'>
+                            <Button
+                                disabled
+                                id="basic-button"
+                                variant='outlined'
+                                sx={{
+                                    borderColor: '#e9eecd',
+                                    color: '#e9eecd',
+                                    backgroundColor: '#52626450',
+                                    '&:hover': {
+                                        backgroundColor: '#e9eecd',
+                                        color: '#526264',
+                                        borderColor: '#526264',
+                                    }
+                                }}
+                            >
+                                Templates
+                            </Button>
+                        </div>
+                    )}
+                    
                 </ThemeProvider>
+
+                <Backdrop
+                    sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                    open={isLoadingTemplate}
+                >
+                <CircularProgress sx={{color: '#e9eecd'}} />
+                </Backdrop>
             </Box>
         </>
     )

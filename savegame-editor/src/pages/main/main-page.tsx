@@ -1,13 +1,14 @@
 import './main-page.css';
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer';
 import { IdData, SaveFile } from '../../models/save-models';
-import { Backdrop, Button, Card, CardActions, CardContent, CardHeader, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography, createTheme } from '@mui/material';
+import { Backdrop, Button, Card, CardActions, CardContent, CardHeader, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography, createTheme } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
 import { open, save } from '@tauri-apps/api/dialog';
 import { writeBinaryFile } from '@tauri-apps/api/fs';
 import { invoke } from "@tauri-apps/api/tauri";
 import { Fragment, useState } from 'react';
 import { listen } from '@tauri-apps/api/event';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 
 export const MainPage = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function}): JSX.Element => {    
     return (
@@ -176,6 +177,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
                         >
                             <Card>
                                 <CardContent>
+                                    <UploadFileIcon/>
                                     <Typography gutterBottom variant="h5" component="div">
                                         Drag your <strong>.sav</strong> file here 
                                     </Typography>

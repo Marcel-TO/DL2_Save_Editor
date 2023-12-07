@@ -193,6 +193,60 @@ pub fn edit_inventory_item_chunk(
     save_file_content
 }
 
+pub fn change_items_durability(
+    item_chunks: Vec<InventoryChunk>,
+    value: f32,
+    mut save_file_content: Vec<u8>,
+) -> (Vec<InventoryChunk>, Vec<u8>) {
+    let mut new_item_chunks: Vec<InventoryChunk> = Vec::new();
+    
+    for current_chunk in item_chunks {
+        let durability_bytes: Vec<u8> = value.to_le_bytes().to_vec();
+        let new_chunk = InventoryChunk::new(
+            current_chunk.level,
+            current_chunk.seed,
+            current_chunk.amount,
+            durability_bytes.clone(),
+            current_chunk.space,
+            current_chunk.index
+        );
+
+        new_item_chunks.push(new_chunk);
+            
+        // Replace all new values.
+        save_file_content = replace_content_of_file(current_chunk.index + 8, durability_bytes, save_file_content);
+    }
+
+    (new_item_chunks, save_file_content)
+}
+
+pub fn change_items_amount(
+    item_chunks: Vec<InventoryChunk>,
+    value: u32,
+    mut save_file_content: Vec<u8>,
+) -> (Vec<InventoryChunk>, Vec<u8>) {
+    let mut new_item_chunks: Vec<InventoryChunk> = Vec::new();
+    
+    for current_chunk in item_chunks {
+        let amount_bytes: Vec<u8> = value.to_le_bytes().to_vec();
+        let new_chunk = InventoryChunk::new(
+            current_chunk.level,
+            current_chunk.seed,
+            amount_bytes.clone(),
+            current_chunk.durability,
+            current_chunk.space,
+            current_chunk.index
+        );
+
+        new_item_chunks.push(new_chunk);
+            
+        // Replace all new values.
+        save_file_content = replace_content_of_file(current_chunk.index + 4, amount_bytes, save_file_content);
+    }
+
+    (new_item_chunks, save_file_content)
+}
+
 /// Represents a method for replacing the file content.
 /// 
 /// ### Parameter
