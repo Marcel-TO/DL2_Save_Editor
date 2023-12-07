@@ -10,6 +10,7 @@ import templates from '../../models/item-templates.json';
 import { FixedSizeList } from 'react-window';
 import { invoke } from '@tauri-apps/api';
 import AsyncAutocomplete from '../../components/async-autocomplete/async-autocomplete';
+import ShuffleOnIcon from '@mui/icons-material/ShuffleOn';
 
 export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, idDatas: IdData[] }): JSX.Element => {
     return (
@@ -478,6 +479,14 @@ const VirtualizedList = ({
         })
     }
 
+    const generateRandomSeed = () => {
+        const min = 10000; // Minimum 5-digit value
+        const max = 65334; // Maximum 5-digit value (exclusive)
+
+        const randomValue = Math.floor(Math.random() * (max - min) + min);
+        setCurrentSelectedItemSeed(randomValue.toString());
+    }
+
     return (
         <>
             <Box sx={{ height: '100%', minWidth: minWidth }}>
@@ -592,14 +601,14 @@ const VirtualizedList = ({
                     <Card onClick={(e) => e.stopPropagation()} variant='outlined'>
                         <CardContent sx={{
                             display: 'flex',
-                            flexDirection: 'column'
+                            flexDirection: 'column',
                         }}>
 
                             <Box sx={{
                                 display: 'flex', 
                                 flexDirection: 'row',
                                 justifyContent: 'center',
-                                marginTop: '20px'
+                                marginTop: '20px',
                             }}>
                                 <Box sx={{width:'500px'}}>
                                     {changeItemIsOpen ? (
@@ -652,7 +661,8 @@ const VirtualizedList = ({
                                 display: 'flex', 
                                 flexDirection: 'row',
                                 justifyContent: 'center',
-                                marginTop: '20px'
+                                marginTop: '20px',
+                                width: '100%',
                             }}>
                                 <TextField
                                     label="Level"
@@ -670,16 +680,18 @@ const VirtualizedList = ({
                                             "&.Mui-focused": { color: "#e9eecd" }
                                         },
                                     }}
+                                    sx={{
+                                        width: '100%'
+                                    }}
                                 />
-
-                                <Button onClick={handleChangeValues}>Change</Button>
                             </Box>
 
                             <Box sx={{
                                 display: 'flex', 
                                 flexDirection: 'row',
                                 justifyContent: 'center',
-                                marginTop: '20px'
+                                marginTop: '20px',
+                                width: '100%'
                             }}>
                                 <TextField
                                     label="Seed"
@@ -697,16 +709,22 @@ const VirtualizedList = ({
                                             "&.Mui-focused": { color: "#e9eecd" }
                                         },
                                     }}
+                                    sx={{
+                                        width: '100%'
+                                    }}
                                 />
 
-                                <Button onClick={handleChangeValues}>Change</Button>
+                                <Button onClick={generateRandomSeed}>
+                                    <ShuffleOnIcon/>
+                                </Button>
                             </Box>
 
                             <Box sx={{
                                 display: 'flex', 
                                 flexDirection: 'row',
                                 justifyContent: 'center',
-                                marginTop: '20px'
+                                marginTop: '20px',
+                                width: '100%'
                             }}>
                                 <TextField
                                     label="Amount"
@@ -724,16 +742,18 @@ const VirtualizedList = ({
                                             "&.Mui-focused": { color: "#e9eecd" }
                                         },
                                     }}
+                                    sx={{
+                                        width: '100%'
+                                    }}
                                 />
-
-                                <Button onClick={handleChangeValues}>Change</Button>
                             </Box>
 
                             <Box sx={{
                                 display: 'flex', 
                                 flexDirection: 'row',
                                 justifyContent: 'center',
-                                marginTop: '20px'
+                                marginTop: '20px',
+                                width: '100%'
                             }}>
                                 <TextField
                                     label="Durability"
@@ -751,9 +771,10 @@ const VirtualizedList = ({
                                             "&.Mui-focused": { color: "#e9eecd" }
                                         },
                                     }}
+                                    sx={{
+                                        width: '100%'
+                                    }}
                                 />
-
-                                <Button onClick={handleChangeValues}>Change</Button>
                             </Box>
 
                             <Button sx={{marginTop: '40px', color: '#e9eecd'}} onClick={() => {
