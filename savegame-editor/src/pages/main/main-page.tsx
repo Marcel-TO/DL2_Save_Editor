@@ -23,7 +23,6 @@ export const MainPage = ({currentSaveFile, setCurrentSaveFile, setIdData}: {curr
 const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function}): JSX.Element => {    
     const [isOpen, setOpen] = useState(false);
     const [isOpeningSave, setOpeningSave] = useState(false);
-    const [isLoadingSave, setIsLoadingSave] = useState(false);
     const [currentSavePath, setCurrentSavePath] = useState('');
 
     const handleClickOpen = () => {

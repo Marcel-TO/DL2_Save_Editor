@@ -1,7 +1,9 @@
 import './info-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
-import { Box, Typography } from '@mui/material'
+import { Box, Chip, Typography, createTheme } from '@mui/material'
 import ContributorsAvatar from '../../components/contributors/contributors-avatar'
+import { useEffect, useState } from 'react'
+import { ThemeProvider } from '@emotion/react'
 
 export const InfoPage = (): JSX.Element => {
     return (
@@ -14,6 +16,40 @@ export const InfoPage = (): JSX.Element => {
 }
 
 const infoDetails = (): JSX.Element => {
+    const [amountOfDownloads, setAmountOfDownloads] = useState(0);
+
+    useEffect(() => {
+        const fetchReleaseInfo = async () => {
+          try {
+            const response = await fetch(
+              'https://api.github.com/repos/Marcel-TO/DL2_Save_Editor/releases'
+            );
+    
+            if (!response.ok) {
+              throw new Error('Failed to fetch release information');
+            }
+    
+            const releases = await response.json();
+            
+            // Calculate total downloads for all releases and assets
+            const downloads = releases.reduce((total: any, release: { assets: any[] }) => {
+                return (
+                total +
+                release.assets.reduce((assetTotal: any, asset: { download_count: any }) => {
+                    return assetTotal + asset.download_count;
+                }, 0)
+                );
+            }, 0);
+    
+            setAmountOfDownloads(downloads);
+          } catch (error) {
+            console.error('Error fetching GitHub release information:', error);
+          }
+        };
+    
+        fetchReleaseInfo();
+      }, []);
+
     return (
         <>
             <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>             
@@ -86,8 +122,34 @@ const infoDetails = (): JSX.Element => {
                 </Typography>
                 <ContributorsAvatar/>
 
-                
             </Box>
+            
+            <ThemeProvider theme={chipTheme}>
+                <Chip 
+                    sx={{
+                        position: 'fixed',
+                        bottom: '0',
+                        right: '0',
+                        margin: '1rem'
+                    }}
+                    label={`Total Downloads: ${amountOfDownloads}`}
+                />
+            </ThemeProvider>
         </>
     )
 }
+
+const chipTheme = createTheme({
+    components: {
+        MuiChip: {
+            styleOverrides: {
+                root: {
+                    borderColor: '#e9eecd',
+                    color: '#899994',
+                    backgroundColor: '#526264',
+
+                }
+            }
+        }
+    }
+});
