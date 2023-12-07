@@ -6,7 +6,7 @@ import { ThemeProvider } from '@emotion/react';
 import { open, save } from '@tauri-apps/api/dialog';
 import { writeBinaryFile } from '@tauri-apps/api/fs';
 import { invoke } from "@tauri-apps/api/tauri";
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { listen } from '@tauri-apps/api/event';
 
 export const MainPage = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function}): JSX.Element => {    
@@ -21,7 +21,8 @@ export const MainPage = ({currentSaveFile, setCurrentSaveFile, setIdData}: {curr
 
 const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function}): JSX.Element => {    
     const [isOpen, setOpen] = useState(false);
-    const [isLoadingSave, setLoadingSave] = useState(false);
+    const [isOpeningSave, setOpeningSave] = useState(false);
+    const [isLoadingSave, setIsLoadingSave] = useState(false);
     const [currentSavePath, setCurrentSavePath] = useState('');
 
     const handleClickOpen = () => {
@@ -30,6 +31,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
 
     const handleClose = () => {
         setOpen(false);
+        setOpeningSave(false);
     };
     
     const handleResetSave = () => {
@@ -56,11 +58,11 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
             await handleSetIdData();
         };
 
-        setLoadingSave(false);
+        setOpeningSave(false);
     }
 
     async function handleCurrentSaveFile() {
-        setLoadingSave(true);
+        setOpeningSave(true);
         listenDragDrop()
     };
 
@@ -80,7 +82,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
         setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: currentSavePath}));
         await handleSetIdData();
 
-        setLoadingSave(false);
+        setOpeningSave(false);
     }
 
     async function saveCurrentSaveFile() {
@@ -97,7 +99,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
             await writeBinaryFile(filePath, currentSaveFile.file_content);
         }
 
-        setLoadingSave(false);
+        setOpeningSave(false);
     }
 
     return (
@@ -152,16 +154,26 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
 
             <ThemeProvider theme={loadSaveCardTheme}>
                 <Backdrop
-                    sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-                    open={isLoadingSave}
-                    onClick={handleClose}
+                    sx={{ 
+                        color: '#fff', 
+                        zIndex: (theme) => theme.zIndex.drawer + 1 
+                    }}
+                    open={isOpeningSave}
+                    onClick={() => setOpeningSave(false)}
                 >
-                    <CircularProgress color="inherit" />
-                    <Card onClick={(e) => e.stopPropagation} variant='outlined'>
-                        <CardContent sx={{
-                            display: 'flex',
-                            flexDirection: 'column'
-                        }}>
+                    <Card onClick={(e) => {
+                            e.stopPropagation; 
+                            e.preventDefault();
+                            e.nativeEvent.stopPropagation();
+                            e.nativeEvent.stopImmediatePropagation();
+                        }} variant='outlined'>
+                        <CardContent 
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                maxWidth: '70vw'
+                            }}
+                        >
                             <Card>
                                 <CardContent>
                                     <Typography gutterBottom variant="h5" component="div">
@@ -172,11 +184,26 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
                                         {currentSavePath}
                                     </Typography>
                                     
-                                    <Button onClick={selectCurrentSaveFile}>Pick a Save manually</Button>
+                                    <Button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            selectCurrentSaveFile();
+                                        }}
+                                        sx={{
+                                            marginTop: '40px'
+                                        }}
+                                    >
+                                        Pick a Save manually
+                                    </Button>
                                 </CardContent>
 
-                                <Button disabled={currentSavePath == '' ? true : false} onClick={continueWithCurrentFile}>Continue with selected Save</Button>
                             </Card>
+                            
+                            <Button 
+                                sx={{
+                                    marginTop: '30px'
+                                }} 
+                                disabled={currentSavePath == '' ? true : false} onClick={continueWithCurrentFile}>Continue with selected Save</Button>
                         </CardContent>
                     </Card>
                 </Backdrop>
