@@ -1,7 +1,7 @@
 import './inventory-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
 import { IdData, InventoryChunk, InventoryItem, InventoryItemRow, SaveFile } from '../../models/save-models'
-import { Backdrop, Box, Button, Card, CardContent, CircularProgress, Divider, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Tab, Tabs, TextField, Typography, createTheme, styled } from '@mui/material'
+import { Backdrop, Box, Button, Card, CardContent, CircularProgress, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Tab, Tabs, TextField, Tooltip, Typography, createTheme, styled } from '@mui/material'
 import { ChangeEvent, Fragment, useState } from 'react';
 import { ThemeProvider } from '@emotion/react';
 import ConstructionRoundedIcon from '@mui/icons-material/ConstructionRounded';
@@ -79,11 +79,10 @@ const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { cu
 
     return (
         <>
-            <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-
+            <Box>
                 <ThemeProvider theme={tabTheme}>
                     <Box sx={{ backgroundColor: '#00000070' }}>
-                        <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex', flexDirection: 'row', position: 'relative', maxWidth: { xs: 320, sm: 2000 } }}>
+                        <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex', flexDirection: 'row', position: 'relative', width: '100%' }}>
                             <Tabs
                                 value={tabIndex}
                                 onChange={handleChange}
@@ -500,92 +499,94 @@ const VirtualizedList = ({
                     {({ index, style }) => (
                         <>
                             <Fragment key={index}>
-                                <ListItemButton style={style} onClick={() => handleSelectedItem(items[index], index)}>
-                                    <ListItemIcon>
-                                        <ConstructionRoundedIcon sx={{ color: '#e9eecd' }} />
-                                    </ListItemIcon>
-                                    <ListItemText
-                                        primary={items[index].name}
-                                        secondary={
-                                            <ThemeProvider theme={listItemTheme}>
-                                                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                                                    <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
-                                                        <Typography
-                                                            sx={{ minWidth: '100px' }}
-                                                            variant="subtitle1">
-                                                            {"Index: "}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant='body2'>
-                                                            {items[index].index}
-                                                        </Typography>
-                                                    </Box>
+                                <Tooltip title={
+                                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                            <Typography
+                                                sx={{ minWidth: '100px' }}
+                                                variant="subtitle1">
+                                                {"Index: "}
+                                            </Typography>
+                                            <Typography
+                                                variant='body2'>
+                                                {items[index].index}
+                                            </Typography>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                            <Typography
+                                                sx={{ minWidth: '100px' }}
+                                                variant="subtitle1">
+                                                {"Chunk Index: "}
+                                            </Typography>
+                                            <Typography
+                                                variant='body2'>
+                                                {items[index].chunk_data.index}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                } arrow placement="bottom-start">
 
-                                                    <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
-                                                        <Typography
-                                                            sx={{ minWidth: '100px' }}
-                                                            variant="subtitle1">
-                                                            {"Chunk Index: "}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant='body2'>
-                                                            {items[index].chunk_data.index}
-                                                        </Typography>
-                                                    </Box>
+                                    <ListItemButton style={style} onClick={() => handleSelectedItem(items[index], index)}>
+                                        <ListItemIcon>
+                                            <ConstructionRoundedIcon sx={{ color: '#e9eecd' }} />
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            primary={items[index].name}
+                                            secondary={
+                                                <ThemeProvider theme={listItemTheme}>
+                                                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                                                        <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
+                                                            <Typography
+                                                                sx={{ minWidth: '100px' }}
+                                                                variant="subtitle1">
+                                                                {"Level: "}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant='body2'>
+                                                                {items[index].chunk_data.level_value}
+                                                            </Typography>
+                                                        </Box>
 
+                                                        <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
+                                                            <Typography
+                                                                sx={{ minWidth: '100px' }}
+                                                                variant="subtitle1">
+                                                                {"Seed: "}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant='body2'>
+                                                                {items[index].chunk_data.seed_value}
+                                                            </Typography>
+                                                        </Box>
 
-                                                    <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
-                                                        <Typography
-                                                            sx={{ minWidth: '100px' }}
-                                                            variant="subtitle1">
-                                                            {"Level: "}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant='body2'>
-                                                            {items[index].chunk_data.level_value}
-                                                        </Typography>
-                                                    </Box>
+                                                        <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
+                                                            <Typography
+                                                                sx={{ minWidth: '100px' }}
+                                                                variant="subtitle1">
+                                                                {"Amount: "}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant='body2'>
+                                                                {items[index].chunk_data.amount_value}
+                                                            </Typography>
+                                                        </Box>
 
-                                                    <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
-                                                        <Typography
-                                                            sx={{ minWidth: '100px' }}
-                                                            variant="subtitle1">
-                                                            {"Seed: "}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant='body2'>
-                                                            {items[index].chunk_data.seed_value}
-                                                        </Typography>
+                                                        <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
+                                                            <Typography
+                                                                sx={{ minWidth: '100px' }}
+                                                                variant="subtitle1">
+                                                                {"Durability: "}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant='body2'>
+                                                                {items[index].chunk_data.durability_value}
+                                                            </Typography>
+                                                        </Box>
                                                     </Box>
-
-                                                    <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
-                                                        <Typography
-                                                            sx={{ minWidth: '100px' }}
-                                                            variant="subtitle1">
-                                                            {"Amount: "}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant='body2'>
-                                                            {items[index].chunk_data.amount_value}
-                                                        </Typography>
-                                                    </Box>
-
-                                                    <Box sx={{ display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center' }}>
-                                                        <Typography
-                                                            sx={{ minWidth: '100px' }}
-                                                            variant="subtitle1">
-                                                            {"Durability: "}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant='body2'>
-                                                            {items[index].chunk_data.durability_value}
-                                                        </Typography>
-                                                    </Box>
-                                                </Box>
-                                                <Divider />
-                                            </ThemeProvider>
-                                        } />
-                                </ListItemButton>
+                                                </ThemeProvider>
+                                            } />
+                                    </ListItemButton>
+                                </Tooltip>
                             </Fragment>
                         </>
                     )}
@@ -775,6 +776,10 @@ const VirtualizedList = ({
                                         width: '100%'
                                     }}
                                 />
+
+                                {/* <Button onClick={generateRandomSeed}>
+                                    <InputIcon/>
+                                </Button> */}
                             </Box>
 
                             <Button sx={{marginTop: '40px', color: '#e9eecd'}} onClick={() => {
