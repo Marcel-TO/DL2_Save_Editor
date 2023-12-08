@@ -397,7 +397,9 @@ fn analize_skill_data(
 fn analize_unlockable_items_data(content: &[u8]) -> Vec<UnlockableItem> {
     // Finds all inventory sequences inside the file.
     let indices: Vec<usize> = get_all_indices_from_sequence(content, &0, &START_INVENTORY, false);
+    let mut tmp_items: Vec<UnlockableItem> = Vec::new();
     let mut items: Vec<UnlockableItem> = Vec::new();
+
 
     // Checks if the sequence is not valid.
     if indices.len() == 0 || indices.len() != 2 {
@@ -431,7 +433,7 @@ fn analize_unlockable_items_data(content: &[u8]) -> Vec<UnlockableItem> {
         let current_index: usize = matching_string_indices[i] + &start_index;
         let size: usize = clean_string.as_bytes().len();
         let sgd: Vec<u8> = inventory_data[matching_string_indices[i]..matching_string_indices[i] + size].to_vec();
-        items.push(UnlockableItem::new(
+        tmp_items.push(UnlockableItem::new(
             clean_string,
             current_index,
             size,
@@ -440,7 +442,33 @@ fn analize_unlockable_items_data(content: &[u8]) -> Vec<UnlockableItem> {
     }
 
     // Sorts the items by their index.
-    items.sort_by(|a, b| a.index.cmp(&b.index));
+    tmp_items.sort_by(|a, b| a.index.cmp(&b.index));
+
+    for i in 0..tmp_items.len() {
+        if i > 0 {
+            let last_index = tmp_items[i - 1].index.clone() + items[i - 1].size.clone();
+            let dif = tmp_items[i].index.clone() - last_index;
+            // Checks if the delta offset is correct.
+            if dif == 30 {
+                items.push(UnlockableItem::new(
+                    tmp_items[i].name.clone(),
+                    tmp_items[i].index.clone(),
+                    tmp_items[i].size.clone(),
+                    tmp_items[i].sgd_data.clone(),
+                ));
+            } else {
+                break;
+            }
+        } else {
+            items.push(UnlockableItem::new(
+                tmp_items[i].name.clone(),
+                tmp_items[i].index.clone(),
+                tmp_items[i].size.clone(),
+                tmp_items[i].sgd_data.clone(),
+            ));
+        }
+    }
+
     items
 }
 
