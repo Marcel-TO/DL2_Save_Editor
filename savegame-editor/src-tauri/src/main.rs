@@ -143,24 +143,24 @@ async fn change_items_amount_1(
 
 fn main() {
     dotenv().ok();
-    // Comment tauri builder if debugging.
-    tauri::Builder::default()
-        .plugin(tauri_plugin_log::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![
-            get_ids,
-            load_save,
-            handle_edit_skill,
-            handle_edit_item_chunk,
-            change_items_durability_max,
-            change_items_durability_1,
-            change_items_durability_1_negative,
-            change_items_amount_max,
-            change_items_amount_1,
-            ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+    // // Comment tauri builder if debugging.
+    // tauri::Builder::default()
+    //     .plugin(tauri_plugin_log::Builder::default().build())
+    //     .invoke_handler(tauri::generate_handler![
+    //         get_ids,
+    //         load_save,
+    //         handle_edit_skill,
+    //         handle_edit_item_chunk,
+    //         change_items_durability_max,
+    //         change_items_durability_1,
+    //         change_items_durability_1_negative,
+    //         change_items_amount_max,
+    //         change_items_amount_1,
+    //         ])
+    //     .run(tauri::generate_context!())
+    //     .expect("error while running tauri application");
 
-    // // Uncomment the following line to if .env file should be selected.
-    // let file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
-    // let save_file = load_save_file(&file_path);
+    // Uncomment the following line to if .env file should be selected.
+    let file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
+    let save_file = load_save_file(&file_path);
 }

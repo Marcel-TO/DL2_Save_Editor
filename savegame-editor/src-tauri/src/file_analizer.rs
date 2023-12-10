@@ -73,10 +73,10 @@ pub fn load_save_file(file_path: &str) -> SaveFile {
     
     // Find all unlockable items.
     let unlockable_items: Vec<UnlockableItem> = analize_unlockable_items_data(&file_content);
-    let last_item: &UnlockableItem = unlockable_items.last().unwrap();
+    let last_item_index: usize = get_index_for_inventory_items(&unlockable_items, &file_content);
 
     // The space between the SGD IDs and chunk data.
-    let jump_offset = last_item.index +75;
+    let jump_offset = last_item_index +75;
 
     // Get all items within the inventory.
     let items: Vec<InventoryItemRow> = get_all_items(&file_content, jump_offset);
@@ -397,7 +397,6 @@ fn analize_skill_data(
 fn analize_unlockable_items_data(content: &[u8]) -> Vec<UnlockableItem> {
     // Finds all inventory sequences inside the file.
     let indices: Vec<usize> = get_all_indices_from_sequence(content, &0, &START_INVENTORY, false);
-    let mut tmp_items: Vec<UnlockableItem> = Vec::new();
     let mut items: Vec<UnlockableItem> = Vec::new();
 
 
@@ -415,12 +414,12 @@ fn analize_unlockable_items_data(content: &[u8]) -> Vec<UnlockableItem> {
 
     // Checks for all unlockableitem IDs.
     // The "_" is important, so that it doesn't include items like "hint_collectable".
+    let mut collectable_indices: Vec<usize> = get_all_indices_from_sequence(inventory_data, &0, format!("{:?}_", ItemTypeEnum::Collectable).as_bytes(), true);
     let mut craftplan_indices: Vec<usize> = get_all_indices_from_sequence(inventory_data, &0, format!("{:?}_", ItemTypeEnum::Craftplan).as_bytes(), true);
     let mut tool_skin_indices: Vec<usize> = get_all_indices_from_sequence(inventory_data, &0, format!("{:?}_", ItemTypeEnum::ToolSkin).as_bytes(), true);
-    let mut collectable_indices: Vec<usize> = get_all_indices_from_sequence(inventory_data, &0, format!("{:?}_", ItemTypeEnum::Collectable).as_bytes(), true);
+    matching_string_indices.append(&mut collectable_indices);
     matching_string_indices.append(&mut craftplan_indices);
     matching_string_indices.append(&mut tool_skin_indices);
-    matching_string_indices.append(&mut collectable_indices);
 
     if matching_string_indices.len() == 0 {
         panic!("No matching unlockable item strings found.")
@@ -433,7 +432,7 @@ fn analize_unlockable_items_data(content: &[u8]) -> Vec<UnlockableItem> {
         let current_index: usize = matching_string_indices[i] + &start_index;
         let size: usize = clean_string.as_bytes().len();
         let sgd: Vec<u8> = inventory_data[matching_string_indices[i]..matching_string_indices[i] + size].to_vec();
-        tmp_items.push(UnlockableItem::new(
+        items.push(UnlockableItem::new(
             clean_string,
             current_index,
             size,
@@ -442,34 +441,44 @@ fn analize_unlockable_items_data(content: &[u8]) -> Vec<UnlockableItem> {
     }
 
     // Sorts the items by their index.
-    tmp_items.sort_by(|a, b| a.index.cmp(&b.index));
+    items.sort_by(|a, b| a.index.cmp(&b.index));
+    items
+}
 
-    for i in 0..tmp_items.len() {
-        if i > 0 {
-            let last_index = tmp_items[i - 1].index.clone() + items[i - 1].size.clone();
-            let dif = tmp_items[i].index.clone() - last_index;
-            // Checks if the delta offset is correct.
-            if dif == 30 {
-                items.push(UnlockableItem::new(
-                    tmp_items[i].name.clone(),
-                    tmp_items[i].index.clone(),
-                    tmp_items[i].size.clone(),
-                    tmp_items[i].sgd_data.clone(),
-                ));
-            } else {
-                break;
+/// Represents a method for retrieving the index from where the inventory items start.
+/// 
+/// ### Parameter
+/// - `unlockable_items`: The unlockable items.
+/// - `file_content`: The byte data of the save.
+/// 
+/// ### Returns `usize`
+/// The index from where the inventory items continue.
+fn get_index_for_inventory_items(unlockable_items: &[UnlockableItem], file_content: &[u8]) -> usize {
+    for item in unlockable_items {
+        let start_index = item.index + item.size + 112;
+
+        // Check if we have enough bytes in file_content
+        if start_index + 4 <= file_content.len() {
+            let index_bytes = &file_content[start_index..start_index + 4];
+            let surrounding_bytes = &file_content[start_index - 4..start_index + 4];
+
+            // Convert surrounding_bytes to a string
+            let surrounding_string = String::from_utf8_lossy(surrounding_bytes);
+
+            // The Regex pattern to match the sgds.
+            let pattern: &str = r"[a-zA-Z0-9_]{4,}SGDs";
+
+            // Defines the regex instance.
+            let re: Regex = Regex::new(pattern).expect("Invalid regex pattern.");
+
+            // Check if the surrounding string matches the pattern
+            if !re.is_match(&surrounding_string) && index_bytes == b"SGDs" {
+                return item.index + item.size;
             }
-        } else {
-            items.push(UnlockableItem::new(
-                tmp_items[i].name.clone(),
-                tmp_items[i].index.clone(),
-                tmp_items[i].size.clone(),
-                tmp_items[i].sgd_data.clone(),
-            ));
         }
     }
 
-    items
+    0 // Default return value if no match is found
 }
 
 /// Represents the method for finding all items inside the inventory.
