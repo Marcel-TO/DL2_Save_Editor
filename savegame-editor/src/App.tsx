@@ -13,6 +13,7 @@ import { IDsPage } from "./pages/ids/ids-page";
 import { InfoPage } from "./pages/info/info-page";
 import { Background } from "./components/background/background";
 import { IdData, SaveFile } from "./models/save-models";
+import { UnlockablePage } from "./pages/unlockable/unlockable-page";
 
 function App() {
   const [idDatas, setCurrentIdDatas] = useState<IdData[]>([])
@@ -23,6 +24,7 @@ function App() {
       [
         (<Route path={'/'} element={<MainPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} setIdData={setCurrentIdDatas}/>}></Route>),
         (<Route path={'/skills'} element={<SkillPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile}/>}></Route>),
+        (<Route path={'/unlockables'} element={<UnlockablePage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile}/>}></Route>),
         (<Route path={'/experience'} element={<ExperiencePage/>}></Route>),
         (<Route path={'/inventory'} element={<InventoryPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} idDatas={idDatas}/>}></Route>),
         (<Route path={'/backpack'} element={<BackpackPage/>}></Route>),

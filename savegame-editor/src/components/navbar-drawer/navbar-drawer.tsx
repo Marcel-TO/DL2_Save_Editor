@@ -28,6 +28,7 @@ import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
 
 // Themes
 const openedMixin = (theme: Theme): CSSObject => ({
@@ -130,7 +131,7 @@ const drawerWidth = 240;
 // The different pages
 const itemPages: [string, JSX.Element, string, boolean][] = [
   ['Skills', <AccountTreeRoundedIcon/>, '/skills', false], 
-  ['Experience', <SchoolRoundedIcon/>, '/experience', true], 
+  ['Unlockables', <LockOpenIcon/>, '/unlockables', false], 
   ['Inventory', <Inventory2RoundedIcon/>, '/inventory', false], 
   ['Backpack', <BackpackRoundedIcon/>, '/backpack', true], 
   ['Campaign', <AssignmentLateRoundedIcon/>, '/campaign', true],
