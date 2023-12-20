@@ -16,6 +16,7 @@ Goon_Electric_Puddle
 Plaguebearer_Puddle
 Goon_Toxic_Large_Puddle
 Goon_Toxic_Small_Puddle
+Gas_Tank_Fire_Puddle
 DLC_Opera_Throwable_Molotov
 Throwable_Molotov_DLC_Opera_AI
 Throwable_UVFlare

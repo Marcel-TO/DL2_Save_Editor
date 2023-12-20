@@ -125,3 +125,5 @@ wpn_2hr_crossbow_hunters
 Chapter2_Mission_wpn_2hr_crossbow_hunters
 wpn_2hp_bow_bozak
 wpn_2hp_bow_bozak
+wpn_2hp_bow_winter_elf
+wpn_2hp_bow_winter_elf_Artifact

@@ -21,6 +21,7 @@ Ammo_Arrow_Explosive
 Ammo_Arrow_Bleeding
 Ammo_Arrow_Infecting
 Ammo_Arrow_MAX
+Ammo_Arrow_DeepFreeze
 Ammo_Bolt
 Ammo_Bolt_Fire
 Ammo_Bolt_Toxic
@@ -53,3 +54,4 @@ Bullet_Arrow_Ballista
 Ammo_Arrow_Ballista
 Bullet_Bolt_Hunters
 Ammo_Bolt_Hunters
+Bullet_Arrow_DeepFreeze

@@ -523,7 +523,7 @@ fn get_all_items(content: &[u8], start_index: usize) -> Vec<InventoryItemRow> {
             // Check if the match is an item or a mod.
             if !&current_item_ids[i].contains("Mod") && !&current_item_ids[i].contains("charm") && &current_item_ids[i] != "NoneSGDs" && &current_item_ids[i] != "SGDs" {
                 // Check if the bullet acts as item or mod or if there is a transmog item.
-                if (current_item_ids[i].contains("Bullet") && mod_counter > 0 && mod_counter < 4) || mod_counter == 3 {
+                if ((current_item_ids[i].contains("Bullet") && mod_counter > 0 && mod_counter < 4) || (current_item_ids[i].contains("Craftplan") && mod_counter < 4)) || mod_counter == 3 {
                     mods.push(Mod::new(
                         current_item_ids[i].clone(),
                         current_item_indices[i],
@@ -795,7 +795,7 @@ fn find_amount_of_matches(content: &[u8], start_index: usize, amount: usize) -> 
             if !mat.as_str().contains("Mod") && !mat.as_str().contains("charm") &&
                 mat.as_str() != "NoneSGDs" && mat.as_str() != "SGDs" {
                     // Check if the bullet acts as item or mod.
-                    if (mat.as_str().contains("Bullet") && mod_counter > 0 && mod_counter <= 4) || mod_counter == 4 {                        
+                    if ((mat.as_str().contains("Bullet") || mat.as_str().contains("Craftplan")) && mod_counter > 0 && mod_counter <= 4) || mod_counter == 4 {                        
                         // Check if the current SGD is valid
                         let tmp_matching_value = mat.as_str().to_string();
                         let index = get_index_from_sequence(content, &start_index, &tmp_matching_value.as_bytes(), true);
