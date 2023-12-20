@@ -40,9 +40,14 @@ static END_SKILLS: [u8; 33] = [
 ];
 
 // Defines the sequence where the inventory starts
-static START_INVENTORY: [u8; 18] = [
-    0x54, 0x6F, 0x6B, 0x65, 0x6E, 0x00, 0x00, 0x00,
-    0x00, 0x07, 0x00, 0x55, 0x6E, 0x6B, 0x6E, 0x6F, 0x77, 0x6E
+// static START_INVENTORY: [u8; 18] = [
+//     0x54, 0x6F, 0x6B, 0x65, 0x6E, 0x00, 0x00, 0x00,
+//     0x00, 0x07, 0x00, 0x55, 0x6E, 0x6B, 0x6E, 0x6F, 0x77, 0x6E
+// ];
+
+static START_INVENTORY: [u8; 16] = [
+    0x4D, 0x61, 0x69, 0x6E, 0x01, 0x00, 0x00, 0x00, 0x00, 0x05,
+    0x00, 0x4F, 0x74, 0x68, 0x65, 0x72
 ];
 
 /// Represents a method for loading a savefile and preparing all necessary information.
@@ -401,12 +406,12 @@ fn analize_unlockable_items_data(content: &[u8]) -> Vec<UnlockableItem> {
 
 
     // Checks if the sequence is not valid.
-    if indices.len() == 0 || indices.len() != 2 {
+    if indices.len() == 0 {
         panic!("Start pattern(s) not found in file.");
     }
 
     // Takes the second inventory index for needed information.
-    let start_index: usize = indices[1];
+    let start_index: usize = indices[indices.len() - 1];
     // Compresses the data and only extracts the inventory part of the file.
     let inventory_data: &[u8] = &content[start_index..];
     // Prepares a list of all matching strings.
