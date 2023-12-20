@@ -59,7 +59,7 @@ export default function AsyncAutocomplete({currentID, iDs, changeCurrentID}: {cu
       options={options}
       loading={loading}
       onChange={(_event: any, newValue: string | null) => {
-        changeCurrentID(newValue + 'SGDs');
+        changeCurrentID(newValue);
       }}
       inputValue={inputValue}
       value={currentID}

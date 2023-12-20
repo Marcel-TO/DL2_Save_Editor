@@ -317,7 +317,7 @@ const VirtualizedList = ({
         setCurrentSelectedItemSeed(selectedItem.chunk_data.seed_value.toString());
         setCurrentSelectedItemAmount(selectedItem.chunk_data.amount_value.toString());
         setCurrentSelectedItemDurability(selectedItem.chunk_data.durability_value.toString());
-        handlePossibleIDs(selectedItem.size);
+        handlePossibleIDs(selectedItem.size - 4); // Due to SGDs in size calculation.
         setIsOpen(true);
     }
 
@@ -332,10 +332,12 @@ const VirtualizedList = ({
         idMapping.forEach(([rowName, idNames]) => {
             if (itemRow.name === rowName) {
                 const matchingIdDatas = idDatas.filter((idData) => idNames.indexOf(idData.filename) > -1);
+                let encoder = new TextEncoder();
     
                 for (let i = 0; i < matchingIdDatas.length; i++) {
                     matchingIdDatas[i].ids.forEach((id) => {
-                        if (id.length <= size - 4) {
+                        let bytes = encoder.encode(id)
+                        if (bytes.length <= size) {
                             iDs.push(id);
                         }
                     });
@@ -389,7 +391,7 @@ const VirtualizedList = ({
     }
 
     const handleAmountValue = (event: ChangeEvent<HTMLInputElement>) => {
-        const maxValue = 9999999;
+        const maxValue = 4294967295;
 
         // Allow only numbers
         var value = event.target.value.replace(/[^0-9]/g, '');
@@ -410,7 +412,7 @@ const VirtualizedList = ({
     }
 
     const handleDurabilityValue = (event: ChangeEvent<HTMLInputElement>) => {
-        const maxValue = 9999999;
+        const maxValue = 4294967295;
 
         // Allow only numbers
         var value = event.target.value.replace(/[^-0-9]/g, '');
@@ -453,7 +455,7 @@ const VirtualizedList = ({
     async function submitItemValues(levelValue: number, seedValue: number, amountValue: number, durabilityValue: number) {
         invoke<Uint8Array>("handle_edit_item_chunk", {
             current_item_index: currentItem?.index,
-            new_id: currentSelectedID.slice(0, -4),
+            new_id: currentSelectedID,
             current_item_chunk_index: currentItem?.chunk_data.index,
             current_item_size: currentItem?.size,
             new_level: levelValue,

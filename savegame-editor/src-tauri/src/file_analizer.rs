@@ -550,7 +550,7 @@ fn get_all_items(content: &[u8], start_index: usize) -> Vec<InventoryItemRow> {
                 }
 
                 // Set the current item initialization.
-                current_item_id = current_item_ids[i].to_string();
+                current_item_id = current_item_ids[i].trim_end_matches("SGDs").to_string();
                 match_bytes = current_item_ids[i].as_bytes();
                 current_item_index = current_item_indices[i];
                 current_inv_chunk = chunks[chunk_counter].clone();
