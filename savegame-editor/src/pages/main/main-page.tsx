@@ -102,6 +102,24 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
         setOpeningSave(false);
     }
 
+    async function exportForPC() {
+        let filePath = await save({
+            defaultPath: '/save_main_0.sav',
+            filters: [{
+              name: 'SAV File',
+              extensions: ['sav']
+            }],
+        });
+
+        if(filePath != null && currentSaveFile != undefined) {
+            // Save data to file   
+            let compressed = await invoke<Uint8Array>('export_for_pc', {data: currentSaveFile.file_content})
+            await writeBinaryFile(filePath, compressed);
+        }
+
+        setOpeningSave(false);
+    }
+
     return (
         <>
             <ThemeProvider theme={cardTheme}>
@@ -147,6 +165,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
 
                         <Button onClick={() => handleCurrentSaveFile()} variant='outlined'>Load Save</Button>
                         <Button onClick={() => saveCurrentSaveFile()} variant='outlined' disabled={currentSaveFile !== undefined ? false : true}>Save current Changes</Button>
+                        <Button onClick={() => exportForPC()} variant='outlined' disabled={currentSaveFile !== undefined ? false : true}>Export for PC</Button>
                     </CardActions>
                 </Card> 
             </ThemeProvider>

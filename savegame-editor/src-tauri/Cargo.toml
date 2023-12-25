@@ -20,6 +20,7 @@ log = "0.4.20"
 tauri-plugin-log = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "dev" }
 regex = "1.10.2"
 dotenv = "0.15.0"
+flate2 = "1.0.28"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

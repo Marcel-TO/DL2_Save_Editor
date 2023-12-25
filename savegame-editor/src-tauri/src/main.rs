@@ -6,7 +6,7 @@ mod id_fetcher;
 mod struct_data;
 
 use dotenv::dotenv;
-use file_analizer::{load_save_file, edit_skill, edit_inventory_item_chunk, change_items_durability, change_items_amount};
+use file_analizer::{load_save_file, edit_skill, edit_inventory_item_chunk, change_items_durability, change_items_amount, export_save_for_pc};
 use struct_data::{SaveFile, InventoryChunk};
 use id_fetcher::fetch_ids;
 use tauri::AppHandle;
@@ -31,6 +31,13 @@ async fn load_save(file_path: &str) -> Result<SaveFile, ()> {
     let save_file = load_save_file(&file_path);
 
     Ok(save_file)
+}
+
+#[tauri::command(rename_all = "snake_case")]
+async fn export_for_pc(data: Vec<u8>) -> Result<Vec<u8>, ()> {
+    let compressed: Vec<u8> = export_save_for_pc(&data);
+
+    Ok(compressed)
 }
 
 #[tauri::command(rename_all = "snake_case")]
@@ -149,6 +156,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             get_ids,
             load_save,
+            export_for_pc,
             handle_edit_skill,
             handle_edit_item_chunk,
             change_items_durability_max,

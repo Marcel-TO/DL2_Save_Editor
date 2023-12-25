@@ -5,10 +5,13 @@
 //! - Unlockable items (craftplans, toolskins, consumables)
 //! - Inventory items (weapons, gear, accesssories, etc)
 
+use std::io::Write;
 use std::{fs, io::Read};
 use std::error::Error;
 use log::info;
 use regex::Regex;
+use flate2::write::GzEncoder;
+use flate2::Compression;
 
 
 // Import all struct datas.
@@ -100,6 +103,14 @@ pub fn load_save_file(file_path: &str) -> SaveFile {
         unlockable_items,
         items,
     )
+}
+
+pub fn export_save_for_pc(data: &Vec<u8>) -> Vec<u8> {
+    let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
+    let _ = encoder.write_all(data);
+    let compressed = encoder.finish().unwrap();
+
+    compressed
 }
 
 /// Represents a method for converting byte content into string content

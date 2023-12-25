@@ -2305,6 +2305,7 @@ name = "savegame-editor"
 version = "0.0.3"
 dependencies = [
  "dotenv",
+ "flate2",
  "log",
  "regex",
  "serde",
