@@ -8,6 +8,7 @@
 use std::io::Write;
 use std::{fs, io::Read};
 use std::error::Error;
+use flate2::bufread::GzDecoder;
 use log::info;
 use regex::Regex;
 use flate2::write::GzEncoder;
@@ -111,6 +112,14 @@ pub fn export_save_for_pc(data: &Vec<u8>) -> Vec<u8> {
     let compressed = encoder.finish().unwrap();
 
     compressed
+}
+
+pub fn decompress_pc_save(data: &Vec<u8>) -> Vec<u8> {
+    let mut gz = GzDecoder::new(&data[..]);
+    let mut s = Vec::new();
+    gz.read_to_end(&mut s).unwrap();
+
+    s
 }
 
 /// Represents a method for converting byte content into string content
