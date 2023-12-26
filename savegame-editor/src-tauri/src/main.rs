@@ -4,6 +4,7 @@
 mod file_analizer;
 mod id_fetcher;
 mod struct_data;
+mod test_saves;
 
 use dotenv::dotenv;
 use file_analizer::{load_save_file, edit_skill, edit_inventory_item_chunk, change_items_durability, change_items_amount, export_save_for_pc};
