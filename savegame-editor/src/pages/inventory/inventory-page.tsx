@@ -1,7 +1,7 @@
 import './inventory-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
 import { IdData, InventoryChunk, InventoryItem, InventoryItemRow, SaveFile } from '../../models/save-models'
-import { Backdrop, Box, Button, Card, CardContent, CircularProgress, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Tab, Tabs, TextField, Tooltip, Typography, createTheme, styled } from '@mui/material'
+import { Backdrop, Box, Button, Card, CardContent, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Tab, Tabs, TextField, Tooltip, Typography, createTheme, styled } from '@mui/material'
 import { ChangeEvent, Fragment, useState } from 'react';
 import { ThemeProvider } from '@emotion/react';
 import ConstructionRoundedIcon from '@mui/icons-material/ConstructionRounded';
@@ -11,6 +11,7 @@ import { FixedSizeList } from 'react-window';
 import { invoke } from '@tauri-apps/api';
 import AsyncAutocomplete from '../../components/async-autocomplete/async-autocomplete';
 import ShuffleOnIcon from '@mui/icons-material/ShuffleOn';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, idDatas: IdData[] }): JSX.Element => {
     return (
@@ -33,7 +34,7 @@ const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { cu
         } else {
             setIsTemplateVisible(false);
         }
-        
+
         setValue(newValue);
     };
 
@@ -66,7 +67,7 @@ const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { cu
                     for (let i = 0; i < new_save_content[0].length; i++) {
                         itemRow.inventory_items[i].chunk_data = new_save_content[0][i];
                     }
-                    
+
                     currentSaveFile.items[tabIndex] = itemRow
                 }
 
@@ -102,9 +103,9 @@ const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { cu
                         </Box>
                         {currentSaveFile?.items?.map((itemArray, index) => (
                             <CustomTabPanel key={index} value={tabIndex} index={index}>
-                                <VirtualizedList 
+                                <VirtualizedList
                                     itemRow={itemArray}
-                                    itemIndex={index} 
+                                    itemIndex={index}
                                     minWidth={360}
                                     currentSaveFile={currentSaveFile}
                                     setCurrentSaveFile={setCurrentSaveFile}
@@ -147,7 +148,7 @@ const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { cu
                                 {templates['weapon-items'].map((item) => (
                                     <MenuItem onClick={() => handleExecuteTemplate(item.methodName)}>{`Execute: ${item.name}`}</MenuItem>
                                 ))}
-                                
+
                             </Menu>
                         </div>
                     ) : (
@@ -171,14 +172,14 @@ const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { cu
                             </Button>
                         </div>
                     )}
-                    
+
                 </ThemeProvider>
 
                 <Backdrop
                     sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                     open={isLoadingTemplate}
                 >
-                <CircularProgress sx={{color: '#e9eecd'}} />
+                    <CircularProgress sx={{ color: '#e9eecd' }} />
                 </Backdrop>
             </Box>
         </>
@@ -272,21 +273,20 @@ const VirtualizedList = ({
     itemRow,
     itemIndex,
     minWidth,
-    currentSaveFile, 
+    currentSaveFile,
     setCurrentSaveFile,
     idDatas,
 }: {
     itemRow: InventoryItemRow,
     itemIndex: number,
     minWidth: number,
-    currentSaveFile: SaveFile | undefined, 
+    currentSaveFile: SaveFile | undefined,
     setCurrentSaveFile: Function,
     idDatas: IdData[],
 }): JSX.Element => {
     const [isOpen, setIsOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState<InventoryItem>();
     const [currentItemIndex, setCurrentItemIndex] = useState(itemIndex);
-    const [items, setItems] = useState<InventoryItem[]>(itemRow.inventory_items);
 
     const [currentSelectedID, setCurrentSelectedID] = useState('');
     const [currentSelectedItemLevel, setCurrentSelectedItemLevel] = useState('');
@@ -294,8 +294,9 @@ const VirtualizedList = ({
     const [currentSelectedItemAmount, setCurrentSelectedItemAmount] = useState('');
     const [currentSelectedItemDurability, setCurrentSelectedItemDurability] = useState('');
     const [possibleIDs, setPossibleIDs] = useState<string[]>([]);
-    
+
     const [changeItemIsOpen, setChangeItemIsOpen] = useState(false);
+    const [removeItemIsOpen, setRemoveItemIsOpen] = useState(false);
 
     const idMapping: [string, string[]][] = [
         ['Weapons', ['Melee', 'Firearm']],
@@ -304,7 +305,21 @@ const VirtualizedList = ({
         ['Accessories', ['Throwable', 'ThrowableLiquid']],
         ['Ammunition', ['Ammo']],
     ];
-    
+
+    const removeEmptyItems = (items: InventoryItem[]): InventoryItem[] => {
+        let newDisplayedItems: InventoryItem[] = [];
+
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].name != '') {
+                newDisplayedItems.push(items[i]);
+            }
+        }
+
+        return newDisplayedItems;
+    }
+
+    const [items, setItems] = useState<InventoryItem[]>(removeEmptyItems(itemRow.inventory_items));
+
     const handleCLickChangeItem = () => {
         setChangeItemIsOpen(!changeItemIsOpen);
     };
@@ -324,16 +339,17 @@ const VirtualizedList = ({
     const handleCloseItem = () => {
         setCurrentItem(undefined);
         setIsOpen(false);
+        setRemoveItemIsOpen(false);
     }
 
     const handlePossibleIDs = (size: number) => {
         let iDs: string[] = [];
-    
+
         idMapping.forEach(([rowName, idNames]) => {
             if (itemRow.name === rowName) {
                 const matchingIdDatas = idDatas.filter((idData) => idNames.indexOf(idData.filename) > -1);
                 let encoder = new TextEncoder();
-    
+
                 for (let i = 0; i < matchingIdDatas.length; i++) {
                     matchingIdDatas[i].ids.forEach((id) => {
                         let bytes = encoder.encode(id)
@@ -342,7 +358,7 @@ const VirtualizedList = ({
                         }
                     });
                 }
-                
+
                 setPossibleIDs(iDs);
             }
         });
@@ -432,7 +448,7 @@ const VirtualizedList = ({
         }
     }
 
-    async function handleChangeValues() {
+    async function handleChangeValues(itemName: string) {
         let levelValue = Number(currentSelectedItemLevel);
         let seedValue = Number(currentSelectedItemSeed);
         let amountValue = Number(currentSelectedItemAmount);
@@ -440,7 +456,7 @@ const VirtualizedList = ({
 
         // Rewrite locally for performance reasons.
         if (items != undefined) {
-            items[currentItemIndex].name = currentSelectedID;
+            items[currentItemIndex].name = itemName;
             items[currentItemIndex].chunk_data.level_value = levelValue;
             items[currentItemIndex].chunk_data.seed_value = seedValue;
             items[currentItemIndex].chunk_data.amount_value = amountValue;
@@ -449,13 +465,13 @@ const VirtualizedList = ({
         }
 
         // setIsOpen(false);
-        submitItemValues(levelValue, seedValue, amountValue, durabilityValue);
+        submitItemValues(itemName, levelValue, seedValue, amountValue, durabilityValue);
     }
 
-    async function submitItemValues(levelValue: number, seedValue: number, amountValue: number, durabilityValue: number) {
+    async function submitItemValues(itemName: string, levelValue: number, seedValue: number, amountValue: number, durabilityValue: number) {
         invoke<Uint8Array>("handle_edit_item_chunk", {
             current_item_index: currentItem?.index,
-            new_id: currentSelectedID,
+            new_id: itemName,
             current_item_chunk_index: currentItem?.chunk_data.index,
             current_item_size: currentItem?.size,
             new_level: levelValue,
@@ -471,9 +487,9 @@ const VirtualizedList = ({
                 for (let i = 0; i < currentSaveFile.items.length; i++) {
                     if (itemRow.name == currentSaveFile.items[i].name &&
                         itemRow.inventory_items.length == currentSaveFile.items[i].inventory_items.length) {
-                            currentSaveFile.items[i] = itemRow;
-                            setCurrentSaveFile(currentSaveFile);
-                            return;
+                        currentSaveFile.items[i] = itemRow;
+                        setCurrentSaveFile(currentSaveFile);
+                        return;
                     }
                 }
             }
@@ -486,6 +502,14 @@ const VirtualizedList = ({
 
         const randomValue = Math.floor(Math.random() * (max - min) + min);
         setCurrentSelectedItemSeed(randomValue.toString());
+    }
+
+    async function handleRemoveItem() {
+        setCurrentSelectedID('');
+        await handleChangeValues('');
+
+        setItems(removeEmptyItems(items));
+        handleCloseItem();
     }
 
     return (
@@ -608,41 +632,43 @@ const VirtualizedList = ({
                         }}>
 
                             <Box sx={{
-                                display: 'flex', 
+                                display: 'flex',
                                 flexDirection: 'row',
                                 justifyContent: 'center',
                                 marginTop: '20px',
                             }}>
-                                <Box sx={{width:'500px'}}>
+                                <Box sx={{ width: '500px' }}>
                                     {changeItemIsOpen ? (
-                                        <AsyncAutocomplete 
+                                        <AsyncAutocomplete
                                             currentID={currentSelectedID}
                                             iDs={possibleIDs}
                                             changeCurrentID={setCurrentSelectedID}
                                         />
                                     ) : (
                                         <Typography gutterBottom variant="h5" component="div">
-                                        {currentItem?.name}
+                                            {currentItem?.name}
                                         </Typography>
                                     )}
                                 </Box>
 
-                                
                                 {possibleIDs.length > 0 ? (
-                                    <Button 
-                                        sx={{
-                                            marginLeft: '10px',
-                                            cursor: 'pointer',
-                                            "&:hover": {
-                                                backgroundColor: '#52626450'
-                                            }
-                                        }}
-                                        onClick={handleCLickChangeItem}
-                                            >
-                                        <BorderColorIcon/>
-                                    </Button>
+                                    <Tooltip title={'Change ID'} arrow placement="top-start">
+                                        <Button
+                                            sx={{
+                                                marginLeft: '10px',
+                                                cursor: 'pointer',
+                                                "&:hover": {
+                                                    backgroundColor: '#52626450'
+                                                }
+                                            }}
+                                            onClick={handleCLickChangeItem}
+                                        >
+                                            <BorderColorIcon />
+                                        </Button>
+                                    </Tooltip>
                                 ) : (
-                                    <Button 
+
+                                    <Button
                                         sx={{
                                             marginLeft: '10px',
                                             cursor: 'pointer',
@@ -652,16 +678,48 @@ const VirtualizedList = ({
                                         }}
                                         onClick={handleCLickChangeItem}
                                         disabled={true}
-                                            >
-                                        <BorderColorIcon/>
+                                    >
+                                        <BorderColorIcon />
                                     </Button>
                                 )}
-                                
 
+                                <Tooltip title={'Remove Item'} arrow placement="top-start">
+                                    <div>
+                                        <Button onClick={() => setRemoveItemIsOpen(true)}>
+                                            <DeleteForeverIcon />
+                                        </Button>
+                                        <Dialog
+                                            open={removeItemIsOpen}
+                                            onClose={() => setRemoveItemIsOpen(false)}
+                                            aria-labelledby="alert-dialog-title"
+                                            aria-describedby="alert-dialog-description">
+                                            <DialogTitle id="alert-dialog-title">
+                                                {"Are you sure that you want to remove this Item?"}
+                                            </DialogTitle>
+                                            <DialogContent>
+                                                <DialogContentText id="alert-dialog-description">
+                                                    When continuing, the item will be removed from the save.
+                                                    <Typography sx={{ color: '#FFFFFF' }}>
+                                                        <strong>The game must be loaded and saved for this change to actually take affect!</strong>
+
+                                                    </Typography>
+                                                </DialogContentText>
+                                            </DialogContent>
+                                            <DialogActions>
+                                                <ThemeProvider theme={dialogButtonTheme}>
+                                                    <Button variant='text' disableElevation onClick={() => setRemoveItemIsOpen(false)}>Go Back</Button>
+                                                    <Button variant='outlined' onClick={() => handleRemoveItem()} autoFocus>
+                                                        Remove Item
+                                                    </Button>
+                                                </ThemeProvider>
+                                            </DialogActions>
+                                        </Dialog>
+                                    </div>
+                                </Tooltip>
                             </Box>
-                            
+
                             <Box sx={{
-                                display: 'flex', 
+                                display: 'flex',
                                 flexDirection: 'row',
                                 justifyContent: 'center',
                                 marginTop: '20px',
@@ -690,7 +748,7 @@ const VirtualizedList = ({
                             </Box>
 
                             <Box sx={{
-                                display: 'flex', 
+                                display: 'flex',
                                 flexDirection: 'row',
                                 justifyContent: 'center',
                                 marginTop: '20px',
@@ -717,13 +775,15 @@ const VirtualizedList = ({
                                     }}
                                 />
 
-                                <Button onClick={generateRandomSeed}>
-                                    <ShuffleOnIcon/>
-                                </Button>
+                                <Tooltip title={'Generate Random Seed'} arrow placement="top-start">
+                                    <Button onClick={generateRandomSeed}>
+                                        <ShuffleOnIcon />
+                                    </Button>
+                                </Tooltip>
                             </Box>
 
                             <Box sx={{
-                                display: 'flex', 
+                                display: 'flex',
                                 flexDirection: 'row',
                                 justifyContent: 'center',
                                 marginTop: '20px',
@@ -752,7 +812,7 @@ const VirtualizedList = ({
                             </Box>
 
                             <Box sx={{
-                                display: 'flex', 
+                                display: 'flex',
                                 flexDirection: 'row',
                                 justifyContent: 'center',
                                 marginTop: '20px',
@@ -784,10 +844,10 @@ const VirtualizedList = ({
                                 </Button> */}
                             </Box>
 
-                            <Button sx={{marginTop: '40px', color: '#e9eecd'}} onClick={() => {
-                                handleChangeValues();
+                            <Button sx={{ marginTop: '40px', color: '#e9eecd' }} onClick={() => {
+                                handleChangeValues(currentSelectedID);
                                 setIsOpen(false);
-                            }}>Change All</Button>
+                            }}>Save changes</Button>
                         </CardContent>
                     </Card>
                 </Backdrop>
@@ -821,13 +881,13 @@ const selectedItemCardTheme = createTheme({
                 root: {
                     color: '#e9eecd',
                     "& fieldset": {
-                    borderColor: "#526264",
+                        borderColor: "#526264",
                     },
                     "&:hover fieldset": {
-                    borderColor: "#899994 !important"
+                        borderColor: "#899994 !important"
                     },
                     "&.Mui-focused fieldset": {
-                    borderColor: "#e9eecd !important"
+                        borderColor: "#e9eecd !important"
                     }
                 }
             }
@@ -842,5 +902,34 @@ const selectedItemCardTheme = createTheme({
                 }
             }
         }
+    }
+});
+
+const dialogButtonTheme = createTheme({
+    components: {
+        MuiButton: {
+            styleOverrides: {
+                root: {
+                    margin: '0 10px',
+                },
+                outlined: {
+                    color: '#e33e2c',
+                    borderColor: '#e33e2c',
+                    '&:hover': {
+                        borderColor: '#e33e2c',
+                        color: '#e9eecd',
+                        backgroundColor: '#e33e2c',
+                    },
+                    '&:disabled': {
+                        borderColor: '#526264',
+                        color: '#526264',
+                    }
+                },
+                text: {
+                    backgroundColor: 'transparent',
+                    color: '#e33e2c',
+                }
+            }
+        },
     }
 });

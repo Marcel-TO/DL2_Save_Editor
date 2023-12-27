@@ -21,7 +21,6 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import AccountTreeRoundedIcon from '@mui/icons-material/AccountTreeRounded';
 import Inventory2RoundedIcon from '@mui/icons-material/Inventory2Rounded';
-import SchoolRoundedIcon from '@mui/icons-material/SchoolRounded';
 import BackpackRoundedIcon from '@mui/icons-material/BackpackRounded';
 import AssignmentLateRoundedIcon from '@mui/icons-material/AssignmentLateRounded';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
