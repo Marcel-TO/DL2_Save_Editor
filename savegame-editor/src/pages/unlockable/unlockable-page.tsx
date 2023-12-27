@@ -1,180 +1,131 @@
 import './unlockable-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
-import { SaveFile, SkillItem } from '../../models/save-models'
+import { SaveFile, UnlockableItem } from '../../models/save-models'
 import { ThemeProvider } from '@emotion/react'
-import styled from '@emotion/styled'
-import { Box, Tabs, List, ListItemButton, ListItemIcon, ListItemText, Typography, Divider, Backdrop, Card, CardContent, TextField, Button, Tab, createTheme } from '@mui/material'
-import { useState, ChangeEvent, Fragment } from 'react'
+import { Box, ListItemButton, ListItemIcon, ListItemText, TextField, createTheme } from '@mui/material'
+import { useState, ChangeEvent } from 'react'
 import LockOpenIcon from '@mui/icons-material/LockOpen';
+import { FixedSizeList } from 'react-window'
 
-export const UnlockablePage = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function}): JSX.Element => {    
+export const UnlockablePage = ({currentSaveFile}: {currentSaveFile: SaveFile | undefined}): JSX.Element => {    
     return (
         <>
         <div className="container">
-            <NavbarDrawer pagename={"Skills"} pagecontent={<UnlockableContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile}/>}></NavbarDrawer>
+            <NavbarDrawer pagename={"Skills"} pagecontent={<UnlockableContent unlockableItems={currentSaveFile != undefined ? currentSaveFile.unlockable_items : []}/>}></NavbarDrawer>
         </div>
         </>
     )
 }
 
-const UnlockableContent = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function}) => {
-    const [currentTab, setCurrentTab] = useState(0);
-    const [isOpen, setIsOpen] = useState(false);
-    const [currentSkill, setCurrentSkill] = useState<SkillItem>();
-    const [currentSkillIndex, setCurrentSkillIndex] = useState(0);
-    const [currentSelectedSkillValue, setCurrentSelectedSkillValue] = useState('');
-    const [displayedSaveFile] = useState<SaveFile | undefined>(currentSaveFile);
+// The content of the ID page
+const UnlockableContent = ({unlockableItems}: {unlockableItems: UnlockableItem[]}): JSX.Element => {
+    // The handled data
+    const [currentSearch, setCurrentSearch] = useState<string>("");
+    const [matchingItems, setMatchingItems] = useState<UnlockableItem[]>(unlockableItems);
+  
+    // Handles the current search.
+    function handleCurrentSelected(event: ChangeEvent<HTMLInputElement>) {
+        var value = event.target.value
+        
+        setCurrentSearch(value);
+        
+        if (value === '') {
+            setMatchingItems(unlockableItems);
+        } else {
+            setMatchingItems(getAllMatchingItems(value));
+        }
+    } 
 
-    const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
-        setCurrentTab(newValue);
-    };
-    
-    return (
-        <>
-            <ThemeProvider theme={tabTheme}>
-                <Box sx={{ width: '100%', backgroundColor: '#00000070'}}>
-                    <List
-                        sx={{ width: '100%', minWidth: 360, bgcolor: 'transparent' }}
-                        component="nav"
-                        aria-labelledby="nested-list-subheader"
-                    >
-                        {displayedSaveFile?.unlockable_items.map((item, index) => (
-                            <Fragment key={item.name}>
-                                <ListItemButton>
-                                    <ListItemIcon>
-                                        <LockOpenIcon sx={{ color: '#e9eecd' }} />
-                                    </ListItemIcon>
-                                    <ListItemText 
-                                        primary={item.name} 
-                                        secondary={
-                                            <ThemeProvider theme={listItemTheme}>
-                                                <Box sx={{display: 'flex', flexDirection: 'column'}}>
-                                                    <Box sx={{display: 'flex', flexDirection: 'row', marginLeft: '40px', alignItems: 'center'}}>
-                                                        <Typography
-                                                            sx={{ minWidth: '100px' }}
-                                                            variant="subtitle1">
-                                                                {"Index: "}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant='body2'>
-                                                            {item.index}
-                                                        </Typography> 
-                                                    </Box>
-                                                </Box>
-                                            </ThemeProvider>
-                                        }/>
-                                </ListItemButton>
-                                <Divider/>
-                            </Fragment>
-                        ))}
-                    </List>
-                </Box>
-            </ThemeProvider>
-        </>
-    )
-}
+    function getAllMatchingItems(value: string): UnlockableItem[] {
+        let matching: UnlockableItem[] = [];
 
-interface TabPanelProps {
-    children?: React.ReactNode;
-    index: number;
-    value: number;
-}
-
-function CustomTabPanel(props: TabPanelProps) {
-    const { children, value, index, ...other } = props;
-
-    return (
-        <div
-        role="tabpanel"
-        hidden={value !== index}
-        id={`simple-tabpanel-${index}`}
-        aria-labelledby={`simple-tab-${index}`}
-        {...other}
-        >
-        {value === index && (
-            <Box sx={{ p: 3 }}>
-            <Typography>{children}</Typography>
-            </Box>
-        )}
-        </div>
-    );
-}
-
-const StyledTab = styled(Tab)({
-    "&.Mui-selected": {
-      backgroundColor: "#e9eecd",
-      color: '#526264',
-    }
-  });
-
-function a11yProps(index: number) {
-    return {
-        id: `simple-tab-${index}`,
-        'aria-controls': `simple-tabpanel-${index}`,
-    };
-}
-
-const tabTheme = createTheme({
-    palette: {
-        mode: 'dark',
-    },
-    components: {
-        MuiTabs: {
-            styleOverrides: {
-                indicator: {
-                    backgroundColor: '#e9eecd',
-                }
-            }
-        },
-        MuiTab: {
-            styleOverrides: {
-                root: {
-                    color: '#e9eecd',
-                    borderRadius: '10% 10% 0 0',
-                    '&:hover': {
-                        backgroundColor: '#52626450',
-                      }
-                },
-            }
-        },
-    }
-});
-
-const listItemTheme = createTheme({
-    palette: {
-        mode: 'dark',
-    },
-    components: {
-        MuiTypography: {
-            styleOverrides: {
-                root: {
-                    color: 'white',
-                }
+        for (let i = 0; i < unlockableItems.length; i++) {
+            if (unlockableItems[i].name.toLocaleLowerCase().includes(value.toLocaleLowerCase())) {
+                matching.push(unlockableItems[i]);
             }
         }
-    }
-});
 
-const selectedSkillCardTheme = createTheme({
+        return matching;
+    }
+  
+    return (
+        <>
+            <div className="id-list-container">
+                <ThemeProvider theme={searchbarTheme}>
+                    <TextField
+                        label="Search"
+                        variant="outlined"
+                        type="text"
+                        value={currentSearch}
+                        onChange={handleCurrentSelected}
+                        InputLabelProps={{
+                            sx: {
+                                color: "#899994",
+                                "&.Mui-focused": { color: "#e9eecd" }
+                            },
+                        }}
+                        sx={{
+                            width: '100%'
+                        }}
+                    />
+
+                </ThemeProvider>
+
+                <VirtualizedList items={matchingItems} minWidth={360} />
+            </div>
+        </>
+    )
+  }
+  
+  // Represents the collapsed nested list.
+  // Using FixedSizedList instead of normal list to improve performance when opening a bracket.
+  const VirtualizedList = ({
+    items,
+    minWidth,
+  }: {
+    items: UnlockableItem[];
+    minWidth: number;
+  }): JSX.Element => { 
+    // Represents the row of the collapsed nested list.
+    const VirtualizedRow = ({ item, style }: { item: UnlockableItem; style: React.CSSProperties }) => {
+      return (
+        <>
+          <ListItemButton key={item.index} sx={{ pl: 4, minWidth: 360 }} style={style}>
+            <ListItemIcon>
+              <LockOpenIcon sx={{color: '#e9eecd'}}/>
+            </ListItemIcon>
+            <ListItemText primary={item.name} />
+          </ListItemButton>
+        </>
+      );
+    };
+  
+    return (
+      <>
+      <Box sx={{ height: '100%', minWidth: minWidth }}>
+        <FixedSizeList
+          height={500}
+          width='100%'
+          itemSize={60}
+          itemCount={items?.length || 0}
+          className='fixedSizeListContainer'
+        >
+          {({ index, style }) => (
+            <>
+              <VirtualizedRow item={items[index]} style={style} />
+            </>
+          )}
+        </FixedSizeList>
+      </Box>
+      </>
+    );
+  };
+
+const searchbarTheme = createTheme({
     palette: {
         mode: 'dark',
     },
     components: {
-        MuiCard: {
-            styleOverrides: {
-                root: {
-                    color: '#e9eecd',
-                    borderColor: '#526264'
-                }
-            }
-        },
-        MuiTextField: {
-            styleOverrides: {
-                root: {
-                    color: 'red',
-                },
-            }
-        },
         MuiOutlinedInput: {
             styleOverrides: {
                 root: {
@@ -191,15 +142,5 @@ const selectedSkillCardTheme = createTheme({
                 }
             }
         },
-        MuiButton: {
-            styleOverrides: {
-                root: {
-                    color: '#899994',
-                    '&:hover': {
-                        color: '#e9eecd'
-                    }
-                }
-            }
-        }
     }
 });
