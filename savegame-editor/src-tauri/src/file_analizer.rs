@@ -114,13 +114,13 @@ pub fn export_save_for_pc(data: &Vec<u8>) -> Vec<u8> {
     compressed
 }
 
-pub fn decompress_pc_save(data: &Vec<u8>) -> Vec<u8> {
-    let mut gz = GzDecoder::new(&data[..]);
-    let mut s = Vec::new();
-    gz.read_to_end(&mut s).unwrap();
+// pub fn decompress_pc_save(data: &Vec<u8>) -> Vec<u8> {
+//     let mut gz = GzDecoder::new(&data[..]);
+//     let mut s = Vec::new();
+//     gz.read_to_end(&mut s).unwrap();
 
-    s
-}
+//     s
+// }
 
 /// Represents a method for converting byte content into string content
 /// 

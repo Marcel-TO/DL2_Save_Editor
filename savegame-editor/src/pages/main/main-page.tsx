@@ -1,7 +1,7 @@
 import './main-page.css';
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer';
 import { IdData, SaveFile } from '../../models/save-models';
-import { Backdrop, Button, Card, CardActions, CardContent, CardHeader, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography, createTheme } from '@mui/material';
+import { Backdrop, Box, Button, Card, CardActions, CardContent, CardHeader, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Typography, createTheme } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
 import { open, save } from '@tauri-apps/api/dialog';
 import { writeBinaryFile } from '@tauri-apps/api/fs';
@@ -126,12 +126,52 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
                 <Card>
                     <CardHeader>Current Save:</CardHeader>
                     <CardContent sx={{height: '70vh'}}>
+                    <Box sx={{height: '100%', overflow: 'scroll', display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
                         <Typography gutterBottom variant="h6" component="div" sx={{ height: 50, display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
                             Selected File: {currentSaveFile?.path}
                         </Typography>
                         <Typography gutterBottom variant="h6" component="div" sx={{ height: 50, display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
                             File Size: {currentSaveFile?.file_content.length} Bytes
                         </Typography>
+                        <Divider/>
+
+                        <Box sx={{marginTop: '2rem', overflow: 'scroll', display: 'flex', flexDirection: 'column'}}>
+                            <Box sx={{ overflowX: 'scroll', display: 'flex', flexDirection: 'row'}}>
+                                <Typography gutterBottom variant="h6" component="div" sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
+                                    Skills
+                                </Typography>
+                                <Box sx={{display: 'flex', flexDirection: 'row'}}>
+                                    <Typography gutterBottom variant="h6" component="div" sx={{ margin: '20px', display: 'flex', flexDirection: 'row', flexWrap: 'wrap', color: '#899994' }}>
+                                        {`Base Skills (${currentSaveFile?.skills.base_skills.length})`}
+                                    </Typography>
+
+                                    <Typography gutterBottom variant="h6" component="div" sx={{ margin: '20px', display: 'flex', flexDirection: 'row', flexWrap: 'wrap', color: '#899994' }}>
+                                        {`Legend Skills (${currentSaveFile?.skills.legend_skills.length})`}
+                                    </Typography>
+                                </Box>
+                            </Box>
+                            <Box sx={{  overflowX: 'scroll', display: 'flex', flexDirection: 'row'}}>
+                                <Typography gutterBottom variant="h6" component="div" sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
+                                    Unlockable Items
+                                </Typography>
+                                <Typography gutterBottom variant="h6" component="div" sx={{ margin: '20px', display: 'flex', flexDirection: 'row', flexWrap: 'wrap', color: '#899994' }}>
+                                    {`Unlockables (${currentSaveFile?.unlockable_items.length})`}
+                                </Typography>
+                            </Box>
+                            <Box sx={{ overflowX: 'scroll', display: 'flex', flexDirection: 'row'}}>
+                                <Typography gutterBottom variant="h6" component="div" sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
+                                    Inventory Items
+                                </Typography>
+                                <Box sx={{display: 'flex', flexDirection: 'row'}}>
+                                    {currentSaveFile?.items.map((itemrow) => (
+                                        <Typography gutterBottom variant="h6" component="div" sx={{ margin: '20px', display: 'flex', flexDirection: 'row', flexWrap: 'wrap', color: '#899994' }}>
+                                            {`${itemrow.name} (${itemrow.inventory_items.length})`}
+                                        </Typography>
+                                    ))}
+                                </Box>
+                            </Box>
+                        </Box>
+                    </Box>
                     </CardContent>
                     <CardActions>                      
                         <Fragment>

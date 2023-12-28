@@ -95,7 +95,7 @@ const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { cu
                                         key={index}
                                         icon={<ConstructionRoundedIcon />}
                                         iconPosition="bottom"
-                                        label={itemrow.name}
+                                        label={`${itemrow.name} (${itemrow.inventory_items.length})`}
                                         {...a11yProps(index)}
                                     />
                                 ))}
@@ -448,11 +448,11 @@ const VirtualizedList = ({
         }
     }
 
-    async function handleChangeValues(itemName: string) {
-        let levelValue = Number(currentSelectedItemLevel);
-        let seedValue = Number(currentSelectedItemSeed);
-        let amountValue = Number(currentSelectedItemAmount);
-        let durabilityValue = Number(currentSelectedItemDurability);
+    async function handleChangeValues(itemName: string, level: string, seed: string, amount: string, durability: string) {
+        let levelValue = Number(level);
+        let seedValue = Number(seed);
+        let amountValue = Number(amount);
+        let durabilityValue = Number(durability);
 
         // Rewrite locally for performance reasons.
         if (items != undefined) {
@@ -505,8 +505,13 @@ const VirtualizedList = ({
     }
 
     async function handleRemoveItem() {
+        setCurrentSelectedItemLevel('0');
+        setCurrentSelectedItemSeed('0');
+        setCurrentSelectedItemAmount('0');
+        setCurrentSelectedItemDurability('0');
         setCurrentSelectedID('');
-        await handleChangeValues('');
+
+        await handleChangeValues('', '0', '0', '0', '0');
 
         setItems(removeEmptyItems(items));
         handleCloseItem();
@@ -838,14 +843,10 @@ const VirtualizedList = ({
                                         width: '100%'
                                     }}
                                 />
-
-                                {/* <Button onClick={generateRandomSeed}>
-                                    <InputIcon/>
-                                </Button> */}
                             </Box>
 
                             <Button sx={{ marginTop: '40px', color: '#e9eecd' }} onClick={() => {
-                                handleChangeValues(currentSelectedID);
+                                handleChangeValues(currentSelectedID, currentSelectedItemLevel, currentSelectedItemSeed, currentSelectedItemAmount, currentSelectedItemDurability);
                                 setIsOpen(false);
                             }}>Save changes</Button>
                         </CardContent>
