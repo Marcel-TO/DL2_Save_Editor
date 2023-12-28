@@ -126,11 +126,11 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
                 <Card>
                     <CardHeader>Current Save:</CardHeader>
                     <CardContent sx={{height: '70vh'}}>
-                    <Box sx={{height: '100%', overflow: 'scroll', display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+                    <Box sx={{height: '100%', overflow: 'scroll', display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'left'}}>
                         <Typography gutterBottom variant="h6" component="div" sx={{ height: 50, display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
                             Selected File: {currentSaveFile?.path}
                         </Typography>
-                        <Typography gutterBottom variant="h6" component="div" sx={{ height: 50, display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
+                        <Typography gutterBottom variant="h6" component="div" sx={{ height: 50, marginTop: '20px', display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
                             File Size: {currentSaveFile?.file_content.length} Bytes
                         </Typography>
                         <Divider/>

@@ -650,9 +650,12 @@ const VirtualizedList = ({
                                             changeCurrentID={setCurrentSelectedID}
                                         />
                                     ) : (
-                                        <Typography gutterBottom variant="h5" component="div">
-                                            {currentItem?.name}
-                                        </Typography>
+                                        <Tooltip title={currentItem?.name} arrow placement="top-start">
+                                            <Typography noWrap gutterBottom variant="h5" component="div">
+                                                {currentItem?.name}
+                                            </Typography>
+                                            
+                                        </Tooltip>
                                     )}
                                 </Box>
 
