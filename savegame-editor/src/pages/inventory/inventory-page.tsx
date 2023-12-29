@@ -513,8 +513,38 @@ const VirtualizedList = ({
 
         await handleChangeValues('', '0', '0', '0', '0');
 
+        // Remove all mods.
+        if (currentItem != undefined) {
+            let startIndex = currentItem.index;
+            let endIndex = currentItem.mod_data[currentItem.mod_data.length - 1].index + currentItem.mod_data[currentItem.mod_data.length - 1].data_content.length;
+            await invokeRemoveItem(startIndex, endIndex, currentItem.chunk_data.index);
+        }
+
         setItems(removeEmptyItems(items));
         handleCloseItem();
+    }
+
+    async function invokeRemoveItem(startIndex: number, endIndex: number, chunkIndex: number) {
+        invoke<Uint8Array>("remove_item", {
+            start_index: startIndex,
+            end_index: endIndex,
+            chunk_index: chunkIndex,
+            save_file_content: currentSaveFile?.file_content
+        }).then((new_save_content) => {
+            if (currentSaveFile != null) {
+                currentSaveFile.file_content = new_save_content;
+                itemRow.inventory_items = items;
+
+                for (let i = 0; i < currentSaveFile.items.length; i++) {
+                    if (itemRow.name == currentSaveFile.items[i].name &&
+                        itemRow.inventory_items.length == currentSaveFile.items[i].inventory_items.length) {
+                        currentSaveFile.items[i] = itemRow;
+                        setCurrentSaveFile(currentSaveFile);
+                        return;
+                    }
+                }
+            }
+        })
     }
 
     return (

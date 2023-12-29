@@ -7,7 +7,7 @@ mod struct_data;
 mod test_saves;
 
 use dotenv::dotenv;
-use file_analizer::{load_save_file, edit_skill, edit_inventory_item_chunk, change_items_durability, change_items_amount, export_save_for_pc};
+use file_analizer::{load_save_file, edit_skill, edit_inventory_item_chunk, change_items_durability, change_items_amount, export_save_for_pc, remove_inventory_item};
 use struct_data::{SaveFile, InventoryChunk};
 use id_fetcher::fetch_ids;
 use tauri::AppHandle;
@@ -149,6 +149,23 @@ async fn change_items_amount_1(
     Ok(new_save_data)
 }
 
+#[tauri::command(rename_all = "snake_case")]
+async fn remove_item(
+    start_index: usize,
+    end_index: usize,
+    chunk_index: usize,
+    save_file_content: Vec<u8>
+) -> Result<Vec<u8>, ()> {
+    let new_save_data = remove_inventory_item(
+        start_index, 
+        end_index,
+        chunk_index,
+        save_file_content,
+    );
+
+    Ok(new_save_data)
+}
+
 fn main() {
     dotenv().ok();
     // Comment tauri builder if debugging.
@@ -160,6 +177,7 @@ fn main() {
             export_for_pc,
             handle_edit_skill,
             handle_edit_item_chunk,
+            remove_item,
             change_items_durability_max,
             change_items_durability_1,
             change_items_durability_1_negative,

@@ -279,6 +279,24 @@ pub fn change_items_amount(
     (new_item_chunks, save_file_content)
 }
 
+pub fn remove_inventory_item(
+    mut start_index: usize,
+    end_index: usize,
+    chunk_index: usize,
+    mut save_file_content: Vec<u8>
+) -> Vec<u8> {
+    start_index = start_index - 6; // This is due to [id value][id size] in front of the ID
+    let size: usize = end_index - start_index;
+    let zero_bytes: Vec<u8> = vec![0; size];
+    let zero_chunk_bytes: Vec<u8> = vec![0; 37];
+
+
+    save_file_content = replace_content_of_file(start_index, zero_bytes, save_file_content);
+    save_file_content = replace_content_of_file(chunk_index, zero_chunk_bytes, save_file_content);
+
+    save_file_content
+}
+
 /// Represents a method for replacing the file content.
 /// 
 /// ### Parameter
