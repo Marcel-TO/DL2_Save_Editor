@@ -299,6 +299,7 @@ const VirtualizedList = ({
     const [removeItemIsOpen, setRemoveItemIsOpen] = useState(false);
 
     const idMapping: [string, string[]][] = [
+        ['Tokens/Tickets', ['Token']],
         ['Weapons', ['Melee', 'Firearm']],
         ['Outfits/Craftresources', ['CraftComponent', 'OutfitPart', 'LootPack']],
         ['Consumables', ['Medkit', 'Powerup']],

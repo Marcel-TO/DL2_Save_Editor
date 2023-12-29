@@ -8,7 +8,6 @@
 use std::io::Write;
 use std::{fs, io::Read};
 use std::error::Error;
-use flate2::bufread::GzDecoder;
 use log::info;
 use regex::Regex;
 use flate2::write::GzEncoder;
