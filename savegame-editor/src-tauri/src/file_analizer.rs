@@ -8,6 +8,7 @@
 use std::io::Write;
 use std::{fs, io::Read};
 use std::error::Error;
+use flate2::read::GzDecoder;
 use log::info;
 use regex::Regex;
 use flate2::write::GzEncoder;
@@ -64,13 +65,11 @@ static START_INVENTORY: [u8; 15] = [
 /// 
 /// ### Parameter
 /// - `file_path`: The filepath of the current selected save.
+/// - `file_content`: The content of the current file.
 /// 
 /// ### Returns `SaveFile`
 /// The save file with all collected data.
-pub fn load_save_file(file_path: &str) -> SaveFile {
-    // Gets the content from the file.
-    let file_content: Vec<u8> = get_contents_from_file(file_path).unwrap();
-    
+pub fn load_save_file(file_path: &str, file_content: Vec<u8>) -> SaveFile {    
     // Gets the indices of the skill data.
     let skill_start_index: usize = get_index_from_sequence(&file_content, &0, &START_SKILLS, true);
     let skill_end_index: usize = get_index_from_sequence(&file_content, &skill_start_index, &END_SKILLS, true);
@@ -105,6 +104,29 @@ pub fn load_save_file(file_path: &str) -> SaveFile {
     )
 }
 
+/// Represents a method for loading a PC savefile and preparing all necessary information.
+/// 
+/// ### Parameter
+/// - `file_path`: The filepath of the current selected save.
+/// - `file_content`: The content of the current file.
+/// 
+/// ### Returns `SaveFile`
+/// The save file with all collected data.
+pub fn load_save_file_pc(file_path: &str, compressed: Vec<u8>) -> SaveFile {
+    let mut gz = GzDecoder::new(&compressed[..]);
+    let mut file_content = Vec::new();
+    gz.read_to_end(&mut file_content).unwrap();
+
+    load_save_file(file_path, file_content)
+}
+
+/// Represents a method for exporting the save for PC (compressing).
+/// 
+/// ### Parameter
+/// - `data`: The content of the save file.
+/// 
+/// ### Returns `Vec<u8>`
+/// The compressed data.
 pub fn export_save_for_pc(data: &Vec<u8>) -> Vec<u8> {
     let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
     let _ = encoder.write_all(data);
@@ -112,14 +134,6 @@ pub fn export_save_for_pc(data: &Vec<u8>) -> Vec<u8> {
 
     compressed
 }
-
-// pub fn decompress_pc_save(data: &Vec<u8>) -> Vec<u8> {
-//     let mut gz = GzDecoder::new(&data[..]);
-//     let mut s = Vec::new();
-//     gz.read_to_end(&mut s).unwrap();
-
-//     s
-// }
 
 /// Represents a method for converting byte content into string content
 /// 
@@ -1062,7 +1076,7 @@ fn get_all_indices_from_sequence(content: &[u8], start_index: &usize, sequence: 
 /// 
 /// ### Returns `Result<Vec<u8>>`
 /// The byte data from the current selected save file.
-fn get_contents_from_file(file_path: &str) -> Result<Vec<u8>> {
+pub fn get_contents_from_file(file_path: &str) -> Result<Vec<u8>> {
     let mut file = fs::File::open(file_path)?;
 
     // Get the file size for allocating the byte array
