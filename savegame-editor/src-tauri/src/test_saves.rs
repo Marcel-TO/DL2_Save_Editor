@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use dotenv::dotenv;
-    use crate::file_analizer::load_save_file;
+    use crate::file_analizer::{load_save_file, get_contents_from_file};
     use std::fs;
     use std::path::Path;
 
@@ -21,7 +21,8 @@ mod tests {
                     if let Some(file_name) = path.file_name() {
                         // Check if the file has the desired extension
                         if file_name.to_string_lossy().ends_with(".sav") {
-                            let save_file = load_save_file(path.to_str().unwrap());        
+                            let file_content: Vec<u8> = get_contents_from_file(path.to_str().unwrap()).unwrap();
+                            let save_file = load_save_file(path.to_str().unwrap(), file_content);        
                             assert!(
                                 save_file.items.len() > 0,
                                 "Save file at path '{}' should have at least one item, but it has {} items.",

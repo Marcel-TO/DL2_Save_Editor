@@ -14,6 +14,9 @@ import { InfoPage } from "./pages/info/info-page";
 import { Background } from "./components/background/background";
 import { IdData, SaveFile } from "./models/save-models";
 import { UnlockablePage } from "./pages/unlockable/unlockable-page";
+import { CazOutpostPage } from "./pages/caz-outpost/caz-outpost";
+import { CazCollectionPage } from "./pages/caz-collection/caz-collection";
+import { KnowledgeVaultPage } from "./pages/knowledge-vault/knowledge-vault";
 
 function App() {
   const [idDatas, setCurrentIdDatas] = useState<IdData[]>([])
@@ -24,7 +27,7 @@ function App() {
       [
         (<Route path={'/'} element={<MainPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} setIdData={setCurrentIdDatas}/>}></Route>),
         (<Route path={'/skills'} element={<SkillPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile}/>}></Route>),
-        (<Route path={'/unlockables'} element={<UnlockablePage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile}/>}></Route>),
+        (<Route path={'/unlockables'} element={<UnlockablePage currentSaveFile={currentSaveFile}/>}></Route>),
         (<Route path={'/experience'} element={<ExperiencePage/>}></Route>),
         (<Route path={'/inventory'} element={<InventoryPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} idDatas={idDatas}/>}></Route>),
         (<Route path={'/backpack'} element={<BackpackPage/>}></Route>),
@@ -32,6 +35,9 @@ function App() {
         (<Route path={'/player'} element={<PlayerPage/>}></Route>),
         (<Route path={'/ids'} element={<IDsPage idData={idDatas}/>}></Route>),
         (<Route path={'/info'} element={<InfoPage/>}></Route>),
+        (<Route path={'/outpost'} element={<CazOutpostPage/>}></Route>),
+        (<Route path={'/caz-collection'} element={<CazCollectionPage setCurrentSaveFile={setCurrentSaveFile}/>}></Route>),
+        (<Route path={'/knowledge-vault'} element={<KnowledgeVaultPage/>}></Route>),
       ]
     )
   )

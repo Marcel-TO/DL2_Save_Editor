@@ -28,6 +28,7 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
+import StoreRoundedIcon from '@mui/icons-material/StoreRounded';
 
 // Themes
 const openedMixin = (theme: Theme): CSSObject => ({
@@ -141,7 +142,8 @@ const otherPages: [string, JSX.Element, string, boolean][] = [
 ];
 const infoPages: [string, JSX.Element, string][] = [
   ['Home', <HomeRoundedIcon/>, '/'],
-  ['Info', <HelpOutlineRoundedIcon/>, '/info'], 
+  ['Info', <HelpOutlineRoundedIcon/>, '/info'],
+  ['Caz Outpost', <StoreRoundedIcon/>, '/outpost'], 
 ];
 
 // Props
