@@ -1,0 +1,99 @@
+.embla {
+  --slide-spacing: 1rem;
+  --slide-size: 80%;
+  --slide-height: 100%;
+  
+}
+.embla__viewport {
+  overflow: hidden;
+}
+.embla__container {
+  backface-visibility: hidden;
+  display: flex;
+  touch-action: pan-y;
+  margin-left: calc(var(--slide-spacing) * -1);
+  transition: height 0.2s;
+}
+.embla__slide {
+  flex: 0 0 var(--slide-size);
+  min-width: 0;
+  padding-left: var(--slide-spacing);
+  position: relative;
+  height: var(--slide-height);
+}
+.embla__slide__img {
+  display: block;
+  height: var(--slide-height);
+  width: 100%;
+  object-fit: cover;
+}
+.embla__slide__number {
+  width: 4.6rem;
+  height: 4.6rem;
+  z-index: 1;
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  border-radius: 50%;
+  background-color: rgba(var(--background-site-rgb-value), 0.85);
+  line-height: 4.6rem;
+  font-weight: 900;
+  text-align: center;
+  pointer-events: none;
+}
+.embla__slide__number > span {
+  color: var(--brand-primary);
+  background-image: linear-gradient(
+    45deg,
+    var(--brand-primary),
+    var(--brand-secondary)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 1.6rem;
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+.embla__parallax {
+  height: 100%;
+  overflow: hidden;
+}
+.embla__parallax__layer {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+.embla__parallax__img {
+  max-width: none;
+  width: calc(100% + (var(--slide-spacing) * 2));
+  margin-left: calc(var(--slide-spacing) * -1);
+}
+
+
+.embla-selection {
+  background-color: #00000050;
+  border-radius: 50px;
+  width: 100%;
+  height: var(--slide-height);
+  border: 2px solid #e9eecd;
+  margin: 3rem;
+  transition: .2s all;
+  cursor: pointer;
+  position: relative;
+  display: block;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+  font-size: x-large;
+}
+
+.embla-selection:hover {
+  -webkit-box-shadow:0px 0px 60px 2px rgba(233,238,205,0.41);
+  -moz-box-shadow: 0px 0px 60px 2px rgba(233,238,205,0.41);
+  box-shadow: 0px 0px 60px 2px rgba(233,238,205,0.41);
+}
