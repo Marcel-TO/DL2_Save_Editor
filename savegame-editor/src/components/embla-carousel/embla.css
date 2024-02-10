@@ -20,6 +20,9 @@
   padding-left: var(--slide-spacing);
   position: relative;
   height: var(--slide-height);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .embla__slide__img {
   display: block;
@@ -90,10 +93,33 @@
   text-align: center;
   align-items: center;
   font-size: x-large;
+  cursor: pointer;
 }
 
 .embla-selection:hover {
   -webkit-box-shadow:0px 0px 60px 2px rgba(233,238,205,0.41);
   -moz-box-shadow: 0px 0px 60px 2px rgba(233,238,205,0.41);
   box-shadow: 0px 0px 60px 2px rgba(233,238,205,0.41);
+}
+
+.slide__title {
+  position: absolute;
+  background-color: black;
+  padding: 1rem 2rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: xx-large;
+  transition: all .2s;
+  border: black solid 1px;
+  text-decoration: none;
+  color: #e9eecd;
+}
+
+.slide__title:hover {
+  color: #e9eecd;
+  border-color: #e9eecd;
+  -webkit-box-shadow:0px 0px 60px 2px rgba(233,238,205,0.41);
+  -moz-box-shadow: 0px 0px 60px 2px rgba(233,238,205,0.41);
+  box-shadow: 0px 0px 60px 2px rgba(233,238,205,0.41);
+  transform: scale(1.2);
 }

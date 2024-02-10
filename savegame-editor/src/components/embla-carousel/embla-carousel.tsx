@@ -12,7 +12,7 @@ type PropType = {
 
 const EmblaCarousel: React.FC<PropType> = (props) => {
   const { slides, options } = props
-  const [emblaRef, emblaApi] = useEmblaCarousel(options)
+  const [emblaRef] = useEmblaCarousel(options)
 
   return (
     <div className="embla">
@@ -23,13 +23,15 @@ const EmblaCarousel: React.FC<PropType> = (props) => {
               <div className="embla__slide__number">
                 <span>{index + 1}</span>
               </div>
-              {name}
+              <a href={link} target='_blank' className="slide__title">
+                {name}
+              </a>
+              
               <img
                 className="embla__slide__img"
                 src={imageByIndex(index)}
                 alt={name}
               />
-              {link}
             </div>
           ))}
         </div>
