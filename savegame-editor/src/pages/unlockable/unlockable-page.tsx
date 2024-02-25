@@ -11,7 +11,7 @@ export const UnlockablePage = ({currentSaveFile}: {currentSaveFile: SaveFile | u
     return (
         <>
         <div className="container">
-            <NavbarDrawer pagename={"Skills"} pagecontent={<UnlockableContent unlockableItems={currentSaveFile != undefined ? currentSaveFile.unlockable_items : []}/>}></NavbarDrawer>
+            <NavbarDrawer pagename={"Unlockables"} pagecontent={<UnlockableContent unlockableItems={currentSaveFile != undefined ? currentSaveFile.unlockable_items : []}/>}></NavbarDrawer>
         </div>
         </>
     )

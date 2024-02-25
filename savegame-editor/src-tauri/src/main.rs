@@ -9,7 +9,7 @@ mod test_saves;
 use dotenv::dotenv;
 use file_analizer::{change_items_amount, change_items_durability, create_backup_from_file, edit_inventory_item_chunk, edit_skill, export_save_for_pc, get_contents_from_file, load_save_file, load_save_file_pc, remove_inventory_item};
 use struct_data::{SaveFile, InventoryChunk};
-use id_fetcher::fetch_ids;
+use id_fetcher::{fetch_ids, update_ids};
 use tauri::{api::file, AppHandle};
 
 #[tauri::command(rename_all = "snake_case")]
@@ -24,6 +24,16 @@ async fn get_ids(app_handle: AppHandle) -> Result<Vec<struct_data::IdData>, ()> 
             let empty_vectory: Vec<struct_data::IdData> = Vec::new();
             Ok(empty_vectory)
         }
+    }
+}
+
+#[tauri::command(rename_all = "snake_case")]
+fn update_id_folder(app_handle: AppHandle, file_path: &str) {
+    let resource_path = app_handle.path_resolver().resolve_resource("./IDs/").unwrap();
+
+    match update_ids(file_path, &resource_path.display().to_string()) {
+        Ok(()) => println!("Successfully replaced directory contents."),
+        Err(err) => eprintln!("Error: {}", err),
     }
 }
 
@@ -183,6 +193,7 @@ fn main() {
         .plugin(tauri_plugin_log::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             get_ids,
+            update_id_folder,
             load_save,
             load_save_pc,
             export_for_pc,

@@ -1,5 +1,5 @@
 use std::{fs, error::Error, path::Path};
-
+use std::io;
 use crate::struct_data::IdData;
 
 // Define global result definition for easier readability.
@@ -11,7 +11,6 @@ type Result<T> = std::result::Result<T,Box<dyn Error>>;
 /// A list of all fetched id sections.
 pub fn fetch_ids(id_path: &String) -> Result<Vec<IdData>> {
     let mut id_datas: Vec<IdData> = Vec::new();
-
     let entries = fs::read_dir(id_path).unwrap();
 
     for entry in entries {
@@ -25,6 +24,26 @@ pub fn fetch_ids(id_path: &String) -> Result<Vec<IdData>> {
     }
 
     Ok(id_datas)
+}
+
+pub fn update_ids(new_file_path: &str, source_path: &str) -> io::Result<()> {
+    // Iterate over the contents of the source directory
+    for entry in fs::read_dir(source_path)? {
+        let entry = entry?;
+        let path = entry.path();
+
+        // Remove each file or directory in the source directory
+        if path.is_file() {
+            fs::remove_file(&path)?;
+        } else if path.is_dir() {
+            fs::remove_dir_all(&path)?;
+        }
+    }
+
+    // Copy all contents from the new file path to the source directory
+    fs::copy(new_file_path, source_path)?;
+
+    Ok(())
 }
 
 /// Represents a method for reading a single id file and retrieving the IDs.
