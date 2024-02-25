@@ -253,6 +253,10 @@ ToxicMod_PowerAttack_halloween_glove
 ToxicMod_PowerAttack_halloween_knife
 ToxicMod_SpecialAttack_halloween_staff
 ShockMod_Lubu
+ShockMod_PowerAttack_NightVibes
+ShockMod_SpecialAttack_NightVibes
+ShockMod_Random_NightVibes
+ImpactMod_PowerAttack_pilgrimpo
 charm_payday2
 charm_walkingdead
 charm_ninja
@@ -268,8 +272,11 @@ charm_fh_warden
 charm_fh_berserker
 charm_pumpkin_smile_a
 charm_dragonwarrior
+charm_boardgame_parkour
+charm_boardgame_combat
 charm_christmas_b
 charm_christmas_c
+charm_pilgrimpo
 HeatMod_SpecialAttack_AI
 ShockMod_SpecialAttack_AI
 ToxicMod_SpecialAttack_AI

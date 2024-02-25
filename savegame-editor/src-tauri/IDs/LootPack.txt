@@ -17,4 +17,5 @@ Replayable_Missions_LootPack
 Replayable_Missions_LootPack_Small
 Dragonwarrior_LootPack
 Board_Quest_Lootpack
+TNF_Treasure_Lootpack
 Event_WinterEvent_Masks

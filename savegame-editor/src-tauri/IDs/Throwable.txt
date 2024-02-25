@@ -161,6 +161,7 @@ Throwable_ThrowingKnifeAGen_challenge
 Throwable_LavanCrossbowSinpersAlley
 skullface_shot
 Throwable_NewGrenade
+Throwable_ExplosiveGrenade_AI
 Player_Shield
 PlayerShieldBullet
 Thrown_Spear_Electric
@@ -238,6 +239,9 @@ Parachute_fh_Berserker
 Parachute_Evil_Elf
 Parachute_Creepy_Santa
 Parachute_DragonWarrior
+Parachute_pilgrimpo
+Parachute_PostApoHealer
+Parachute_NightVibes
 Throwable_Dinghy
 Shrapnel_Trap
 Shrapnel_Trap_Upgrade1

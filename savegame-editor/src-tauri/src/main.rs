@@ -199,5 +199,6 @@ fn main() {
 
     // // Uncomment the following line to if .env file should be selected.
     // let file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
-    // let save_file = load_save_file(&file_path);
+    // let file_content: Vec<u8> = get_contents_from_file(&file_path).unwrap();
+    // let save_file = load_save_file(&file_path, file_content);
 }

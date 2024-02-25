@@ -87,13 +87,10 @@ pub fn load_save_file(file_path: &str, file_content: Vec<u8>) -> SaveFile {
     
     // Find all unlockable items.
     let unlockable_items: Vec<UnlockableItem> = analize_unlockable_items_data(&file_content);
-    let last_item_index: usize = get_index_for_inventory_items(&unlockable_items, &file_content);
-
-    // The space between the SGD IDs and chunk data.
-    let jump_offset = last_item_index +75;
+    let index_inventory_items: usize = get_index_for_inventory_items(&unlockable_items, &file_content);
 
     // Get all items within the inventory.
-    let items: Vec<InventoryItemRow> = get_all_items(&file_content, jump_offset);
+    let items: Vec<InventoryItemRow> = get_all_items(&file_content, index_inventory_items);
 
     SaveFile::new(
         file_path.to_string(),
@@ -517,32 +514,19 @@ fn analize_unlockable_items_data(content: &[u8]) -> Vec<UnlockableItem> {
 /// ### Returns `usize`
 /// The index from where the inventory items continue.
 fn get_index_for_inventory_items(unlockable_items: &[UnlockableItem], file_content: &[u8]) -> usize {
-    for item in unlockable_items {
-        let start_index = item.index + item.size + 112;
+    let start_index: usize = unlockable_items[0].index + unlockable_items[0].size;
+    let string_content = String::from_utf8_lossy(&file_content[start_index..]);
 
-        // Check if we have enough bytes in file_content
-        if start_index + 4 <= file_content.len() {
-            let index_bytes = &file_content[start_index..start_index + 4];
-            let surrounding_bytes = &file_content[start_index - 4..start_index + 4];
-
-            // Convert surrounding_bytes to a string
-            let surrounding_string = String::from_utf8_lossy(surrounding_bytes);
-
-            // The Regex pattern to match the sgds.
-            let pattern: &str = r"[a-zA-Z0-9_]{4,}SGDs";
-
-            // Defines the regex instance.
-            let re: Regex = Regex::new(pattern).expect("Invalid regex pattern.");
-
-            // Check if the surrounding string matches the pattern
-            if !re.is_match(&surrounding_string) && index_bytes == b"SGDs" {
-                return item.index + item.size;
-            }
-        }
+    let sgd_position = get_index_from_sequence(&file_content[start_index..], &0, &[0, 83, 71, 68, 115], true);
+    
+    // -36 to get the chunk data from the first SGDs
+    if sgd_position > 0 {
+        return start_index + sgd_position - 36
     }
 
+    // +75 as jump offset between unlockables and SGDs from items
     if unlockable_items.len() > 0 {
-        return unlockable_items[unlockable_items.len() - 1].index + unlockable_items[unlockable_items.len() - 1].size
+        return unlockable_items[unlockable_items.len() - 1].index + unlockable_items[unlockable_items.len() - 1].size + 76
     } else {
         0 // Default return value if no match is found
     }

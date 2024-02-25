@@ -112,9 +112,6 @@ Infection_Stage1_Vision
 Infection_Stage2_Landing
 Infection_Stage4_Invis
 Infection_Stage4_Jump
-Potion_WoD_BanuHaqim
-Potion_WoD_Brujah
-Potion_WoD_Tremere
 InstantHeal_HoneyBar
 InstantHeal_Chocolate
 InstantHeal_Cookie
