@@ -1075,6 +1075,17 @@ pub fn get_contents_from_file(file_path: &str) -> Result<Vec<u8>> {
     Ok(file_contents)
 }
 
+/// Represents a method for creating a backup file.
+/// 
+/// ### Parameter
+/// - `file_path`: The save file.
+/// - `file_content`: The content of the file.
+pub fn create_backup_from_file(file_path: &str, file_content: &[u8]) {
+    let backup_path = format!("{}.bak", file_path);
+    let mut file = fs::File::create(&backup_path).unwrap();
+    file.write_all(file_content).unwrap();
+}
+
 /// Represents a method for converting to string and removing unnecessary characters.
 /// 
 /// ### Parameter

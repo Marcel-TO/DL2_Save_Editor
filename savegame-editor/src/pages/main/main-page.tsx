@@ -6,7 +6,7 @@ import { ThemeProvider } from '@emotion/react';
 import { open, save } from '@tauri-apps/api/dialog';
 import { writeBinaryFile } from '@tauri-apps/api/fs';
 import { invoke } from "@tauri-apps/api/tauri";
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 
@@ -24,6 +24,10 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
     const [isOpen, setOpen] = useState(false);
     const [isOpeningSave, setOpeningSave] = useState(false);
     const [currentSavePath, setCurrentSavePath] = useState('');
+
+    useEffect(() => {
+        handleSetIdData();
+      }, []);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -54,7 +58,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
         });
       
         if (filepath != null && !Array.isArray(filepath)) {
-            setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: filepath}));
+            await setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: filepath}));
             await handleSetIdData();
         };
 
@@ -120,6 +124,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
         setOpeningSave(false);
     }
 
+
     return (
         <>
             <ThemeProvider theme={cardTheme}>
@@ -152,7 +157,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
                                 <DialogContent>
                                 <DialogContentText id="alert-dialog-description">
                                     When resetting, the current save will be deselcted. This means that all unsaved changes
-                                    to the save will be lost.If this is not your intention, please save before continuing. 
+                                    to the save will be lost. If this is not your intention, please save before continuing. 
                                 </DialogContentText>
                                 </DialogContent>
                                 <DialogActions>
@@ -168,7 +173,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
 
                         <Button onClick={() => handleCurrentSaveFile()} variant='outlined'>Load Save</Button>
                         <Button onClick={() => saveCurrentSaveFile()} variant='outlined' disabled={currentSaveFile !== undefined ? false : true}>Save current Changes</Button>
-                        <Button onClick={() => exportForPC()} variant='outlined' disabled={currentSaveFile !== undefined ? false : true}>Export for PC</Button>
+                        <Button onClick={() => exportForPC()} variant='outlined' disabled={currentSaveFile !== undefined ? false : true}>Export for PC / Compress</Button>
                     </CardActions>
                 </Card> 
             </ThemeProvider>
