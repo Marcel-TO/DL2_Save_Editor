@@ -32,7 +32,7 @@ jobs:
               tag_name: `app-v${process.env.PACKAGE_VERSION} fix`,
               name: `Save Editor v${process.env.PACKAGE_VERSION} fix`,
               body: 'Fixes issues regarding inventory offset',
-              draft: true,
+              draft: false,
               prerelease: false
             })
             return data.id
