@@ -346,23 +346,24 @@ const VirtualizedList = ({
     const handlePossibleIDs = (size: number) => {
         let iDs: string[] = [];
 
-        idMapping.forEach(([rowName, idNames]) => {
-            if (itemRow.name === rowName) {
-                const matchingIdDatas = idDatas.filter((idData) => idNames.indexOf(idData.filename) > -1);
-                let encoder = new TextEncoder();
+        idMapping.forEach(([_rowName, idNames]) => {
+            // if (itemRow.name === rowName) {
+            // }
 
-                for (let i = 0; i < matchingIdDatas.length; i++) {
-                    matchingIdDatas[i].ids.forEach((id) => {
-                        let bytes = encoder.encode(id)
-                        if (bytes.length <= size) {
-                            iDs.push(id);
-                        }
-                    });
-                }
+            const matchingIdDatas = idDatas.filter((idData) => idNames.indexOf(idData.filename) > -1);
+            let encoder = new TextEncoder();
 
-                setPossibleIDs(iDs);
+            for (let i = 0; i < matchingIdDatas.length; i++) {
+                matchingIdDatas[i].ids.forEach((id) => {
+                    let bytes = encoder.encode(id)
+                    if (bytes.length <= size) {
+                        iDs.push(id);
+                    }
+                });
             }
         });
+
+        setPossibleIDs(iDs);
     };
 
     const handleLevelValue = (event: ChangeEvent<HTMLInputElement>) => {
@@ -685,28 +686,12 @@ const VirtualizedList = ({
                                             <Typography noWrap gutterBottom variant="h5" component="div">
                                                 {currentItem?.name}
                                             </Typography>
-                                            
+
                                         </Tooltip>
                                     )}
                                 </Box>
 
-                                {possibleIDs.length > 0 ? (
-                                    <Tooltip title={'Change ID'} arrow placement="top-start">
-                                        <Button
-                                            sx={{
-                                                marginLeft: '10px',
-                                                cursor: 'pointer',
-                                                "&:hover": {
-                                                    backgroundColor: '#52626450'
-                                                }
-                                            }}
-                                            onClick={handleCLickChangeItem}
-                                        >
-                                            <BorderColorIcon />
-                                        </Button>
-                                    </Tooltip>
-                                ) : (
-
+                                <Tooltip title={'Change ID'} arrow placement="top-start">
                                     <Button
                                         sx={{
                                             marginLeft: '10px',
@@ -716,15 +701,14 @@ const VirtualizedList = ({
                                             }
                                         }}
                                         onClick={handleCLickChangeItem}
-                                        disabled={true}
                                     >
                                         <BorderColorIcon />
                                     </Button>
-                                )}
+                                </Tooltip>
 
                                 <Tooltip title={'Remove Item'} arrow placement="top-start">
                                     <div>
-                                        <Button onClick={() => setRemoveItemIsOpen(true)}>
+                                        <Button onClick={() => setRemoveItemIsOpen(true)} disabled={true}>
                                             <DeleteForeverIcon />
                                         </Button>
                                         <Dialog
@@ -755,6 +739,7 @@ const VirtualizedList = ({
                                         </Dialog>
                                     </div>
                                 </Tooltip>
+
                             </Box>
 
                             <Box sx={{
@@ -965,6 +950,6 @@ const dialogButtonTheme = createTheme({
                     color: '#e33e2c',
                 }
             }
-        },
+        }
     }
 });

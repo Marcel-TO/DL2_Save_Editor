@@ -124,6 +124,23 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
         setOpeningSave(false);
     }
 
+    async function importFromPC() {
+        let filepath = await open({
+            multiple: false,
+            filters: [{
+              name: 'SAV File',
+              extensions: ['sav']
+            }],
+        });
+      
+        if (filepath != null && !Array.isArray(filepath)) {
+            await setCurrentSaveFile(await invoke<SaveFile>("load_save_pc", {file_path: filepath}));
+            await handleSetIdData();
+        };
+
+        setOpeningSave(false);
+    }
+
 
     return (
         <>
@@ -173,7 +190,8 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
 
                         <Button onClick={() => handleCurrentSaveFile()} variant='outlined'>Load Save</Button>
                         <Button onClick={() => saveCurrentSaveFile()} variant='outlined' disabled={currentSaveFile !== undefined ? false : true}>Save current Changes</Button>
-                        <Button onClick={() => exportForPC()} variant='outlined' disabled={currentSaveFile !== undefined ? false : true}>Export for PC / Compress</Button>
+                        <Button onClick={() => exportForPC()} variant='outlined' disabled={currentSaveFile !== undefined ? false : true}>Compress / Export for PC</Button>
+                        <Button onClick={() => importFromPC()} variant='outlined'>Decompress / Load from PC</Button>
                     </CardActions>
                 </Card> 
             </ThemeProvider>

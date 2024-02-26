@@ -36,7 +36,7 @@ function App() {
         (<Route path={'/ids'} element={<IDsPage idData={idDatas}/>}></Route>),
         (<Route path={'/info'} element={<InfoPage/>}></Route>),
         (<Route path={'/outpost'} element={<CazOutpostPage/>}></Route>),
-        (<Route path={'/caz-collection'} element={<CazCollectionPage setCurrentSaveFile={setCurrentSaveFile}/>}></Route>),
+        (<Route path={'/caz-collection'} element={<CazCollectionPage/>}></Route>),
         (<Route path={'/knowledge-vault'} element={<KnowledgeVaultPage/>}></Route>),
       ]
     )

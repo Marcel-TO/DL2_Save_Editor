@@ -90,6 +90,7 @@ const IdContent = ({idData}: {idData: IdData[]}): JSX.Element => {
               }
             }}
             onClick={updateIDs}
+            disabled={true}
             >
             <UpdateIcon/>
           </Button>
