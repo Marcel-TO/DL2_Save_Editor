@@ -112,6 +112,13 @@ Infection_Stage1_Vision
 Infection_Stage2_Landing
 Infection_Stage4_Invis
 Infection_Stage4_Jump
+InstantHeal_HoneyBar
+InstantHeal_Chocolate
+InstantHeal_Cookie
+InstantHeal_Gingersnap
+InstantHeal_EmergencyRations
+InstantHeal_Chips
+InstantHeal_Halva
 Portable_Camouflage_Bossfight
 Antizine_Mushroom
 SupressantRegen
@@ -132,3 +139,5 @@ Event_Halloween_Potion_3
 Event_Halloween_Potion_4
 Event_Halloween_Potion_5
 Event_Dropkick_Potion
+Event_Halloween_Potion_2022
+Event_Halloween_Potion_2023

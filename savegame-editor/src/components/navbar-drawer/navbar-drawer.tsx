@@ -21,13 +21,14 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import AccountTreeRoundedIcon from '@mui/icons-material/AccountTreeRounded';
 import Inventory2RoundedIcon from '@mui/icons-material/Inventory2Rounded';
-import SchoolRoundedIcon from '@mui/icons-material/SchoolRounded';
 import BackpackRoundedIcon from '@mui/icons-material/BackpackRounded';
 import AssignmentLateRoundedIcon from '@mui/icons-material/AssignmentLateRounded';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import StoreRoundedIcon from '@mui/icons-material/StoreRounded';
 
 // Themes
 const openedMixin = (theme: Theme): CSSObject => ({
@@ -130,7 +131,7 @@ const drawerWidth = 240;
 // The different pages
 const itemPages: [string, JSX.Element, string, boolean][] = [
   ['Skills', <AccountTreeRoundedIcon/>, '/skills', false], 
-  ['Experience', <SchoolRoundedIcon/>, '/experience', true], 
+  ['Unlockables', <LockOpenIcon/>, '/unlockables', false], 
   ['Inventory', <Inventory2RoundedIcon/>, '/inventory', false], 
   ['Backpack', <BackpackRoundedIcon/>, '/backpack', true], 
   ['Campaign', <AssignmentLateRoundedIcon/>, '/campaign', true],
@@ -141,7 +142,8 @@ const otherPages: [string, JSX.Element, string, boolean][] = [
 ];
 const infoPages: [string, JSX.Element, string][] = [
   ['Home', <HomeRoundedIcon/>, '/'],
-  ['Info', <HelpOutlineRoundedIcon/>, '/info'], 
+  ['Info', <HelpOutlineRoundedIcon/>, '/info'],
+  ['Caz Outpost', <StoreRoundedIcon/>, '/outpost'], 
 ];
 
 // Props

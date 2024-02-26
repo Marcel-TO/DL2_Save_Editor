@@ -2302,9 +2302,10 @@ dependencies = [
 
 [[package]]
 name = "savegame-editor"
-version = "0.0.3"
+version = "1.0.6"
 dependencies = [
  "dotenv",
+ "flate2",
  "log",
  "regex",
  "serde",

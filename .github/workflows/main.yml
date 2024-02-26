@@ -29,9 +29,9 @@ jobs:
             const { data } = await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag_name: `app-v${process.env.PACKAGE_VERSION}`,
-              name: `Save Editor v${process.env.PACKAGE_VERSION}`,
-              body: 'First official release.',
+              tag_name: `app-v${process.env.PACKAGE_VERSION} fix`,
+              name: `Save Editor v${process.env.PACKAGE_VERSION} fix`,
+              body: 'Fixes issues regarding inventory offset',
               draft: true,
               prerelease: false
             })

@@ -5,10 +5,14 @@
 //! - Unlockable items (craftplans, toolskins, consumables)
 //! - Inventory items (weapons, gear, accesssories, etc)
 
+use std::io::Write;
 use std::{fs, io::Read};
 use std::error::Error;
+use flate2::read::GzDecoder;
 use log::info;
 use regex::Regex;
+use flate2::write::GzEncoder;
+use flate2::Compression;
 
 
 // Import all struct datas.
@@ -40,22 +44,32 @@ static END_SKILLS: [u8; 33] = [
 ];
 
 // Defines the sequence where the inventory starts
-static START_INVENTORY: [u8; 18] = [
-    0x54, 0x6F, 0x6B, 0x65, 0x6E, 0x00, 0x00, 0x00,
-    0x00, 0x07, 0x00, 0x55, 0x6E, 0x6B, 0x6E, 0x6F, 0x77, 0x6E
+// -> Token.....Unknown
+// static START_INVENTORY: [u8; 18] = [
+//     0x54, 0x6F, 0x6B, 0x65, 0x6E, 0x00, 0x00, 0x00,
+//     0x00, 0x07, 0x00, 0x55, 0x6E, 0x6B, 0x6E, 0x6F, 0x77, 0x6E
+// ];
+
+// -> Special.....Unknown
+// static START_INVENTORY: [u8; 20] = [
+//     0x53, 0x70, 0x65, 0x63, 0x69, 0x61, 0x6C, 0x00, 0x00, 
+//     0x00, 0x00, 0x07, 0x00, 0x55, 0x6E, 0x6B, 0x6E, 0x6F, 0x77, 0x6E
+// ];
+
+static START_INVENTORY: [u8; 15] = [
+    0x4D, 0x61, 0x69, 0x6E, 0x01, 0x00, 0x00, 0x00, 0x05, 
+    0x00, 0x4F, 0x74, 0x68, 0x65, 0x72
 ];
 
 /// Represents a method for loading a savefile and preparing all necessary information.
 /// 
 /// ### Parameter
 /// - `file_path`: The filepath of the current selected save.
+/// - `file_content`: The content of the current file.
 /// 
 /// ### Returns `SaveFile`
 /// The save file with all collected data.
-pub fn load_save_file(file_path: &str) -> SaveFile {
-    // Gets the content from the file.
-    let file_content: Vec<u8> = get_contents_from_file(file_path).unwrap();
-    
+pub fn load_save_file(file_path: &str, file_content: Vec<u8>) -> SaveFile {    
     // Gets the indices of the skill data.
     let skill_start_index: usize = get_index_from_sequence(&file_content, &0, &START_SKILLS, true);
     let skill_end_index: usize = get_index_from_sequence(&file_content, &skill_start_index, &END_SKILLS, true);
@@ -73,13 +87,10 @@ pub fn load_save_file(file_path: &str) -> SaveFile {
     
     // Find all unlockable items.
     let unlockable_items: Vec<UnlockableItem> = analize_unlockable_items_data(&file_content);
-    let last_item_index: usize = get_index_for_inventory_items(&unlockable_items, &file_content);
-
-    // The space between the SGD IDs and chunk data.
-    let jump_offset = last_item_index +75;
+    let index_inventory_items: usize = get_index_for_inventory_items(&unlockable_items, &file_content);
 
     // Get all items within the inventory.
-    let items: Vec<InventoryItemRow> = get_all_items(&file_content, jump_offset);
+    let items: Vec<InventoryItemRow> = get_all_items(&file_content, index_inventory_items);
 
     SaveFile::new(
         file_path.to_string(),
@@ -88,6 +99,37 @@ pub fn load_save_file(file_path: &str) -> SaveFile {
         unlockable_items,
         items,
     )
+}
+
+/// Represents a method for loading a PC savefile and preparing all necessary information.
+/// 
+/// ### Parameter
+/// - `file_path`: The filepath of the current selected save.
+/// - `file_content`: The content of the current file.
+/// 
+/// ### Returns `SaveFile`
+/// The save file with all collected data.
+pub fn load_save_file_pc(file_path: &str, compressed: Vec<u8>) -> SaveFile {
+    let mut gz = GzDecoder::new(&compressed[..]);
+    let mut file_content = Vec::new();
+    gz.read_to_end(&mut file_content).unwrap();
+
+    load_save_file(file_path, file_content)
+}
+
+/// Represents a method for exporting the save for PC (compressing).
+/// 
+/// ### Parameter
+/// - `data`: The content of the save file.
+/// 
+/// ### Returns `Vec<u8>`
+/// The compressed data.
+pub fn export_save_for_pc(data: &Vec<u8>) -> Vec<u8> {
+    let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
+    let _ = encoder.write_all(data);
+    let compressed = encoder.finish().unwrap();
+
+    compressed
 }
 
 /// Represents a method for converting byte content into string content
@@ -247,6 +289,24 @@ pub fn change_items_amount(
     (new_item_chunks, save_file_content)
 }
 
+pub fn remove_inventory_item(
+    mut start_index: usize,
+    end_index: usize,
+    chunk_index: usize,
+    mut save_file_content: Vec<u8>
+) -> Vec<u8> {
+    start_index = start_index - 6; // This is due to [id value][id size] in front of the ID
+    let size: usize = end_index - start_index;
+    let zero_bytes: Vec<u8> = vec![0; size];
+    let zero_chunk_bytes: Vec<u8> = vec![0; 37];
+
+
+    save_file_content = replace_content_of_file(start_index, zero_bytes, save_file_content);
+    save_file_content = replace_content_of_file(chunk_index, zero_chunk_bytes, save_file_content);
+
+    save_file_content
+}
+
 /// Represents a method for replacing the file content.
 /// 
 /// ### Parameter
@@ -401,12 +461,12 @@ fn analize_unlockable_items_data(content: &[u8]) -> Vec<UnlockableItem> {
 
 
     // Checks if the sequence is not valid.
-    if indices.len() == 0 || indices.len() != 2 {
+    if indices.len() == 0 {
         panic!("Start pattern(s) not found in file.");
     }
 
     // Takes the second inventory index for needed information.
-    let start_index: usize = indices[1];
+    let start_index: usize = indices[indices.len() - 1];
     // Compresses the data and only extracts the inventory part of the file.
     let inventory_data: &[u8] = &content[start_index..];
     // Prepares a list of all matching strings.
@@ -454,31 +514,22 @@ fn analize_unlockable_items_data(content: &[u8]) -> Vec<UnlockableItem> {
 /// ### Returns `usize`
 /// The index from where the inventory items continue.
 fn get_index_for_inventory_items(unlockable_items: &[UnlockableItem], file_content: &[u8]) -> usize {
-    for item in unlockable_items {
-        let start_index = item.index + item.size + 112;
+    let start_index: usize = unlockable_items[0].index + unlockable_items[0].size;
+    let string_content = String::from_utf8_lossy(&file_content[start_index..]);
 
-        // Check if we have enough bytes in file_content
-        if start_index + 4 <= file_content.len() {
-            let index_bytes = &file_content[start_index..start_index + 4];
-            let surrounding_bytes = &file_content[start_index - 4..start_index + 4];
-
-            // Convert surrounding_bytes to a string
-            let surrounding_string = String::from_utf8_lossy(surrounding_bytes);
-
-            // The Regex pattern to match the sgds.
-            let pattern: &str = r"[a-zA-Z0-9_]{4,}SGDs";
-
-            // Defines the regex instance.
-            let re: Regex = Regex::new(pattern).expect("Invalid regex pattern.");
-
-            // Check if the surrounding string matches the pattern
-            if !re.is_match(&surrounding_string) && index_bytes == b"SGDs" {
-                return item.index + item.size;
-            }
-        }
+    let sgd_position = get_index_from_sequence(&file_content[start_index..], &0, &[0, 83, 71, 68, 115], true);
+    
+    // -36 to get the chunk data from the first SGDs
+    if sgd_position > 0 {
+        return start_index + sgd_position - 36
     }
 
-    0 // Default return value if no match is found
+    // +75 as jump offset between unlockables and SGDs from items
+    if unlockable_items.len() > 0 {
+        return unlockable_items[unlockable_items.len() - 1].index + unlockable_items[unlockable_items.len() - 1].size + 76
+    } else {
+        0 // Default return value if no match is found
+    }
 }
 
 /// Represents the method for finding all items inside the inventory.
@@ -523,7 +574,7 @@ fn get_all_items(content: &[u8], start_index: usize) -> Vec<InventoryItemRow> {
             // Check if the match is an item or a mod.
             if !&current_item_ids[i].contains("Mod") && !&current_item_ids[i].contains("charm") && &current_item_ids[i] != "NoneSGDs" && &current_item_ids[i] != "SGDs" {
                 // Check if the bullet acts as item or mod or if there is a transmog item.
-                if (current_item_ids[i].contains("Bullet") && mod_counter > 0 && mod_counter < 4) || mod_counter == 3 {
+                if ((current_item_ids[i].contains("Bullet") && mod_counter > 0 && mod_counter < 4) || (current_item_ids[i].contains("Craftplan") && mod_counter < 4)) || mod_counter == 3 {
                     mods.push(Mod::new(
                         current_item_ids[i].clone(),
                         current_item_indices[i],
@@ -550,7 +601,7 @@ fn get_all_items(content: &[u8], start_index: usize) -> Vec<InventoryItemRow> {
                 }
 
                 // Set the current item initialization.
-                current_item_id = current_item_ids[i].to_string();
+                current_item_id = current_item_ids[i].trim_end_matches("SGDs").to_string();
                 match_bytes = current_item_ids[i].as_bytes();
                 current_item_index = current_item_indices[i];
                 current_inv_chunk = chunks[chunk_counter].clone();
@@ -795,7 +846,7 @@ fn find_amount_of_matches(content: &[u8], start_index: usize, amount: usize) -> 
             if !mat.as_str().contains("Mod") && !mat.as_str().contains("charm") &&
                 mat.as_str() != "NoneSGDs" && mat.as_str() != "SGDs" {
                     // Check if the bullet acts as item or mod.
-                    if (mat.as_str().contains("Bullet") && mod_counter > 0 && mod_counter <= 4) || mod_counter == 4 {                        
+                    if ((mat.as_str().contains("Bullet") || mat.as_str().contains("Craftplan")) && mod_counter > 0 && mod_counter <= 4) || mod_counter == 4 {                        
                         // Check if the current SGD is valid
                         let tmp_matching_value = mat.as_str().to_string();
                         let index = get_index_from_sequence(content, &start_index, &tmp_matching_value.as_bytes(), true);
@@ -1009,7 +1060,7 @@ fn get_all_indices_from_sequence(content: &[u8], start_index: &usize, sequence: 
 /// 
 /// ### Returns `Result<Vec<u8>>`
 /// The byte data from the current selected save file.
-fn get_contents_from_file(file_path: &str) -> Result<Vec<u8>> {
+pub fn get_contents_from_file(file_path: &str) -> Result<Vec<u8>> {
     let mut file = fs::File::open(file_path)?;
 
     // Get the file size for allocating the byte array
@@ -1022,6 +1073,17 @@ fn get_contents_from_file(file_path: &str) -> Result<Vec<u8>> {
     file.read_exact(&mut file_contents)?;
     
     Ok(file_contents)
+}
+
+/// Represents a method for creating a backup file.
+/// 
+/// ### Parameter
+/// - `file_path`: The save file.
+/// - `file_content`: The content of the file.
+pub fn create_backup_from_file(file_path: &str, file_content: &[u8]) {
+    let backup_path = format!("{}.bak", file_path);
+    let mut file = fs::File::create(&backup_path).unwrap();
+    file.write_all(file_content).unwrap();
 }
 
 /// Represents a method for converting to string and removing unnecessary characters.

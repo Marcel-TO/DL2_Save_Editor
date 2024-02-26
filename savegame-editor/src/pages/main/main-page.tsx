@@ -1,12 +1,12 @@
 import './main-page.css';
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer';
 import { IdData, SaveFile } from '../../models/save-models';
-import { Backdrop, Button, Card, CardActions, CardContent, CardHeader, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography, createTheme } from '@mui/material';
+import { Backdrop, Box, Button, Card, CardActions, CardContent, CardHeader, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Typography, createTheme } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
 import { open, save } from '@tauri-apps/api/dialog';
 import { writeBinaryFile } from '@tauri-apps/api/fs';
 import { invoke } from "@tauri-apps/api/tauri";
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 
@@ -24,6 +24,10 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
     const [isOpen, setOpen] = useState(false);
     const [isOpeningSave, setOpeningSave] = useState(false);
     const [currentSavePath, setCurrentSavePath] = useState('');
+
+    useEffect(() => {
+        handleSetIdData();
+      }, []);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -54,7 +58,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
         });
       
         if (filepath != null && !Array.isArray(filepath)) {
-            setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: filepath}));
+            await setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: filepath}));
             await handleSetIdData();
         };
 
@@ -102,18 +106,57 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
         setOpeningSave(false);
     }
 
+    async function exportForPC() {
+        let filePath = await save({
+            defaultPath: '/save_main_0.sav',
+            filters: [{
+              name: 'SAV File',
+              extensions: ['sav']
+            }],
+        });
+
+        if(filePath != null && currentSaveFile != undefined) {
+            // Save data to file   
+            let compressed = await invoke<Uint8Array>('export_for_pc', {data: currentSaveFile.file_content})
+            await writeBinaryFile(filePath, compressed);
+        }
+
+        setOpeningSave(false);
+    }
+
+    async function importFromPC() {
+        let filepath = await open({
+            multiple: false,
+            filters: [{
+              name: 'SAV File',
+              extensions: ['sav']
+            }],
+        });
+      
+        if (filepath != null && !Array.isArray(filepath)) {
+            await setCurrentSaveFile(await invoke<SaveFile>("load_save_pc", {file_path: filepath}));
+            await handleSetIdData();
+        };
+
+        setOpeningSave(false);
+    }
+
+
     return (
         <>
             <ThemeProvider theme={cardTheme}>
                 <Card>
                     <CardHeader>Current Save:</CardHeader>
                     <CardContent sx={{height: '70vh'}}>
+                    <Box sx={{height: '100%', overflow: 'scroll', display: 'flex', flexDirection: 'column', textAlign: 'left'}}>
                         <Typography gutterBottom variant="h6" component="div" sx={{ height: 50, display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
                             Selected File: {currentSaveFile?.path}
                         </Typography>
-                        <Typography gutterBottom variant="h6" component="div" sx={{ height: 50, display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
+                        <Typography gutterBottom variant="h6" component="div" sx={{ height: 50, marginTop: '20px', display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
                             File Size: {currentSaveFile?.file_content.length} Bytes
                         </Typography>
+                        <Divider/>
+                    </Box>
                     </CardContent>
                     <CardActions>                      
                         <Fragment>
@@ -131,7 +174,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
                                 <DialogContent>
                                 <DialogContentText id="alert-dialog-description">
                                     When resetting, the current save will be deselcted. This means that all unsaved changes
-                                    to the save will be lost.If this is not your intention, please save before continuing. 
+                                    to the save will be lost. If this is not your intention, please save before continuing. 
                                 </DialogContentText>
                                 </DialogContent>
                                 <DialogActions>
@@ -147,6 +190,8 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
 
                         <Button onClick={() => handleCurrentSaveFile()} variant='outlined'>Load Save</Button>
                         <Button onClick={() => saveCurrentSaveFile()} variant='outlined' disabled={currentSaveFile !== undefined ? false : true}>Save current Changes</Button>
+                        <Button onClick={() => exportForPC()} variant='outlined' disabled={currentSaveFile !== undefined ? false : true}>Compress / Export for PC</Button>
+                        <Button onClick={() => importFromPC()} variant='outlined'>Decompress / Load from PC</Button>
                     </CardActions>
                 </Card> 
             </ThemeProvider>

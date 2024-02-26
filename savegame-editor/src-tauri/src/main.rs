@@ -4,12 +4,13 @@
 mod file_analizer;
 mod id_fetcher;
 mod struct_data;
+mod test_saves;
 
 use dotenv::dotenv;
-use file_analizer::{load_save_file, edit_skill, edit_inventory_item_chunk, change_items_durability, change_items_amount};
+use file_analizer::{change_items_amount, change_items_durability, create_backup_from_file, edit_inventory_item_chunk, edit_skill, export_save_for_pc, get_contents_from_file, load_save_file, load_save_file_pc, remove_inventory_item};
 use struct_data::{SaveFile, InventoryChunk};
-use id_fetcher::fetch_ids;
-use tauri::AppHandle;
+use id_fetcher::{fetch_ids, update_ids};
+use tauri::{api::file, AppHandle};
 
 #[tauri::command(rename_all = "snake_case")]
 async fn get_ids(app_handle: AppHandle) -> Result<Vec<struct_data::IdData>, ()> {
@@ -27,10 +28,37 @@ async fn get_ids(app_handle: AppHandle) -> Result<Vec<struct_data::IdData>, ()> 
 }
 
 #[tauri::command(rename_all = "snake_case")]
+fn update_id_folder(app_handle: AppHandle, file_path: &str) {
+    let resource_path = app_handle.path_resolver().resolve_resource("./IDs/").unwrap();
+
+    match update_ids(file_path, &resource_path.display().to_string()) {
+        Ok(()) => println!("Successfully replaced directory contents."),
+        Err(err) => eprintln!("Error: {}", err),
+    }
+}
+
+#[tauri::command(rename_all = "snake_case")]
 async fn load_save(file_path: &str) -> Result<SaveFile, ()> {
-    let save_file = load_save_file(&file_path);
+    let file_content: Vec<u8> = get_contents_from_file(&file_path).unwrap();
+    create_backup_from_file(&file_path, &file_content);
+    let save_file = load_save_file(&file_path, file_content);
 
     Ok(save_file)
+}
+
+#[tauri::command(rename_all = "snake_case")]
+async fn load_save_pc(file_path: &str) -> Result<SaveFile, ()> {
+    let file_content: Vec<u8> = get_contents_from_file(&file_path).unwrap();
+    let save_file = load_save_file_pc(&file_path, file_content);
+
+    Ok(save_file)
+}
+
+#[tauri::command(rename_all = "snake_case")]
+async fn export_for_pc(data: Vec<u8>) -> Result<Vec<u8>, ()> {
+    let compressed: Vec<u8> = export_save_for_pc(&data);
+
+    Ok(compressed)
 }
 
 #[tauri::command(rename_all = "snake_case")]
@@ -141,6 +169,23 @@ async fn change_items_amount_1(
     Ok(new_save_data)
 }
 
+#[tauri::command(rename_all = "snake_case")]
+async fn remove_item(
+    start_index: usize,
+    end_index: usize,
+    chunk_index: usize,
+    save_file_content: Vec<u8>
+) -> Result<Vec<u8>, ()> {
+    let new_save_data = remove_inventory_item(
+        start_index, 
+        end_index,
+        chunk_index,
+        save_file_content,
+    );
+
+    Ok(new_save_data)
+}
+
 fn main() {
     dotenv().ok();
     // Comment tauri builder if debugging.
@@ -148,9 +193,13 @@ fn main() {
         .plugin(tauri_plugin_log::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             get_ids,
+            update_id_folder,
             load_save,
+            load_save_pc,
+            export_for_pc,
             handle_edit_skill,
             handle_edit_item_chunk,
+            remove_item,
             change_items_durability_max,
             change_items_durability_1,
             change_items_durability_1_negative,
@@ -162,5 +211,6 @@ fn main() {
 
     // // Uncomment the following line to if .env file should be selected.
     // let file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
-    // let save_file = load_save_file(&file_path);
+    // let file_content: Vec<u8> = get_contents_from_file(&file_path).unwrap();
+    // let save_file = load_save_file(&file_path, file_content);
 }

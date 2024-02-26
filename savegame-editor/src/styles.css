@@ -19,6 +19,8 @@
   flex-direction: column;
   justify-content: center;
   text-align: center;
+  width: 100% !important;
+  height: 100%;
 }
 
 .logo {

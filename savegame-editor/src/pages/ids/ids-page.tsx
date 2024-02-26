@@ -3,9 +3,12 @@ import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
 import { Fragment, useState } from 'react'
 import { IdData } from '../../models/save-models';
 import CatchingPokemonIcon from '@mui/icons-material/CatchingPokemon';
-import { Box, Collapse, List, ListItemButton, ListItemIcon, ListItemText, Slide, Snackbar } from '@mui/material';
+import { Box, Button, Collapse, List, ListItemButton, ListItemIcon, ListItemText, Slide, Snackbar, Tooltip } from '@mui/material';
 import SavedSearchIcon from '@mui/icons-material/SavedSearch';
 import { FixedSizeList } from 'react-window';
+import UpdateIcon from '@mui/icons-material/Update';
+import { open } from '@tauri-apps/api/dialog';
+import { invoke } from '@tauri-apps/api';
 
 
 // The ID page
@@ -34,6 +37,17 @@ const IdContent = ({idData}: {idData: IdData[]}): JSX.Element => {
       setCurrentSelected(filename);
   } 
 
+  async function updateIDs() {
+    let filepath = await open({
+      multiple: false,
+      directory: true,
+    });
+
+    if (filepath != null && !Array.isArray(filepath)) {
+      await await invoke("update_id_folder", {file_path: filepath})
+    };
+  }
+
   return (
       <>
           <div className="id-list-container">
@@ -57,6 +71,30 @@ const IdContent = ({idData}: {idData: IdData[]}): JSX.Element => {
               ))}
               </List>
           </div>
+
+          <Tooltip title='Update IDs'>
+            <Button
+            sx={{
+              position: 'fixed',
+              right: '1rem',
+              bottom: '1rem',
+              backgroundColor: '#526264',
+              color: '#899994',
+              transition: 'all .2',
+              borderRadius: '50%',
+              width: '4rem',
+              height: '4rem',
+              '&:hover': {
+                backgroundColor: '#899994',
+                color: '#e9eecd'
+              }
+            }}
+            onClick={updateIDs}
+            disabled={true}
+            >
+            <UpdateIcon/>
+          </Button>
+        </Tooltip>
       </>
   )
 }
