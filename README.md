@@ -28,7 +28,7 @@ We are thrilled to present the first beta version of our Open-Source Save Editor
 ## Getting Started
 If you want to test out the Editor yourself, feel free to download the Application inside the release and visit the Tutorial + QnA for further details.
 <p align="center">
-  <a href="./TUTORIAL.md">
+  <a href="./Tutorial.md">
     <img src="https://img.shields.io/badge/Visit-Tutorial-899994"/>
   </a>
   <a href="./CommonlyAskedQuestions.md">
