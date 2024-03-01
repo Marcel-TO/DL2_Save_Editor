@@ -1,4 +1,8 @@
-# Dying Light 2 Save Editor
+<p align="right">
+  <img alt="GitHub Downloads (all assets, all releases)" src="https://img.shields.io/github/downloads/Marcel-TO/DL2_Save_Editor/total?style=for-the-badge&logo=Github&logoColor=black&label=Editor%20Downloads&labelColor=899994&color=899994">
+</p>
+
+# Dying Light 2 Save Editor 
 
 ## Empowering Gamers, Unleashing Possibilities
 *Greetings Pilgrims!*
@@ -20,6 +24,17 @@ We are thrilled to present the first beta version of our Open-Source Save Editor
 - Calculating savefile size to switch to every desired weapon.
 - Change Mods
 - Change Stats
+
+## Getting Started
+If you want to test out the Editor yourself, feel free to download the Application inside the release and visit the Tutorial + QnA for further details.
+<p align="center">
+  <a href="./TUTORIAL.md">
+    <img src="https://img.shields.io/badge/Visit-Tutorial-899994"/>
+  </a>
+  <a href="./CommonlyAskedQuestions.md">
+    <img src="https://img.shields.io/badge/Visit-QnA-899994"/>
+  </a>
+</p>
 
 ## Tech Stack
 This editor uses the *Tauri* Framework for the application.
