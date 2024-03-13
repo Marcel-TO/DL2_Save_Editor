@@ -23,4 +23,7 @@
 > - To test if you decrypted/decompressed it correctly you could right click on your save and open with your desired hex editor (For example [HxD](https://mh-nexus.de/de/hxd/) or [ImHex](https://github.com/WerWolv/ImHex)). The content should look something like this (The ASCII text should contain readable bits like `Savegame`, etc):
 > ![image](https://github.com/Marcel-TO/DL2_Save_Editor/assets/91308057/dd2eec27-abbf-4bc8-898c-a4224862e530)
 >
+> - There are currently some issues with the new guns inside that might cause issues for the editor. A possible solution in some cases might be to put the weapons inside the stash before loading the save
+>
+> 
 > - If the save is still not loading, please contact one of the developers, they will debug the save and correct the issue in the next release
