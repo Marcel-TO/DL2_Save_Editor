@@ -46,13 +46,13 @@ If you are curious about the process and wanna have a little insight regarding f
 ## Getting Started
 If you want to test out the Editor yourself, feel free to download the Application inside the release and visit the wiki for further details (like Tutorial + QnA).
 <p align="center">
-  <a href="./wiki/Home">
+  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Home">
     <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Wiki-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
   </a>
-  <a href="./wiki/Getting-Started-with-the-Editor">
+  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Getting-Started-with-the-Editor">
     <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Getting_Started-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
   </a>
-  <a href="./wiki/Commonly-Asked-Questions-(QnA)">
+  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Commonly-Asked-Questions-(QnA)">
     <img alt="Static Badge" src="https://img.shields.io/badge/Visit-QnA-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
   </a>
   <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Tutorial">
