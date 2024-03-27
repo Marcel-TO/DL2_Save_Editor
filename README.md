@@ -36,16 +36,27 @@ We are thrilled to present the first Open-Source Save Editor for the Videogame *
 - Edit Backpack
 - Caz Outpost (Stay tuned to learn more about it)
 - Automatically update IDs
-- 
+
+If you are curious about the process and wanna have a little insight regarding future implementations, check out the Feature release board. It also contains a list of current bugs and a backlog plan:
+
+<a href="https://github.com/users/Marcel-TO/projects/2/views/2">
+    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Feature_Board-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
+</a>
 
 ## Getting Started
-If you want to test out the Editor yourself, feel free to download the Application inside the release and visit the Tutorial + QnA for further details.
+If you want to test out the Editor yourself, feel free to download the Application inside the release and visit the wiki for further details (like Tutorial + QnA).
 <p align="center">
-  <a href="./Tutorial.md">
-    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Tutorial-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
+  <a href="./wiki/Home">
+    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Wiki-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
   </a>
-  <a href="./CommonlyAskedQuestions.md">
+  <a href="./wiki/Getting-Started-with-the-Editor">
+    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Getting_Started-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
+  </a>
+  <a href="./wiki/Commonly-Asked-Questions-(QnA)">
     <img alt="Static Badge" src="https://img.shields.io/badge/Visit-QnA-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
+  </a>
+  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Tutorial">
+    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Tutorial-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
   </a>
 </p>
 
