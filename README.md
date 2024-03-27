@@ -39,23 +39,23 @@ We are thrilled to present the first Open-Source Save Editor for the Videogame *
 
 If you are curious about the process and wanna have a little insight regarding future implementations, check out the Feature release board. It also contains a list of current bugs and a backlog plan:
 
-<a href="https://github.com/users/Marcel-TO/projects/2/views/2">
+<a href="https://github.com/users/Marcel-TO/projects/2/views/2" target="_blank">
     <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Feature_Board-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
 </a>
 
 ## Getting Started
 If you want to test out the Editor yourself, feel free to download the Application inside the release and visit the wiki for further details (like Tutorial + QnA).
 <p align="center">
-  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Home">
+  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Home" target="_blank">
     <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Wiki-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
   </a>
-  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Getting-Started-with-the-Editor">
+  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Getting-Started-with-the-Editor" target="_blank">
     <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Getting_Started-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
   </a>
-  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Commonly-Asked-Questions-(QnA)">
+  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Commonly-Asked-Questions-(QnA)" target="_blank">
     <img alt="Static Badge" src="https://img.shields.io/badge/Visit-QnA-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
   </a>
-  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Tutorial">
+  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Tutorial" target="_blank">
     <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Tutorial-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
   </a>
 </p>
@@ -101,17 +101,17 @@ After all prerequisites are fulfilled it is possible to start the application wi
 Currently there are 2 contributers that work hard to increase the experience of Dying Light 2. With the help of Caz`s incredible knowledge of savegamefiles and the coding experience of Marcel, the Editor is not only extremely useful, but has a modern UI with Dying Light 2 themed content. A special thanks to Batang as well. He supported us all the time and played a crucial role for the completion of this editor.
 
 <p>
-  <a href="https://github.com/Marcel-TO">
+  <a href="https://github.com/Marcel-TO" target="_blank">
     <img alt="Static Badge" src="https://img.shields.io/badge/Developer-MarcelMcHawk-899994?style=for-the-badge">
   </a>
 </p>
 <p>
-  <a href="https://github.com/zCaazual">
+  <a href="https://github.com/zCaazual" target="_blank">
     <img alt="Static Badge" src="https://img.shields.io/badge/Reverse Engineer-zCazual-526264?style=for-the-badge">
   </a>
 </p>
 <p>
-  <a href="https://github.com/B-a-t-a-n-g">
+  <a href="https://github.com/B-a-t-a-n-g" target="_blank">
     <img alt="Static Badge" src="https://img.shields.io/badge/Tester-Batang-2f4045?style=for-the-badge">
   </a>
 </p>
