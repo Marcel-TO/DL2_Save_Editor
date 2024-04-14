@@ -1,13 +1,16 @@
 #[cfg(test)]
 mod tests {
     use dotenv::dotenv;
-    use crate::file_analizer::{load_save_file, get_contents_from_file};
+    use crate::logger::ConsoleLogger;
+    use crate::save_logic::file_analyser::{load_save_file, get_contents_from_file};
     use std::fs;
     use std::path::Path;
 
     #[test]
     fn test_items_for_various_save_files() {
         dotenv().ok();
+
+        let mut logger = ConsoleLogger::new();
 
         let dir_string = std::env::var("SAVE_DIRECTORY_PATH").expect("SAVE_DIRECTORY_PATH must be set.");
         let dir_path = Path::new(dir_string.as_str());
@@ -22,7 +25,9 @@ mod tests {
                         // Check if the file has the desired extension
                         if file_name.to_string_lossy().ends_with(".sav") {
                             let file_content: Vec<u8> = get_contents_from_file(path.to_str().unwrap()).unwrap();
-                            let save_file = load_save_file(path.to_str().unwrap(), file_content);        
+                            let save_result = load_save_file(path.to_str().unwrap(), file_content, &mut logger, false);        
+                            let save_file = save_result.unwrap();
+                            
                             assert!(
                                 save_file.items.len() > 0,
                                 "Save file at path '{}' should have at least one item, but it has {} items.",

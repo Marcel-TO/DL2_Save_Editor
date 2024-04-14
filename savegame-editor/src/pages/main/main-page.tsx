@@ -58,7 +58,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
         });
       
         if (filepath != null && !Array.isArray(filepath)) {
-            await setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: filepath}));
+            await setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: filepath, is_debugging: true}));
             await handleSetIdData();
         };
 
@@ -83,7 +83,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
             return;
         }
         
-        setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: currentSavePath}));
+        setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: currentSavePath, is_debugging: true}));
         await handleSetIdData();
 
         setOpeningSave(false);
@@ -134,7 +134,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
         });
       
         if (filepath != null && !Array.isArray(filepath)) {
-            await setCurrentSaveFile(await invoke<SaveFile>("load_save_pc", {file_path: filepath}));
+            await setCurrentSaveFile(await invoke<SaveFile>("load_save_pc", {file_path: filepath, is_debugging: true}));
             await handleSetIdData();
         };
 

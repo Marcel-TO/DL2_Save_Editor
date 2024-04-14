@@ -1,19 +1,21 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod file_analizer;
-mod id_fetcher;
-mod struct_data;
-mod test_saves;
+mod save_logic;
+mod logger;
+
+use std::error::Error;
 
 use dotenv::dotenv;
-use file_analizer::{change_items_amount, change_items_durability, create_backup_from_file, edit_inventory_item_chunk, edit_skill, export_save_for_pc, get_contents_from_file, load_save_file, load_save_file_pc, remove_inventory_item};
-use struct_data::{SaveFile, InventoryChunk};
-use id_fetcher::{fetch_ids, update_ids};
+use save_logic::file_analyser::{change_items_amount, change_items_durability, create_backup_from_file, edit_inventory_item_chunk, edit_skill, export_save_for_pc, get_contents_from_file, load_save_file, load_save_file_pc, remove_inventory_item};
+use save_logic::struct_data::{SaveFile, InventoryChunk, IdData};
+use save_logic::id_fetcher::{fetch_ids, update_ids};
 use tauri::{api::file, AppHandle};
+use crate::logger::{ConsoleLogger, LoggerFunctions};
+
 
 #[tauri::command(rename_all = "snake_case")]
-async fn get_ids(app_handle: AppHandle) -> Result<Vec<struct_data::IdData>, ()> {
+async fn get_ids(app_handle: AppHandle) -> Result<Vec<IdData>, String> {
     let resource_path = app_handle.path_resolver().resolve_resource("./IDs/").unwrap();
 
     match fetch_ids(&resource_path.display().to_string()) {
@@ -21,7 +23,7 @@ async fn get_ids(app_handle: AppHandle) -> Result<Vec<struct_data::IdData>, ()> 
             Ok(id_datas)
         }
         Err(_) => {
-            let empty_vectory: Vec<struct_data::IdData> = Vec::new();
+            let empty_vectory: Vec<IdData> = Vec::new();
             Ok(empty_vectory)
         }
     }
@@ -38,37 +40,49 @@ fn update_id_folder(app_handle: AppHandle, file_path: &str) {
 }
 
 #[tauri::command(rename_all = "snake_case")]
-async fn load_save(file_path: &str) -> Result<SaveFile, ()> {
+async fn load_save(file_path: &str, is_debugging: bool) -> Result<SaveFile, String> {
+    // Initializes the logger.
+    let mut logger: ConsoleLogger = ConsoleLogger::new();
+
     let file_content: Vec<u8> = get_contents_from_file(&file_path).unwrap();
     create_backup_from_file(&file_path, &file_content);
-    let save_file = load_save_file(&file_path, file_content);
+    let save_file = load_save_file(&file_path, file_content, &mut logger, is_debugging);
 
-    Ok(save_file)
+    match save_file {
+        Ok(save) => return Ok(save),
+        Err(err) => return Err(err.to_string())
+    }
 }
 
 #[tauri::command(rename_all = "snake_case")]
-async fn load_save_pc(file_path: &str) -> Result<SaveFile, ()> {
+async fn load_save_pc(file_path: &str, is_debugging: bool) -> Result<SaveFile, String> {
+    // Initializes the logger.
+    let mut logger: ConsoleLogger = ConsoleLogger::new();
+
     let file_content: Vec<u8> = get_contents_from_file(&file_path).unwrap();
-    let save_file = load_save_file_pc(&file_path, file_content);
+    let save_file = load_save_file_pc(&file_path, file_content, &mut logger, is_debugging);
 
-    Ok(save_file)
+    match save_file {
+        Ok(save) => return Ok(save),
+        Err(err) => return Err(err.to_string())
+    }
 }
 
 #[tauri::command(rename_all = "snake_case")]
-async fn export_for_pc(data: Vec<u8>) -> Result<Vec<u8>, ()> {
+async fn export_for_pc(data: Vec<u8>) -> Result<Vec<u8>, String> {
     let compressed: Vec<u8> = export_save_for_pc(&data);
 
     Ok(compressed)
 }
 
 #[tauri::command(rename_all = "snake_case")]
-async fn handle_edit_skill(current_skill: String, current_skill_index: usize, is_base_skill: bool,  new_value: u16, save_file: String) -> Result<String, ()> {
-    let converted_skill = serde_json::from_str(&current_skill).map_err(|_| ())?;
-    let converted_save_file = serde_json::from_str(&save_file).map_err(|_| ())?;
+async fn handle_edit_skill(current_skill: String, current_skill_index: usize, is_base_skill: bool,  new_value: u16, save_file: String) -> Result<String, String> {
+    let converted_skill = serde_json::from_str(&current_skill).map_err(|_| ()).unwrap();
+    let converted_save_file = serde_json::from_str(&save_file).map_err(|_| ()).unwrap();
     
     let new_save_file = edit_skill(converted_skill, current_skill_index, is_base_skill, new_value, converted_save_file);
 
-    let result_save = serde_json::to_string(&new_save_file).map_err(|_| ())?;    
+    let result_save = serde_json::to_string(&new_save_file).map_err(|_| ()).unwrap();    
     Ok(result_save)
 }
 
@@ -83,7 +97,7 @@ async fn handle_edit_item_chunk(
     new_amount: u32,
     new_durability: f32,
     save_file_content: Vec<u8>
-) -> Result<Vec<u8>, ()> {
+) -> Result<Vec<u8>, String> {
     let new_save_content = edit_inventory_item_chunk(
         current_item_index,
         new_id,
@@ -103,7 +117,7 @@ async fn handle_edit_item_chunk(
 async fn change_items_durability_max(
     item_chunks: Vec<InventoryChunk>,
     save_file_content: Vec<u8>,
-) -> Result<(Vec<InventoryChunk>, Vec<u8>), ()> {
+) -> Result<(Vec<InventoryChunk>, Vec<u8>), String> {
     let new_save_data = change_items_durability(
         item_chunks, 
         9999999.0,
@@ -117,7 +131,7 @@ async fn change_items_durability_max(
 async fn change_items_durability_1(
     item_chunks: Vec<InventoryChunk>,
     save_file_content: Vec<u8>,
-) -> Result<(Vec<InventoryChunk>, Vec<u8>), ()> {
+) -> Result<(Vec<InventoryChunk>, Vec<u8>), String> {
     let new_save_data = change_items_durability(
         item_chunks, 
         1.0,
@@ -131,7 +145,7 @@ async fn change_items_durability_1(
 async fn change_items_durability_1_negative(
     item_chunks: Vec<InventoryChunk>,
     save_file_content: Vec<u8>,
-) -> Result<(Vec<InventoryChunk>, Vec<u8>), ()> {
+) -> Result<(Vec<InventoryChunk>, Vec<u8>), String> {
     let new_save_data = change_items_durability(
         item_chunks, 
         -1.0,
@@ -145,7 +159,7 @@ async fn change_items_durability_1_negative(
 async fn change_items_amount_max(
     item_chunks: Vec<InventoryChunk>,
     save_file_content: Vec<u8>,
-) -> Result<(Vec<InventoryChunk>, Vec<u8>), ()> {
+) -> Result<(Vec<InventoryChunk>, Vec<u8>), String> {
     let new_save_data = change_items_amount(
         item_chunks, 
         9999999,
@@ -159,7 +173,7 @@ async fn change_items_amount_max(
 async fn change_items_amount_1(
     item_chunks: Vec<InventoryChunk>,
     save_file_content: Vec<u8>,
-) -> Result<(Vec<InventoryChunk>, Vec<u8>), ()> {
+) -> Result<(Vec<InventoryChunk>, Vec<u8>), String> {
     let new_save_data = change_items_amount(
         item_chunks, 
         1,
@@ -175,7 +189,7 @@ async fn remove_item(
     end_index: usize,
     chunk_index: usize,
     save_file_content: Vec<u8>
-) -> Result<Vec<u8>, ()> {
+) -> Result<Vec<u8>, String> {
     let new_save_data = remove_inventory_item(
         start_index, 
         end_index,
@@ -208,9 +222,4 @@ fn main() {
             ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-
-    // // Uncomment the following line to if .env file should be selected.
-    // let file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
-    // let file_content: Vec<u8> = get_contents_from_file(&file_path).unwrap();
-    // let save_file = load_save_file(&file_path, file_content);
 }
