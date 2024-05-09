@@ -232,4 +232,20 @@ fn main() {
             ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+
+    // // Uncomment the following line to if .env file should be selected.
+    // let file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
+    // // Initializes the logger.
+    // let mut logger: ConsoleLogger = ConsoleLogger::new();
+    // // Initializes resource path where IDs are stored.
+    // let resource_path = "/home/mchawk/Documents/Github/DL2_Save_Editor/savegame-editor/src-tauri/target/debug/IDs".to_string();
+
+    // // Initializes IDs
+    // let ids = fetch_ids(&resource_path).unwrap();
+
+    // let file_content: Vec<u8> = get_contents_from_file(&file_path).unwrap();
+    // create_backup_from_file(&file_path, &file_content);
+    // let save_file = load_save_file(&file_path, file_content, ids, &mut logger, false).unwrap();
+
+    // println!("{:?}", save_file.file_string)
 }

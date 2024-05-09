@@ -843,69 +843,82 @@ fn create_item_row(items: Vec<InventoryItem>, ids: Vec<IdData>) -> InventoryItem
     let mut tab_item = 0;
 
     for item in items.iter() {
+        let mut is_matched = false;
         for id_section in ids.iter() {
+            if is_matched {
+                break;
+            }
+
             for id_name in id_section.ids.iter() {
-                if id_name.contains(&item.name) {
-                    match id_section.filename.as_str() {
-                        "Ammo" => tab_ammunition += 1,
-                        "Cash" => tab_item += 1,
-                        "Collectable" => tab_item += 1,
-                        "CraftComponent" => tab_craftresources += 1,
-                        "CraftPart" => tab_craftresources += 1,
-                        "EvolvingItem" => tab_item += 1,
-                        "Firearm" => tab_weapons += 1,
-                        "Flashlight" => tab_accessories += 1,
-                        "InventoryItem" => tab_accessories += 1,
-                        "ItemBundle" => tab_item += 1,
-                        "Lockpick" => tab_equipment += 1,
-                        "LootPack" => tab_craftresources += 1,
-                        "Medkit" => tab_consumables += 1,
-                        "Other" => tab_quest += 1,
-                        "OutfitPart" => tab_craftresources += 1,
-                        "Powerup" => tab_consumables += 1,
-                        "SurvivorPack" => tab_item += 1,
-                        "SyringeAntizin" => tab_consumables += 1,
-                        "Throwable" => tab_accessories += 1,
-                        "ThrowableLiquid" => tab_accessories += 1,
-                        "Token" => tab_tokens += 1,
-                        "Uncategorized" => tab_item += 1,
-                        "Valuable" => tab_craftresources += 1,
-                        "VehicleUpgrade" => tab_item += 1,
-                        "Voucher" => tab_item += 1,
+                if is_matched {
+                    break;
+                }
+
+                if item.name.contains(id_name) {
+                    match id_section.filename.to_lowercase().as_str() {
+                        "ammo" => tab_ammunition += 1,
+                        "cash" => tab_item += 1,
+                        "collectable" => tab_item += 1,
+                        "craftcomponent" => tab_craftresources += 1,
+                        "craftpart" => tab_craftresources += 1,
+                        "evolvingitem" => tab_item += 1,
+                        "firearm" => tab_weapons += 1,
+                        "flashlight" => tab_accessories += 1,
+                        "inventoryitem" => tab_accessories += 1,
+                        "itembundle" => tab_item += 1,
+                        "lockpick" => tab_equipment += 1,
+                        "lootpack" => tab_craftresources += 1,
+                        "medkit" => tab_consumables += 1,
+                        "melee" => tab_weapons += 1,
+                        "other" => tab_quest += 1,
+                        "outfitpart" => tab_craftresources += 1,
+                        "powerup" => tab_consumables += 1,
+                        "survivorpack" => tab_item += 1,
+                        "syringeantizin" => tab_consumables += 1,
+                        "throwable" => tab_accessories += 1,
+                        "throwableliquid" => tab_accessories += 1,
+                        "token" => tab_tokens += 1,
+                        "uncategorized" => tab_item += 1,
+                        "valuable" => tab_craftresources += 1,
+                        "vehicleupgrade" => tab_item += 1,
+                        "voucher" => tab_item += 1,
                         _ => tab_item += 1
                     }
+
+                    is_matched = true;
+                    break;
                 }
             }
         }
     }
 
     // Initialize the counters
-    let counters = [
+    let counters = vec![
         tab_tokens, tab_equipment, tab_craftresources, tab_consumables,
         tab_accessories, tab_quest, tab_ammunition, tab_weapons, tab_item
     ];
 
     // Find the maximum value among the counters
-    let highest_counter = *counters.iter().max().unwrap();
+    let highest_counter = counters.iter().max().unwrap();
 
     // Perform actions based on the highest counter
-    if highest_counter == tab_tokens {
+    if highest_counter == &tab_tokens {
         return InventoryItemRow::new("Tokens/Tickets".to_string(), items);
-    } else if highest_counter == tab_equipment {
+    } else if highest_counter == &tab_equipment {
         return InventoryItemRow::new("Equipment".to_string(), items);
-    } else if highest_counter == tab_craftresources {
+    } else if highest_counter == &tab_craftresources {
         return InventoryItemRow::new("Outfits/Craftresources".to_string(), items);
-    } else if highest_counter == tab_consumables {
+    } else if highest_counter == &tab_consumables {
         return InventoryItemRow::new("Consumables".to_string(), items);
-    } else if highest_counter == tab_accessories {
+    } else if highest_counter == &tab_accessories {
         return InventoryItemRow::new("Accessories".to_string(), items);
-    } else if highest_counter == tab_quest {
+    } else if highest_counter == &tab_quest {
         return InventoryItemRow::new("Quest Items".to_string(), items);
-    } else if highest_counter == tab_ammunition {
+    } else if highest_counter == &tab_ammunition {
         return InventoryItemRow::new("Ammunition".to_string(), items);
-    } else if highest_counter == tab_weapons {
+    } else if highest_counter == &tab_weapons {
         return InventoryItemRow::new("Weapons".to_string(), items);
-    } else if highest_counter == tab_item {
+    } else if highest_counter == &tab_item {
         return InventoryItemRow::new("Items".to_string(), items)
     }
 

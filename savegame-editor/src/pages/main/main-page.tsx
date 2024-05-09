@@ -58,7 +58,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
         });
       
         if (filepath != null && !Array.isArray(filepath)) {
-            await setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: filepath, is_debugging: true}));
+            await setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: filepath, is_debugging: false}));
             await handleSetIdData();
         };
 
