@@ -23,8 +23,10 @@ use crate::save_logic::struct_data::{
     InventoryItem,
     InventoryItemRow,
     InventoryChunk,
-    Mod,
+    IdData,
 };
+
+use super::struct_data::Mod;
 
 // Define global result definition for easier readability.
 type Result<T> = std::result::Result<T,Box<dyn Error>>;
@@ -51,12 +53,19 @@ static START_INVENTORY: [u8; 15] = [
 /// ### Parameter
 /// - `file_path`: The filepath of the current selected save.
 /// - `file_content`: The content of the current file.
+/// - `ids`: The list of all IDs.
 /// - `logger`: The console logger that logs every event.
 /// - `is_debugging`: Indicates whether the file analyser is in debugging mode or not.
 /// 
 /// ### Returns `SaveFile`
 /// The save file with all collected data.
-pub fn load_save_file(file_path: &str, file_content: Vec<u8>, logger: &mut ConsoleLogger, is_debugging: bool) -> Result<SaveFile> {   
+pub fn load_save_file(
+    file_path: &str,
+    file_content: Vec<u8>,
+    ids: Vec<IdData>,
+    logger: &mut ConsoleLogger,
+    is_debugging: bool
+) -> Result<SaveFile> {   
     // Gets the indices of the skill data.
     let skill_start_index: usize = get_index_from_sequence(&file_content, &0, &START_SKILLS, true);
     let skill_end_index: usize = get_index_from_sequence(&file_content, &skill_start_index, &END_SKILLS, true);
@@ -125,7 +134,7 @@ pub fn load_save_file(file_path: &str, file_content: Vec<u8>, logger: &mut Conso
     let index_inventory_items: usize = index_inventory_items_result.unwrap();
 
     // Get all items within the inventory.
-    let items_result: Result<Vec<InventoryItemRow>> = get_all_items(&file_content, index_inventory_items, logger, is_debugging);
+    let items_result: Result<Vec<InventoryItemRow>> = get_all_items(&file_content, index_inventory_items, ids, logger, is_debugging);
 
     // Check if the editor did not manage to validate the unlockables.
     match &items_result {
@@ -153,20 +162,27 @@ pub fn load_save_file(file_path: &str, file_content: Vec<u8>, logger: &mut Conso
 /// 
 /// ### Parameter
 /// - `file_path`: The filepath of the current selected save.
-/// - `file_content`: The content of the current file.
+/// - `compressed`: The compressed content of the current file.
+/// - `ids`: The list of all IDs.
 /// - `logger`: The console logger that logs every event.
 /// - `is_debugging`: Indicates whether the file analyser is in debugging mode or not.
 /// 
 /// ### Returns `SaveFile`
 /// The save file with all collected data.
-pub fn load_save_file_pc(file_path: &str, compressed: Vec<u8>, logger: &mut ConsoleLogger, is_debugging: bool) -> Result<SaveFile> {
+pub fn load_save_file_pc(
+    file_path: &str,
+    compressed: Vec<u8>,
+    ids: Vec<IdData>,
+    logger: &mut ConsoleLogger,
+    is_debugging: bool
+) -> Result<SaveFile> {
     let mut gz = GzDecoder::new(&compressed[..]);
     let mut file_content = Vec::new();
     if let Err(error) = gz.read_to_end(&mut file_content) {
         return Err(format!("{} -> Make sure that the file you want to decompress is actually compressed.", error.to_string()).into());
     }
 
-    load_save_file(file_path, file_content, logger, is_debugging)
+    load_save_file(file_path, file_content, ids, logger, is_debugging)
 }
 
 /// Represents a method for exporting the save for PC (compressing).
@@ -656,13 +672,20 @@ fn get_index_for_inventory_items(unlockable_items: &[UnlockableItem], file_conte
 /// ### Parameter
 /// - `content`: The byte data of the current selected save.
 /// - `start_index`: The start index of the inventory data.
+/// - `ids`: The list of all IDs.
 /// - `logger`: The console logger that logs every event.
 /// - `is_debugging`: Indicates whether the file analyser is in debugging mode or not.
 /// 
 /// ### Returns `Vec<Vec<InventoryItem>>`
 /// The list of all different item sections.
 /// Each section contains a list of items, for example: gear, weapons, etc....
-fn get_all_items(content: &[u8], start_index: usize, logger: &mut ConsoleLogger, is_debugging: bool) -> Result<Vec<InventoryItemRow>> {
+fn get_all_items(
+    content: &[u8],
+    start_index: usize,
+    ids: Vec<IdData>,
+    logger: &mut ConsoleLogger,
+    is_debugging: bool
+) -> Result<Vec<InventoryItemRow>> {
     // Prepare data.
     let mut items: Vec<InventoryItemRow> = Vec::new();
     let mut index: usize = start_index;
@@ -777,7 +800,7 @@ fn get_all_items(content: &[u8], start_index: usize, logger: &mut ConsoleLogger,
         }
 
         // Add the inner section to the item list.
-        let item_row = create_item_row(inner_item_list.clone());
+        let item_row = create_item_row(inner_item_list.clone(), ids.clone());
         items.push(item_row);
         let last_inner_item: &InventoryItem = &inner_item_list.last().unwrap();
         index = last_inner_item.index;
@@ -804,35 +827,86 @@ fn get_all_items(content: &[u8], start_index: usize, logger: &mut ConsoleLogger,
 /// 
 /// ### Parameter
 /// - `items`: The item of a specific section.
+/// - `ids`: The list of all IDs.
 /// 
 /// ### Returns `InventoryItemRow`
 /// A specific itemrow with name and items inside.
-fn create_item_row(items: Vec<InventoryItem>) -> InventoryItemRow {
+fn create_item_row(items: Vec<InventoryItem>, ids: Vec<IdData>) -> InventoryItemRow {
+    let mut tab_tokens = 0;
+    let mut tab_equipment = 0;
+    let mut tab_craftresources = 0;
+    let mut tab_consumables = 0;
+    let mut tab_accessories = 0;
+    let mut tab_quest = 0;
+    let mut tab_ammunition = 0;
+    let mut tab_weapons = 0;
+    let mut tab_item = 0;
+
     for item in items.iter() {
-        if item.name.contains("Token") || item.name.contains("Ticket") {
-            return InventoryItemRow::new("Tokens/Tickets".to_string(), items);
+        for id_section in ids.iter() {
+            for id_name in id_section.ids.iter() {
+                if id_name.contains(&item.name) {
+                    match id_section.filename.as_str() {
+                        "Ammo" => tab_ammunition += 1,
+                        "Cash" => tab_item += 1,
+                        "Collectable" => tab_item += 1,
+                        "CraftComponent" => tab_craftresources += 1,
+                        "CraftPart" => tab_craftresources += 1,
+                        "EvolvingItem" => tab_item += 1,
+                        "Firearm" => tab_weapons += 1,
+                        "Flashlight" => tab_accessories += 1,
+                        "InventoryItem" => tab_accessories += 1,
+                        "ItemBundle" => tab_item += 1,
+                        "Lockpick" => tab_equipment += 1,
+                        "LootPack" => tab_craftresources += 1,
+                        "Medkit" => tab_consumables += 1,
+                        "Other" => tab_quest += 1,
+                        "OutfitPart" => tab_craftresources += 1,
+                        "Powerup" => tab_consumables += 1,
+                        "SurvivorPack" => tab_item += 1,
+                        "SyringeAntizin" => tab_consumables += 1,
+                        "Throwable" => tab_accessories += 1,
+                        "ThrowableLiquid" => tab_accessories += 1,
+                        "Token" => tab_tokens += 1,
+                        "Uncategorized" => tab_item += 1,
+                        "Valuable" => tab_craftresources += 1,
+                        "VehicleUpgrade" => tab_item += 1,
+                        "Voucher" => tab_item += 1,
+                        _ => tab_item += 1
+                    }
+                }
+            }
         }
-        else if item.name.contains("Keyfinder") || item.name.contains("Binoculars") {
-            return InventoryItemRow::new("Equipment".to_string(), items);
-        }
-        else if item.name.contains("Outfit") || item.name.contains("Craft") || item.name.contains("Plant") {
-            return InventoryItemRow::new("Outfits/Craftresources".to_string(), items);
-        }
-        else if item.name.contains("Potion") || item.name.contains("Booster")  || item.name.contains("Medkit") || item.name.contains("Flare") {
-            return InventoryItemRow::new("Consumables".to_string(), items);
-        }
-        else if item.name.contains("KaDoom") || item.name.contains("Broom") || item.name.contains("Throwable") || (item.name.contains("wpn") && item.name.contains("challenge")) {
-            return InventoryItemRow::new("Accessories".to_string(), items);
-        }
-        else if item.name.contains("Quest") {
-            return InventoryItemRow::new("Quest Items".to_string(), items);
-        }
-        else if item.name.contains("Bullet") {
-            return InventoryItemRow::new("Ammunition".to_string(), items);
-        }
-        else if item.name.contains("wpn") && !item.name.contains("challenge") {
-            return InventoryItemRow::new("Weapons".to_string(), items);
-        }
+    }
+
+    // Initialize the counters
+    let counters = [
+        tab_tokens, tab_equipment, tab_craftresources, tab_consumables,
+        tab_accessories, tab_quest, tab_ammunition, tab_weapons, tab_item
+    ];
+
+    // Find the maximum value among the counters
+    let highest_counter = *counters.iter().max().unwrap();
+
+    // Perform actions based on the highest counter
+    if highest_counter == tab_tokens {
+        return InventoryItemRow::new("Tokens/Tickets".to_string(), items);
+    } else if highest_counter == tab_equipment {
+        return InventoryItemRow::new("Equipment".to_string(), items);
+    } else if highest_counter == tab_craftresources {
+        return InventoryItemRow::new("Outfits/Craftresources".to_string(), items);
+    } else if highest_counter == tab_consumables {
+        return InventoryItemRow::new("Consumables".to_string(), items);
+    } else if highest_counter == tab_accessories {
+        return InventoryItemRow::new("Accessories".to_string(), items);
+    } else if highest_counter == tab_quest {
+        return InventoryItemRow::new("Quest Items".to_string(), items);
+    } else if highest_counter == tab_ammunition {
+        return InventoryItemRow::new("Ammunition".to_string(), items);
+    } else if highest_counter == tab_weapons {
+        return InventoryItemRow::new("Weapons".to_string(), items);
+    } else if highest_counter == tab_item {
+        return InventoryItemRow::new("Items".to_string(), items)
     }
 
     InventoryItemRow::new("Items".to_string(), items)

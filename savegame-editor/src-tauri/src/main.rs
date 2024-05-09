@@ -4,18 +4,17 @@
 mod save_logic;
 mod logger;
 
-use std::error::Error;
-
 use dotenv::dotenv;
 use save_logic::file_analyser::{change_items_amount, change_items_durability, create_backup_from_file, edit_inventory_item_chunk, edit_skill, export_save_for_pc, get_contents_from_file, load_save_file, load_save_file_pc, remove_inventory_item};
 use save_logic::struct_data::{SaveFile, InventoryChunk, IdData};
 use save_logic::id_fetcher::{fetch_ids, update_ids};
-use tauri::{api::file, AppHandle};
-use crate::logger::{ConsoleLogger, LoggerFunctions};
+use tauri::AppHandle;
+use crate::logger::ConsoleLogger;
 
 
 #[tauri::command(rename_all = "snake_case")]
 async fn get_ids(app_handle: AppHandle) -> Result<Vec<IdData>, String> {
+    // Initializes resource path where IDs are stored.
     let resource_path = app_handle.path_resolver().resolve_resource("./IDs/").unwrap();
 
     match fetch_ids(&resource_path.display().to_string()) {
@@ -31,6 +30,7 @@ async fn get_ids(app_handle: AppHandle) -> Result<Vec<IdData>, String> {
 
 #[tauri::command(rename_all = "snake_case")]
 fn update_id_folder(app_handle: AppHandle, file_path: &str) {
+    // Initializes resource path where IDs are stored.
     let resource_path = app_handle.path_resolver().resolve_resource("./IDs/").unwrap();
 
     match update_ids(file_path, &resource_path.display().to_string()) {
@@ -40,13 +40,18 @@ fn update_id_folder(app_handle: AppHandle, file_path: &str) {
 }
 
 #[tauri::command(rename_all = "snake_case")]
-async fn load_save(file_path: &str, is_debugging: bool) -> Result<SaveFile, String> {
+async fn load_save(app_handle: AppHandle, file_path: &str, is_debugging: bool) -> Result<SaveFile, String> {
     // Initializes the logger.
     let mut logger: ConsoleLogger = ConsoleLogger::new();
+    // Initializes resource path where IDs are stored.
+    let resource_path = app_handle.path_resolver().resolve_resource("./IDs/").unwrap();
+
+    // Initializes IDs
+    let ids = fetch_ids(&resource_path.display().to_string()).unwrap();
 
     let file_content: Vec<u8> = get_contents_from_file(&file_path).unwrap();
     create_backup_from_file(&file_path, &file_content);
-    let save_file = load_save_file(&file_path, file_content, &mut logger, is_debugging);
+    let save_file = load_save_file(&file_path, file_content, ids, &mut logger, is_debugging);
 
     match save_file {
         Ok(save) => return Ok(save),
@@ -55,12 +60,17 @@ async fn load_save(file_path: &str, is_debugging: bool) -> Result<SaveFile, Stri
 }
 
 #[tauri::command(rename_all = "snake_case")]
-async fn load_save_pc(file_path: &str, is_debugging: bool) -> Result<SaveFile, String> {
+async fn load_save_pc(app_handle: AppHandle, file_path: &str, is_debugging: bool) -> Result<SaveFile, String> {
     // Initializes the logger.
     let mut logger: ConsoleLogger = ConsoleLogger::new();
+    // Initializes resource path where IDs are stored.
+    let resource_path = app_handle.path_resolver().resolve_resource("./IDs/").unwrap();
+
+    // Initializes IDs
+    let ids = fetch_ids(&resource_path.display().to_string()).unwrap();
 
     let file_content: Vec<u8> = get_contents_from_file(&file_path).unwrap();
-    let save_file = load_save_file_pc(&file_path, file_content, &mut logger, is_debugging);
+    let save_file = load_save_file_pc(&file_path, file_content, ids, &mut logger, is_debugging);
 
     match save_file {
         Ok(save) => return Ok(save),
