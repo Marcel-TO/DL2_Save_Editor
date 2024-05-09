@@ -12,6 +12,7 @@ import { invoke } from '@tauri-apps/api';
 import AsyncAutocomplete from '../../components/async-autocomplete/async-autocomplete';
 import ShuffleOnIcon from '@mui/icons-material/ShuffleOn';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 
 export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, idDatas: IdData[] }): JSX.Element => {
     return (
@@ -294,18 +295,19 @@ const VirtualizedList = ({
     const [currentSelectedItemAmount, setCurrentSelectedItemAmount] = useState('');
     const [currentSelectedItemDurability, setCurrentSelectedItemDurability] = useState('');
     const [possibleIDs, setPossibleIDs] = useState<string[]>([]);
+    const [currentPossibleIDSection, setCurrentPossibleIDSection] = useState('');
 
     const [changeItemIsOpen, setChangeItemIsOpen] = useState(false);
     const [removeItemIsOpen, setRemoveItemIsOpen] = useState(false);
 
-    const idMapping: [string, string[]][] = [
-        ['Tokens/Tickets', ['Token']],
-        ['Weapons', ['Melee', 'Firearm']],
-        ['Outfits/Craftresources', ['CraftComponent', 'OutfitPart', 'LootPack']],
-        ['Consumables', ['Medkit', 'Powerup']],
-        ['Accessories', ['Throwable', 'ThrowableLiquid']],
-        ['Ammunition', ['Ammo']],
-    ];
+    // const idMapping: [string, string[]][] = [
+    //     ['Tokens/Tickets', ['Token']],
+    //     ['Weapons', ['Melee', 'Firearm']],
+    //     ['Outfits/Craftresources', ['CraftComponent', 'OutfitPart', 'LootPack']],
+    //     ['Consumables', ['Medkit', 'Powerup']],
+    //     ['Accessories', ['Throwable', 'ThrowableLiquid']],
+    //     ['Ammunition', ['Ammo']],
+    // ];
 
     const removeEmptyItems = (items: InventoryItem[]): InventoryItem[] => {
         let newDisplayedItems: InventoryItem[] = [];
@@ -333,7 +335,7 @@ const VirtualizedList = ({
         setCurrentSelectedItemSeed(selectedItem.chunk_data.seed_value.toString());
         setCurrentSelectedItemAmount(selectedItem.chunk_data.amount_value.toString());
         setCurrentSelectedItemDurability(selectedItem.chunk_data.durability_value.toString());
-        handlePossibleIDs(selectedItem.size - 4); // Due to SGDs in size calculation.
+        handlePossibleIDs(selectedItem.size);
         setIsOpen(true);
     }
 
@@ -346,24 +348,37 @@ const VirtualizedList = ({
     const handlePossibleIDs = (size: number) => {
         let iDs: string[] = [];
 
-        idMapping.forEach(([_rowName, idNames]) => {
-            // if (itemRow.name === rowName) {
-            // }
+        // Check the current selected ID section.
+        for (let x = 0; x < idDatas.length; x++) {
+            if (idDatas[x].filename == currentPossibleIDSection) {
+                let encoder = new TextEncoder();
 
-            const matchingIdDatas = idDatas.filter((idData) => idNames.indexOf(idData.filename) > -1);
-            let encoder = new TextEncoder();
-
-            for (let i = 0; i < matchingIdDatas.length; i++) {
-                matchingIdDatas[i].ids.forEach((id) => {
-                    let bytes = encoder.encode(id)
-                    if (bytes.length <= size) {
-                        iDs.push(id);
-                    }
-                });
+                for (let i = 0; i < idDatas[x].ids.length; i++) {
+                    idDatas[x].ids.forEach((id) => {
+                        let bytes = encoder.encode(id)
+                        if (bytes.length <= size) {
+                            iDs.push(id);
+                        }
+                    });
+                }
             }
-        });
+        }
 
         setPossibleIDs(iDs);
+    };
+
+    const handleCurrentPossibleIDSection = (section: string) => {
+        setCurrentPossibleIDSection(section);
+        handleCurrentPossibleIDSectionMenuClose();
+    };
+
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const selectCurrentPossibleIDSection = Boolean(anchorEl);
+    const handleCurrentPossibleIDSectionMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleCurrentPossibleIDSectionMenuClose = () => {
+        setAnchorEl(null);
     };
 
     const handleLevelValue = (event: ChangeEvent<HTMLInputElement>) => {
@@ -676,11 +691,53 @@ const VirtualizedList = ({
                             }}>
                                 <Box sx={{ width: '500px' }}>
                                     {changeItemIsOpen ? (
-                                        <AsyncAutocomplete
-                                            currentID={currentSelectedID}
-                                            iDs={possibleIDs}
-                                            changeCurrentID={setCurrentSelectedID}
-                                        />
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                flexDirection: 'row',
+                                            }}
+                                        >
+                                            <Button
+                                                sx={{
+                                                    marginLeft: '10px',
+                                                    cursor: 'pointer',
+                                                    "&:hover": {
+                                                        backgroundColor: '#52626450'
+                                                    }
+                                                }}
+                                                id="basic-button"
+                                                aria-controls={selectCurrentPossibleIDSection ? 'basic-menu' : undefined}
+                                                aria-haspopup="true"
+                                                aria-expanded={selectCurrentPossibleIDSection ? 'true' : undefined}
+                                                onClick={handleCurrentPossibleIDSectionMenu}
+                                            >
+                                                <SettingsSuggestIcon />
+                                            </Button>
+                                            <Menu
+                                                id="basic-menu"
+                                                anchorEl={anchorEl}
+                                                open={selectCurrentPossibleIDSection}
+                                                onClose={handleCurrentPossibleIDSectionMenuClose}
+                                                MenuListProps={{
+                                                'aria-labelledby': 'basic-button',
+                                                }}
+                                            >
+                                                {idDatas.map((idData) => (
+                                                    <>
+                                                        {idData.filename == currentPossibleIDSection ? (
+                                                            <MenuItem sx={{backgroundColor: '#526264'}} onClick={() => handleCurrentPossibleIDSection(idData.filename)}>{idData.filename}</MenuItem>
+                                                        ) : (
+                                                            <MenuItem onClick={() => handleCurrentPossibleIDSection(idData.filename)}>{idData.filename}</MenuItem>
+                                                        )}
+                                                    </>
+                                                ))}
+                                            </Menu>
+                                            <AsyncAutocomplete
+                                                currentID={currentSelectedID}
+                                                iDs={possibleIDs}
+                                                changeCurrentID={setCurrentSelectedID}
+                                            />
+                                        </Box>
                                     ) : (
                                         <Tooltip title={currentItem?.name} arrow placement="top-start">
                                             <Typography noWrap gutterBottom variant="h5" component="div">
