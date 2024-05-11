@@ -300,15 +300,6 @@ const VirtualizedList = ({
     const [changeItemIsOpen, setChangeItemIsOpen] = useState(false);
     const [removeItemIsOpen, setRemoveItemIsOpen] = useState(false);
 
-    // const idMapping: [string, string[]][] = [
-    //     ['Tokens/Tickets', ['Token']],
-    //     ['Weapons', ['Melee', 'Firearm']],
-    //     ['Outfits/Craftresources', ['CraftComponent', 'OutfitPart', 'LootPack']],
-    //     ['Consumables', ['Medkit', 'Powerup']],
-    //     ['Accessories', ['Throwable', 'ThrowableLiquid']],
-    //     ['Ammunition', ['Ammo']],
-    // ];
-
     const removeEmptyItems = (items: InventoryItem[]): InventoryItem[] => {
         let newDisplayedItems: InventoryItem[] = [];
 
@@ -335,7 +326,7 @@ const VirtualizedList = ({
         setCurrentSelectedItemSeed(selectedItem.chunk_data.seed_value.toString());
         setCurrentSelectedItemAmount(selectedItem.chunk_data.amount_value.toString());
         setCurrentSelectedItemDurability(selectedItem.chunk_data.durability_value.toString());
-        handlePossibleIDs(selectedItem.size);
+        handlePossibleIDs(selectedItem.size, currentPossibleIDSection);
         setIsOpen(true);
     }
 
@@ -345,12 +336,12 @@ const VirtualizedList = ({
         setRemoveItemIsOpen(false);
     }
 
-    const handlePossibleIDs = (size: number) => {
+    const handlePossibleIDs = (size: number, current_section: string) => {
         let iDs: string[] = [];
 
         // Check the current selected ID section.
         for (let x = 0; x < idDatas.length; x++) {
-            if (idDatas[x].filename == currentPossibleIDSection) {
+            if (idDatas[x].filename == current_section) {
                 let encoder = new TextEncoder();
 
                 for (let i = 0; i < idDatas[x].ids.length; i++) {
@@ -364,11 +355,15 @@ const VirtualizedList = ({
             }
         }
 
+        console.log("Updated possible IDs (%d) in section: ", iDs.length, current_section)
         setPossibleIDs(iDs);
     };
 
     const handleCurrentPossibleIDSection = (section: string) => {
         setCurrentPossibleIDSection(section);
+        if (currentItem != undefined) {
+            handlePossibleIDs(currentItem.size, section)
+        }
         handleCurrentPossibleIDSectionMenuClose();
     };
 
