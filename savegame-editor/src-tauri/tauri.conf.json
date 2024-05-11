@@ -28,9 +28,14 @@
       "fs": {
         "all": true,
         "scope": [
-          "$RESOURCE/*"
+          "$RESOURCE/*",
+          "$APPCONFIG", 
+          "$APPCONFIG/*"
         ]
-      }
+      },
+      "path": {
+        "all": true
+       }
     },
     "bundle": {
       "resources": [

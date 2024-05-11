@@ -17,6 +17,7 @@ import { UnlockablePage } from "./pages/unlockable/unlockable-page";
 import { CazOutpostPage } from "./pages/caz-outpost/caz-outpost";
 import { CazCollectionPage } from "./pages/caz-collection/caz-collection";
 import { KnowledgeVaultPage } from "./pages/knowledge-vault/knowledge-vault";
+import { SettingsPage } from "./pages/settings/settings-page";
 
 function App() {
   const [idDatas, setCurrentIdDatas] = useState<IdData[]>([])
@@ -38,6 +39,7 @@ function App() {
         (<Route path={'/outpost'} element={<CazOutpostPage/>}></Route>),
         (<Route path={'/caz-collection'} element={<CazCollectionPage/>}></Route>),
         (<Route path={'/knowledge-vault'} element={<KnowledgeVaultPage/>}></Route>),
+        (<Route path={'/settings'} element={<SettingsPage/>}></Route>),
       ]
     )
   )

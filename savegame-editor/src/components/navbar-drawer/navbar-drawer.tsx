@@ -29,6 +29,7 @@ import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import StoreRoundedIcon from '@mui/icons-material/StoreRounded';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 // Themes
 const openedMixin = (theme: Theme): CSSObject => ({
@@ -139,6 +140,7 @@ const itemPages: [string, JSX.Element, string, boolean][] = [
 const otherPages: [string, JSX.Element, string, boolean][] = [
   ['Player', <AccountCircleOutlinedIcon/>, '/player', true],
   ['IDs', <FingerprintIcon/>, '/ids', false], 
+  ['Settings', <SettingsIcon/>, '/settings', false]
 ];
 const infoPages: [string, JSX.Element, string, boolean][] = [
   ['Home', <HomeRoundedIcon/>, '/', false],
