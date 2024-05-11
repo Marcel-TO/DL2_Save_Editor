@@ -726,10 +726,9 @@ fn get_all_items(
         // iterate through each found match and validate the position of the match.
         for i in 0..current_item_ids.len() {
             // Check if the match is an item or a mod.
-            if !&current_item_ids[i].to_lowercase().contains("mod") && !&current_item_ids[i].to_lowercase().contains("charm") {
+            if validate_item_or_mod(&current_item_ids[i]) {
                 // Check if the bullet acts as item or mod or if there is a transmog item.
-                if (current_item_ids[i].to_lowercase().contains("bullet") || current_item_ids[i].to_lowercase().contains("craftplan")) &&
-                    (current_item_id.to_lowercase().contains("bow") || (current_item_id.to_lowercase().contains("firearm") && !current_item_id.to_lowercase().contains("bullet")) || current_item_id.to_lowercase().contains("gun") || current_item_id.to_lowercase().contains("harpoon")) {
+                if validate_item_or_transmog(&current_item_ids[i], &current_item_id) {
                     if is_debugging {
                         logger.log_message(&format!("Since this item can be item and mod, the editor validated it as a mod: [{}]", current_item_ids[i].to_string()), Vec::new());
                     }
@@ -821,6 +820,23 @@ fn get_all_items(
     }
 
     Ok(items)
+}
+
+fn validate_item_or_mod(current_match: &str) -> bool {
+    if !current_match.to_lowercase().contains("mod") && !current_match.to_lowercase().contains("charm") {
+        return true
+    }
+
+    false
+}
+
+fn validate_item_or_transmog(current_match: &str, last_match: &str) -> bool {
+    if (current_match.to_lowercase().contains("bullet") || current_match.to_lowercase().contains("craftplan")) &&
+    (last_match.to_lowercase().contains("bow") || (last_match.to_lowercase().contains("firearm") && !last_match.to_lowercase().contains("bullet")) || last_match.to_lowercase().contains("gun") || last_match.to_lowercase().contains("harpoon")) {
+        return true
+    }
+
+    false
 }
 
 /// Represents the method for matching the item of each section to its dedicated row.
@@ -1191,10 +1207,9 @@ fn find_amount_of_matches(content: &[u8], start_index: usize, amount: usize, log
                 }
                 
                 // Checks whether the match is an item or a mod.
-                if !mat.as_str().to_lowercase().contains("mod") && !mat.as_str().to_lowercase().contains("charm") {
+                if validate_item_or_mod(mat.as_str()) {
                     // Checks whether the match is bullet that acts as a mod.
-                    if (mat.as_str().to_lowercase().contains("bullet") || mat.as_str().to_lowercase().contains("craftplan")) && 
-                    (last_match.to_lowercase().contains("bow") || (last_match.to_lowercase().contains("firearm") && !last_match.to_lowercase().contains("bullet")) || last_match.to_lowercase().contains("gun") || last_match.to_lowercase().contains("harpoon")) {                        
+                    if validate_item_or_transmog(mat.as_str(), &last_match) {                
                         if is_debugging {
                             logger.log_message(&format!("Found potential SGDs match for mod: [{}]", mat.as_str()), Vec::new());
                         }
