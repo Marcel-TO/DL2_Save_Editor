@@ -9,12 +9,14 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { Fragment, useEffect, useState } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import { SettingsManager } from 'tauri-settings';
+import { SettingsSchema } from '../../models/settings-schema';
 
-export const MainPage = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function}): JSX.Element => {    
+export const MainPage = ({currentSaveFile, setCurrentSaveFile, setIdData, settingsManager}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function, settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {    
     return (
         <>
             <div className="container">
-                <NavbarDrawer pagename={"Main"} pagecontent={<MainContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} setIdData={setIdData}/>}></NavbarDrawer>
+                <NavbarDrawer pagename={"Main"} pagecontent={<MainContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} setIdData={setIdData}/>} settingsManager={settingsManager}></NavbarDrawer>
             </div>
         </>
     )

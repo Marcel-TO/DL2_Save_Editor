@@ -4,32 +4,36 @@ import { SettingsSchema } from '../../models/settings-schema';
 import { SettingsManager } from 'tauri-settings';
 import { Box, Button, Divider, Switch, Typography } from '@mui/material';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export const SettingsPage = ({settingsManager}: {settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {
     return (
         <>
         <div className="container">
-            <NavbarDrawer pagename={"Settings"} pagecontent={<SettingsContent settingsManager={settingsManager}/>}></NavbarDrawer>
+            <NavbarDrawer pagename={"Settings"} pagecontent={<SettingsContent settingsManager={settingsManager}/>} settingsManager={settingsManager}></NavbarDrawer>
         </div>
         </>
     )
 }
 
 const SettingsContent = ({settingsManager}: {settingsManager: SettingsManager<SettingsSchema>}) => {
-    const [isDebug, setIsDebug] = useState<boolean>(settingsManager.settings.debugMode)
+    const [isDebug, setIsDebug] = useState<boolean>(settingsManager ? settingsManager.settings && settingsManager.settings.debugMode : false)
+    const navigate = useNavigate();
 
-    const changeDebugSetting = (option: boolean) => {
+    async function changeDebugSetting(option: boolean) {
         setIsDebug(option)
-        settingsManager.setCache('debugMode', option);
+        await settingsManager?.set('debugMode', option);
+        // settingsManager?.setCache('debugMode', option);
     }
     
     const getIsDebug = () => {
-        var res = settingsManager.getCache('debugMode')
+        var res = settingsManager?.getCache('debugMode')
         console.log("SettingsManger Theme: ", res)
     }
 
     async function saveSettings() {
-        await settingsManager.syncCache();
+        await settingsManager?.syncCache();
+        // navigate('/')
     }
     
 

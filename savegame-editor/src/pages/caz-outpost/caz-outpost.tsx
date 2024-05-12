@@ -3,15 +3,17 @@ import './caz-outpost.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
 import { Box, Typography } from '@mui/material'
 import { Link } from 'react-router-dom';
+import { SettingsManager } from 'tauri-settings';
+import { SettingsSchema } from '../../models/settings-schema';
 
 
-export const CazOutpostPage = (): JSX.Element => {
+export const CazOutpostPage = ({settingsManager}: {settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {
     return (
         <>        
         <div className="caz-outpost"></div>
 
         <div className="container">
-            <NavbarDrawer pagename={"Caz Outpost"} pagecontent={<OutpostContent/>}></NavbarDrawer>
+            <NavbarDrawer pagename={"Caz Outpost"} pagecontent={<OutpostContent/>} settingsManager={settingsManager}></NavbarDrawer>
         </div>
         </>
     )

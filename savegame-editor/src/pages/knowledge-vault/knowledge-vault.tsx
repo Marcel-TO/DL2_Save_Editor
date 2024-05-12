@@ -3,14 +3,16 @@ import './knowledge-vault.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
 import { EmblaOptionsType } from 'embla-carousel'
 import EmblaCarousel from '../../components/embla-carousel/embla-carousel'
+import { SettingsManager } from 'tauri-settings'
+import { SettingsSchema } from '../../models/settings-schema'
 
-export const KnowledgeVaultPage = (): JSX.Element => {
+export const KnowledgeVaultPage = ({settingsManager}: {settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {
     return (
         <>        
         <div className="caz-outpost"></div>
 
         <div className="container">
-            <NavbarDrawer pagename={"Knowledge Vault"} pagecontent={<KnowledgeVaultContent/>}></NavbarDrawer>
+            <NavbarDrawer pagename={"Knowledge Vault"} pagecontent={<KnowledgeVaultContent/>} settingsManager={settingsManager}></NavbarDrawer>
         </div>
         </>
     )

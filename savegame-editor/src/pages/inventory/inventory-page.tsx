@@ -13,12 +13,14 @@ import AsyncAutocomplete from '../../components/async-autocomplete/async-autocom
 import ShuffleOnIcon from '@mui/icons-material/ShuffleOn';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
+import { SettingsManager } from 'tauri-settings';
+import { SettingsSchema } from '../../models/settings-schema';
 
-export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, idDatas: IdData[] }): JSX.Element => {
+export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile, idDatas, settingsManager }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, idDatas: IdData[], settingsManager: SettingsManager<SettingsSchema> }): JSX.Element => {
     return (
         <>
             <div className="container">
-                <NavbarDrawer pagename={"Inventory"} pagecontent={<InventoryContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} idDatas={idDatas} />}></NavbarDrawer>
+                <NavbarDrawer pagename={"Inventory"} pagecontent={<InventoryContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} idDatas={idDatas}/>} settingsManager={settingsManager}></NavbarDrawer>
             </div>
         </>
     )

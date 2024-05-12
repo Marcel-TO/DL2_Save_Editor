@@ -8,13 +8,15 @@ import AccountTreeRoundedIcon from '@mui/icons-material/AccountTreeRounded';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { invoke } from '@tauri-apps/api';
+import { SettingsManager } from 'tauri-settings';
+import { SettingsSchema } from '../../models/settings-schema';
 
 
-export const SkillPage = ({currentSaveFile, setCurrentSaveFile}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function}): JSX.Element => {    
+export const SkillPage = ({currentSaveFile, setCurrentSaveFile, settingsManager}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {    
     return (
         <>
         <div className="container">
-            <NavbarDrawer pagename={"Skills"} pagecontent={<SkillContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile}/>}></NavbarDrawer>
+            <NavbarDrawer pagename={"Skills"} pagecontent={<SkillContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile}/>} settingsManager={settingsManager}></NavbarDrawer>
         </div>
         </>
     )

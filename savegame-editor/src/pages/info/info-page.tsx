@@ -4,12 +4,14 @@ import { Box, Chip, Typography, createTheme } from '@mui/material'
 import ContributorsAvatar from '../../components/contributors/contributors-avatar'
 import { useEffect, useState } from 'react'
 import { ThemeProvider } from '@emotion/react'
+import { SettingsManager } from 'tauri-settings'
+import { SettingsSchema } from '../../models/settings-schema'
 
-export const InfoPage = (): JSX.Element => {
+export const InfoPage = ({settingsManager}: {settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {
     return (
         <>
             <div className="page-container">
-                <NavbarDrawer pagename={"Info"} pagecontent={infoDetails()}></NavbarDrawer>
+                <NavbarDrawer pagename={"Info"} pagecontent={infoDetails()} settingsManager={settingsManager}></NavbarDrawer>
             </div>
         </>
     )

@@ -14,6 +14,8 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import { ThemeProvider } from '@emotion/react';
+import { SettingsManager } from 'tauri-settings';
+import { SettingsSchema } from '../../models/settings-schema';
 
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -30,6 +32,8 @@ import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import StoreRoundedIcon from '@mui/icons-material/StoreRounded';
 import SettingsIcon from '@mui/icons-material/Settings';
+import BugReportIcon from '@mui/icons-material/BugReport';
+import { useEffect, useState } from 'react';
 
 // Themes
 const openedMixin = (theme: Theme): CSSObject => ({
@@ -140,7 +144,7 @@ const itemPages: [string, JSX.Element, string, boolean][] = [
 const otherPages: [string, JSX.Element, string, boolean][] = [
   ['Player', <AccountCircleOutlinedIcon/>, '/player', true],
   ['IDs', <FingerprintIcon/>, '/ids', false], 
-  ['Settings', <SettingsIcon/>, '/settings', false]
+  ['Settings', <SettingsIcon/>, '/settings', false],
 ];
 const infoPages: [string, JSX.Element, string, boolean][] = [
   ['Home', <HomeRoundedIcon/>, '/', false],
@@ -152,12 +156,18 @@ const infoPages: [string, JSX.Element, string, boolean][] = [
 interface NavbarDrawerProps {
   pagename: string,
   pagecontent: JSX.Element,
+  settingsManager: SettingsManager<SettingsSchema> | undefined
 }
 
 // Actual Navbar
-export const NavbarDrawer = ({pagename, pagecontent}: NavbarDrawerProps): JSX.Element => {
+export const NavbarDrawer = ({pagename, pagecontent, settingsManager}: NavbarDrawerProps): JSX.Element => {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [isDebugSelected, setIsDebugSelected] = useState(settingsManager ? settingsManager.settings && settingsManager.settings.debugMode : false)
+
+  useEffect(() => {
+    setIsDebugSelected(settingsManager ? settingsManager.settings && settingsManager.settings.debugMode : false);
+  }, [])
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -320,6 +330,43 @@ export const NavbarDrawer = ({pagename, pagecontent}: NavbarDrawerProps): JSX.El
                       </ListItemButton>
                     </ListItem>
                   ))}
+                </List>
+                <Divider sx={{ backgroundColor: '#e9eecd60' }} />
+                <List>
+                <ListItem key='debug' disablePadding sx={{
+                      display: 'block',
+                      color: '#e9eecd',
+                    }}>
+                      <ListItemButton
+                        sx={{
+                          minHeight: 48,
+                          justifyContent: open ? 'initial' : 'center',
+                          px: 2.5,
+                          '&:hover': {
+                            color: '#e9eecd',
+                            backgroundColor: '#526264',
+                          },
+                        }}
+                        component={Link} to='/debug'
+                        disabled={!isDebugSelected}
+                      >
+                        <ListItemIcon
+                          sx={{
+                            minWidth: 0,
+                            mr: open ? 3 : 'auto',
+                            justifyContent: 'center',
+                            color: '#e9eecd',
+                          }}
+                        >
+                          {<BugReportIcon/>}
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={'Debug'}
+                          sx={{
+                            opacity: open ? 1 : 0,
+                          }} />
+                      </ListItemButton>
+                    </ListItem>
                 </List>
               </Drawer>
             <Container sx={{

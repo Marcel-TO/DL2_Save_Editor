@@ -9,14 +9,16 @@ import { FixedSizeList } from 'react-window';
 import UpdateIcon from '@mui/icons-material/Update';
 import { open } from '@tauri-apps/api/dialog';
 import { invoke } from '@tauri-apps/api';
+import { SettingsManager } from 'tauri-settings';
+import { SettingsSchema } from '../../models/settings-schema';
 
 
 // The ID page
-export const IDsPage = ({idData}: {idData: IdData[]}): JSX.Element => {  
+export const IDsPage = ({idData, settingsManager}: {idData: IdData[], settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {  
   return (
         <>
         <div className="container">
-            <NavbarDrawer pagename={"IDs"} pagecontent={<IdContent idData={idData}/>}></NavbarDrawer>
+            <NavbarDrawer pagename={"IDs"} pagecontent={<IdContent idData={idData}/>} settingsManager={settingsManager}></NavbarDrawer>
         </div>
         </>
     )
