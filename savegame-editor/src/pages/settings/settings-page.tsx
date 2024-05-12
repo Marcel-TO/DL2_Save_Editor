@@ -1,46 +1,30 @@
 import './settings-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
+import { SettingsSchema } from '../../models/settings-schema';
 import { SettingsManager } from 'tauri-settings';
-import { Button } from '@mui/material';
+import { Box, Button, Divider, Switch, Typography } from '@mui/material';
+import { useState } from 'react';
 
-export const SettingsPage = (): JSX.Element => {
+export const SettingsPage = ({settingsManager}: {settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {
     return (
         <>
         <div className="container">
-            <NavbarDrawer pagename={"Settings"} pagecontent={<SettingsContent/>}></NavbarDrawer>
+            <NavbarDrawer pagename={"Settings"} pagecontent={<SettingsContent settingsManager={settingsManager}/>}></NavbarDrawer>
         </div>
         </>
     )
 }
 
-const SettingsContent = () => {
-    type Schema = {
-        theme: 'dark' | 'light';
-        startFullscreen: boolean;
-    }
+const SettingsContent = ({settingsManager}: {settingsManager: SettingsManager<SettingsSchema>}) => {
+    const [isDebug, setIsDebug] = useState<boolean>(settingsManager.settings.debugMode)
 
-    const settingsManager = new SettingsManager<Schema>(
-        { // defaults
-            theme: 'light',
-            startFullscreen: true
-        },
-        { // options
-            fileName: 'customization-settings'
-        }
-    );
-
-    async function initManager() {
-        // checks whether the settings file exists and created it if not
-        // loads the settings if it exists
-        settingsManager.initialize();
-    }
-
-    const changeTheme = () => {
-        settingsManager.setCache('theme', 'dark');
+    const changeDebugSetting = (option: boolean) => {
+        setIsDebug(option)
+        settingsManager.setCache('debugMode', option);
     }
     
     const getIsDebug = () => {
-        var res = settingsManager.getCache('theme')
+        var res = settingsManager.getCache('debugMode')
         console.log("SettingsManger Theme: ", res)
     }
 
@@ -51,10 +35,32 @@ const SettingsContent = () => {
 
     return(
         <>
-            <Button onClick={initManager}>INIT</Button>
-            <Button onClick={changeTheme}>Change</Button>
-            <Button onClick={getIsDebug}>Log</Button>
-            <Button onClick={saveSettings}>SAVE</Button>
+            <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center'
+            }}>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                        width: '60%',
+                        alignItems: 'center',
+                        margin: '2rem',
+                    }}>
+                    <Typography sx={{width: '60%'}}>Debug Mode</Typography>
+                    <Switch
+                        checked={isDebug}
+                        onChange={() => changeDebugSetting(!isDebug)}
+                        inputProps={{ 'aria-label': 'controlled' }}
+                    />
+                </Box>
+            </Box>
+
+            <Button onClick={getIsDebug}>Log Debug</Button>
+            <Button onClick={saveSettings}>Save Settings</Button>
         </>
     )
 }
