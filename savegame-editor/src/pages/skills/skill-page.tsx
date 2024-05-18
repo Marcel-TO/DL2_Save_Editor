@@ -22,7 +22,7 @@ export const SkillPage = ({currentSaveFile, setCurrentSaveFile, settingsManager}
                     currentSaveFile ? (
                         <SkillContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile}/>
                     ) : (
-                      <h1>You need to learn a save first</h1>
+                      <h1>You need to load a save first</h1>
                     )}
                 settingsManager={settingsManager}
             ></NavbarDrawer>

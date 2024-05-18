@@ -25,7 +25,7 @@ export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile, idDatas, se
                     currentSaveFile ? (
                         <InventoryContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} idDatas={idDatas} />
                     ) : (
-                        <h1>You need to learn a save first</h1>
+                        <h1>You need to load a save first</h1>
                     )}
                 settingsManager={settingsManager}
             ></NavbarDrawer>
