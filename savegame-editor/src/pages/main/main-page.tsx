@@ -70,6 +70,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
     const [isOpen, setOpen] = useState(false);
     const [isOpeningSave, setOpeningSave] = useState(false);
     const [currentSavePath, setCurrentSavePath] = useState('');
+    const [catchedError, setCatchedError] = useState<string>();
 
     useEffect(() => {
         handleSetIdData();
@@ -83,6 +84,10 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
         setOpen(false);
         setOpeningSave(false);
     };
+
+    const handleCloseErrorMessage = () => {
+        setCatchedError(undefined);
+    }
     
     const handleResetSave = () => {
         setCurrentSaveFile(undefined);
@@ -104,7 +109,10 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
         });
       
         if (filepath != null && !Array.isArray(filepath)) {
-            await setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: filepath, is_debugging: false}));
+            let newSave = await invoke<SaveFile>("load_save", {file_path: filepath, is_debugging: false}).catch((err) => {
+              setCatchedError(err);
+            })
+            await setCurrentSaveFile();
             await handleSetIdData();
         };
 
@@ -299,7 +307,28 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
                         </CardContent>
                     </Card>
                 </Backdrop>
+            </ThemeProvider>
 
+            <ThemeProvider theme={newToTheEditorTheme}>
+                <Dialog
+                    open={catchedError ? true : false}
+                    onClose={handleCloseErrorMessage}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description">
+                    <DialogTitle sx={{color: '#e33e2c'}}>
+                    {'Error'}
+                    </DialogTitle>
+                    <DialogContent>
+                    <DialogContentText sx={{color: '#e9eecd'}}>
+                        {catchedError}
+                    </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button variant='outlined' disableElevation onClick={handleCloseErrorMessage} autoFocus>
+                            I understand
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </ThemeProvider>
         </>
     )
