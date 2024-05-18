@@ -331,43 +331,49 @@ export const NavbarDrawer = ({pagename, pagecontent, settingsManager}: NavbarDra
                     </ListItem>
                   ))}
                 </List>
-                <Divider sx={{ backgroundColor: '#e9eecd60' }} />
-                <List>
-                <ListItem key='debug' disablePadding sx={{
-                      display: 'block',
-                      color: '#e9eecd',
-                    }}>
-                      <ListItemButton
-                        sx={{
-                          minHeight: 48,
-                          justifyContent: open ? 'initial' : 'center',
-                          px: 2.5,
-                          '&:hover': {
-                            color: '#e9eecd',
-                            backgroundColor: '#526264',
-                          },
-                        }}
-                        component={Link} to='/debug'
-                        disabled={!isDebugSelected}
-                      >
-                        <ListItemIcon
+                {isDebugSelected ? (
+                  <>
+                  <Divider sx={{ backgroundColor: '#e9eecd60' }} />
+                  <List>
+                  <ListItem key='debug' disablePadding sx={{
+                        display: 'block',
+                        color: '#e9eecd',
+                      }}>
+                        <ListItemButton
                           sx={{
-                            minWidth: 0,
-                            mr: open ? 3 : 'auto',
-                            justifyContent: 'center',
-                            color: '#e9eecd',
+                            minHeight: 48,
+                            justifyContent: open ? 'initial' : 'center',
+                            px: 2.5,
+                            '&:hover': {
+                              color: '#e9eecd',
+                              backgroundColor: '#526264',
+                            },
                           }}
+                          component={Link} to='/debug'
+                          disabled={!isDebugSelected}
                         >
-                          {<BugReportIcon/>}
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={'Debug'}
-                          sx={{
-                            opacity: open ? 1 : 0,
-                          }} />
-                      </ListItemButton>
-                    </ListItem>
-                </List>
+                          <ListItemIcon
+                            sx={{
+                              minWidth: 0,
+                              mr: open ? 3 : 'auto',
+                              justifyContent: 'center',
+                              color: '#e9eecd',
+                            }}
+                          >
+                            {<BugReportIcon/>}
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={'Debug'}
+                            sx={{
+                              opacity: open ? 1 : 0,
+                            }} />
+                        </ListItemButton>
+                      </ListItem>
+                  </List>
+                  </>
+                ): (
+                  <></>
+                )}
               </Drawer>
             <Container sx={{
               flexGrow: 1,

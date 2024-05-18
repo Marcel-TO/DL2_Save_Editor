@@ -104,7 +104,7 @@
 
 .slide__title {
   position: absolute;
-  background-color: black;
+  background-color: #00000090;
   padding: 1rem 2rem;
   border-radius: 20px;
   cursor: pointer;

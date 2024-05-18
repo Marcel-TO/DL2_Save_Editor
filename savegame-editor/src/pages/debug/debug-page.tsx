@@ -42,8 +42,8 @@ const VirtualizedList = ({
     const VirtualizedRow = ({ id, style }: { id: string; style: React.CSSProperties }) => {
       return (
         <>
-          <ListItemButton key={id} sx={{ pl: 4, minWidth: 360 }} style={style}>
-            <ListItemText primary={`Line item ${id}`} />
+          <ListItemButton key={id} sx={{ minWidth: 360 }} style={style}>
+            <ListItemText primary={`> ${id}`} />
           </ListItemButton>
         </>
       );
