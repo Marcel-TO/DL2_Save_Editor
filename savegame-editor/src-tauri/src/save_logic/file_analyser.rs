@@ -877,6 +877,7 @@ fn create_item_row(items: Vec<InventoryItem>, ids: Vec<IdData>) -> InventoryItem
                         "collectable" => tab_item += 1,
                         "craftcomponent" => tab_craftresources += 1,
                         "craftpart" => tab_craftresources += 1,
+                        "equipment" => tab_equipment += 1,
                         "evolvingitem" => tab_item += 1,
                         "firearm" => tab_weapons += 1,
                         "flashlight" => tab_accessories += 1,
