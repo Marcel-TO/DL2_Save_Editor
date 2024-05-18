@@ -1,6 +1,6 @@
 import "./App.css";
-import { useEffect, useState } from "react";
-import { Route, Router, RouterProvider, createBrowserRouter, createRoutesFromElements } from "react-router-dom";
+import { useState } from "react";
+import { Route, RouterProvider, createBrowserRouter, createRoutesFromElements } from "react-router-dom";
 import { SettingsManager } from 'tauri-settings';
 import { SettingsSchema } from "./models/settings-schema";
 
@@ -22,12 +22,10 @@ import { KnowledgeVaultPage } from "./pages/knowledge-vault/knowledge-vault";
 import { SettingsPage } from "./pages/settings/settings-page";
 import { DebugPage } from "./pages/debug/debug-page";
 import { StartPage } from "./pages/start/start-page";
-import { RedirectPage } from "./pages/redirect/redirect-page";
 
 function App() {
   const [idDatas, setCurrentIdDatas] = useState<IdData[]>([])
   const [currentSaveFile, setCurrentSaveFile] = useState<SaveFile>();
-  const [redirectPath, setRedirectPath] = useState('/');
   const settingsManager = new SettingsManager<SettingsSchema>(
     { // defaults
         theme: 'light',
@@ -47,8 +45,7 @@ function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       [
-        (<Route path={'/'} element={<StartPage settingsManager={settingsManager} redirectPath={redirectPath} setRedirectPath={setRedirectPath}/>}></Route>),
-        (<Route path={'/redirect'} element={<RedirectPage navigateTo={redirectPath}/>}></Route>),
+        (<Route path={'/'} element={<StartPage settingsManager={settingsManager}/>}></Route>),
         (<Route path={'/main'} element={<MainPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} setIdData={setCurrentIdDatas} settingsManager={settingsManager}/>}></Route>),
         (<Route path={'/skills'} element={<SkillPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} settingsManager={settingsManager}/>}></Route>),
         (<Route path={'/unlockables'} element={<UnlockablePage currentSaveFile={currentSaveFile} settingsManager={settingsManager}/>}></Route>),

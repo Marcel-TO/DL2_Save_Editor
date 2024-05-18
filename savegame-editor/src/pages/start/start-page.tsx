@@ -5,47 +5,20 @@ import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
 import { ThemeProvider } from '@emotion/react'
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, createTheme } from '@mui/material'
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
 
-export const StartPage = ({settingsManager, redirectPath, setRedirectPath}: {settingsManager: SettingsManager<SettingsSchema>, redirectPath: string, setRedirectPath: Function}): JSX.Element => {
+export const StartPage = ({settingsManager}: {settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {
     return (
         <>
         <div className="container">
-            <NavbarDrawer pagename={"Start"} pagecontent={<StartContent settingsManager={settingsManager} redirectPath={redirectPath} setRedirectPath={setRedirectPath}/>} settingsManager={settingsManager}></NavbarDrawer>
+            <NavbarDrawer pagename={"Start"} pagecontent={<StartContent/>} settingsManager={settingsManager}></NavbarDrawer>
         </div>
         </>
     )
 }
 
-const StartContent = ({settingsManager, redirectPath, setRedirectPath}: {settingsManager: SettingsManager<SettingsSchema>, redirectPath: string, setRedirectPath: Function}): JSX.Element => {
-    const [isNew, setIsNew] = useState<boolean>(settingsManager ? settingsManager.settings && settingsManager.settings.isNewToEditor : false)
-
-    
+const StartContent = (): JSX.Element => {    
     return (
         <>
-            {isNew ? (
-                <Dialog
-                open={true}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description">
-                <DialogTitle sx={{color: '#e9eecd'}}>
-                {"New to the Editor?"}
-                </DialogTitle>
-                <DialogContent>
-                <DialogContentText id="alert-dialog-description">
-                    If you are new to using the Editor, welcome! 
-                    I know the process might seem overwhelming at first, but if you follow the steps below, using the Editor should become a breeze.
-                </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <ThemeProvider theme={dialogButtonTheme}>
-                        <Button variant='outlined' component={Link} to={'/main'} autoFocus>
-                            Start Editing
-                        </Button>
-                    </ThemeProvider>
-                </DialogActions>
-            </Dialog>
-            ): (
             <Dialog
                 open={true}
                 aria-labelledby="alert-dialog-title"
@@ -61,13 +34,12 @@ const StartContent = ({settingsManager, redirectPath, setRedirectPath}: {setting
                 </DialogContent>
                 <DialogActions>
                     <ThemeProvider theme={dialogButtonTheme}>
-                        <Button variant='outlined' component={Link} to={'/redirect'} autoFocus>
+                        <Button variant='outlined' component={Link} to={'/main'} autoFocus>
                             Start Editing
                         </Button>
                     </ThemeProvider>
                 </DialogActions>
             </Dialog>
-            )}
         </>
     )
 }

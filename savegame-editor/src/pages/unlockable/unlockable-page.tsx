@@ -12,8 +12,17 @@ import { SettingsSchema } from '../../models/settings-schema'
 export const UnlockablePage = ({currentSaveFile, settingsManager}: {currentSaveFile: SaveFile | undefined, settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {    
     return (
         <>
-        <div className="container">
-            <NavbarDrawer pagename={"Unlockables"} pagecontent={<UnlockableContent unlockableItems={currentSaveFile != undefined ? currentSaveFile.unlockable_items : []}/>} settingsManager={settingsManager}></NavbarDrawer>
+          <div className="container">
+            <NavbarDrawer 
+                pagename={"Unlockables"} 
+                pagecontent={
+                    currentSaveFile ? (
+                      <UnlockableContent unlockableItems={currentSaveFile != undefined ? currentSaveFile.unlockable_items : []}/>
+                    ) : (
+                      <h1>You need to learn a save first</h1>
+                    )}
+                settingsManager={settingsManager}
+            ></NavbarDrawer>
         </div>
         </>
     )

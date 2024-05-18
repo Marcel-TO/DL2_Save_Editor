@@ -149,7 +149,7 @@ const otherPages: [string, JSX.Element, string, boolean][] = [
 const infoPages: [string, JSX.Element, string, boolean][] = [
   ['Home', <HomeRoundedIcon/>, '/main', false],
   ['Info', <HelpOutlineRoundedIcon/>, '/info', false],
-  ['Caz Outpost', <StoreRoundedIcon/>, '/outpost', true], 
+  ['Caz Outpost', <StoreRoundedIcon/>, '/outpost', false], 
 ];
 
 // Props

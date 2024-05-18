@@ -16,15 +16,22 @@ import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 import { SettingsManager } from 'tauri-settings';
 import { SettingsSchema } from '../../models/settings-schema';
 
-export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile, idDatas, settingsManager }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, idDatas: IdData[], settingsManager: SettingsManager<SettingsSchema> }): JSX.Element => {
-    return (
-        <>
-            <div className="container">
-                <NavbarDrawer pagename={"Inventory"} pagecontent={<InventoryContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} idDatas={idDatas}/>} settingsManager={settingsManager}></NavbarDrawer>
-            </div>
-        </>
-    )
-}
+export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile, idDatas, settingsManager }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, idDatas: IdData[], settingsManager: SettingsManager<SettingsSchema> }): JSX.Element => (
+    <>
+        <div className="container">
+            <NavbarDrawer 
+                pagename={"Inventory"} 
+                pagecontent={
+                    currentSaveFile ? (
+                        <InventoryContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} idDatas={idDatas} />
+                    ) : (
+                        <h1>You need to learn a save first</h1>
+                    )}
+                settingsManager={settingsManager}
+            ></NavbarDrawer>
+        </div>
+    </>
+)
 
 const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, idDatas: IdData[] }) => {
     const [tabIndex, setValue] = useState(0);
