@@ -21,15 +21,19 @@ import { CazCollectionPage } from "./pages/caz-collection/caz-collection";
 import { KnowledgeVaultPage } from "./pages/knowledge-vault/knowledge-vault";
 import { SettingsPage } from "./pages/settings/settings-page";
 import { DebugPage } from "./pages/debug/debug-page";
+import { StartPage } from "./pages/start/start-page";
+import { RedirectPage } from "./pages/redirect/redirect-page";
 
 function App() {
   const [idDatas, setCurrentIdDatas] = useState<IdData[]>([])
   const [currentSaveFile, setCurrentSaveFile] = useState<SaveFile>();
+  const [redirectPath, setRedirectPath] = useState('/');
   const settingsManager = new SettingsManager<SettingsSchema>(
     { // defaults
         theme: 'light',
         startFullscreen: true,
-        debugMode: false
+        debugMode: false,
+        isNewToEditor: true
     },
     { // options
         fileName: 'customization-settings'
@@ -43,7 +47,9 @@ function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       [
-        (<Route path={'/'} element={<MainPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} setIdData={setCurrentIdDatas} settingsManager={settingsManager}/>}></Route>),
+        (<Route path={'/'} element={<StartPage settingsManager={settingsManager} redirectPath={redirectPath} setRedirectPath={setRedirectPath}/>}></Route>),
+        (<Route path={'/redirect'} element={<RedirectPage navigateTo={redirectPath}/>}></Route>),
+        (<Route path={'/main'} element={<MainPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} setIdData={setCurrentIdDatas} settingsManager={settingsManager}/>}></Route>),
         (<Route path={'/skills'} element={<SkillPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} settingsManager={settingsManager}/>}></Route>),
         (<Route path={'/unlockables'} element={<UnlockablePage currentSaveFile={currentSaveFile} settingsManager={settingsManager}/>}></Route>),
         (<Route path={'/experience'} element={<ExperiencePage settingsManager={settingsManager}/>}></Route>),

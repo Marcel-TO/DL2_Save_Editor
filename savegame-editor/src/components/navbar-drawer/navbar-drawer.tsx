@@ -147,7 +147,7 @@ const otherPages: [string, JSX.Element, string, boolean][] = [
   ['Settings', <SettingsIcon/>, '/settings', false],
 ];
 const infoPages: [string, JSX.Element, string, boolean][] = [
-  ['Home', <HomeRoundedIcon/>, '/', false],
+  ['Home', <HomeRoundedIcon/>, '/main', false],
   ['Info', <HelpOutlineRoundedIcon/>, '/info', false],
   ['Caz Outpost', <StoreRoundedIcon/>, '/outpost', true], 
 ];
