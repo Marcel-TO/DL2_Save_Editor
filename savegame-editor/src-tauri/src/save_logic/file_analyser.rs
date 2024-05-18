@@ -155,6 +155,7 @@ pub fn load_save_file(
         skills.unwrap().clone(),
         unlockable_items,
         items_result?,
+        logger.log_histroy.clone()
     ))
 }
 
@@ -247,7 +248,8 @@ pub fn edit_skill(
         replace_content_of_file(&new_skill.index + &new_skill.size, new_skill.points_data.clone(), save_file.file_content),
         save_file.skills,
         save_file.unlockable_items,
-        save_file.items
+        save_file.items,
+        save_file.log_history.clone()
     );
 
     // Changes the current skill to the new one.

@@ -2,7 +2,7 @@ import './settings-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
 import { SettingsSchema } from '../../models/settings-schema';
 import { SettingsManager } from 'tauri-settings';
-import { Box, Button, Divider, Switch, Typography } from '@mui/material';
+import { Box, Button, Divider, Switch, ThemeProvider, Typography, createTheme } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -22,18 +22,13 @@ const SettingsContent = ({settingsManager}: {settingsManager: SettingsManager<Se
 
     async function changeDebugSetting(option: boolean) {
         setIsDebug(option)
-        await settingsManager?.set('debugMode', option);
-        // settingsManager?.setCache('debugMode', option);
-    }
-    
-    const getIsDebug = () => {
-        var res = settingsManager?.getCache('debugMode')
-        console.log("SettingsManger Theme: ", res)
+        settingsManager?.setCache('debugMode', option);
+        // settingsManager.setCache('isNewToEditor', true);
     }
 
     async function saveSettings() {
         await settingsManager?.syncCache();
-        // navigate('/')
+        navigate('/main')
     }
     
 
@@ -62,9 +57,43 @@ const SettingsContent = ({settingsManager}: {settingsManager: SettingsManager<Se
                     />
                 </Box>
             </Box>
-
-            <Button onClick={getIsDebug}>Log Debug</Button>
-            <Button onClick={saveSettings}>Save Settings</Button>
+            
+            <ThemeProvider theme={settingsTheme}>
+                {/* <Button variant='outlined' onClick={getIsDebug}>Log Debug</Button> */}
+                <Button variant='outlined' onClick={saveSettings}>Save Settings</Button>
+            </ThemeProvider>
         </>
     )
 }
+
+const settingsTheme = createTheme({
+    palette: {
+        mode: 'dark'
+    },
+    components: {
+        MuiButton: {
+            styleOverrides: {
+                root: {
+                    margin: '0 10px',
+                },
+                outlined: {
+                    color: '#e9eecd', 
+                    borderColor: '#e9eecd',
+                    '&:hover': {
+                        borderColor: '#e9eecd',
+                        color: '#526264',
+                        backgroundColor: '#e9eecd',
+                    },
+                    '&:disabled': {
+                        borderColor: '#526264',
+                        color: '#526264',
+                    }
+                },
+                text: {
+                    backgroundColor: 'transparent',
+                    color: '#e9eecd',
+                }
+            }
+        }
+    }
+}) 

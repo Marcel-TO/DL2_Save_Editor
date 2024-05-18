@@ -60,7 +60,7 @@ function App() {
         (<Route path={'/caz-collection'} element={<CazCollectionPage settingsManager={settingsManager}/>}></Route>),
         (<Route path={'/knowledge-vault'} element={<KnowledgeVaultPage settingsManager={settingsManager}/>}></Route>),
         (<Route path={'/settings'} element={<SettingsPage settingsManager={settingsManager}/>}></Route>),
-        (<Route path={'/debug'} element={<DebugPage settingsManager={settingsManager}/>}></Route>),
+        (<Route path={'/debug'} element={<DebugPage settingsManager={settingsManager} currentSaveFile={currentSaveFile}/>}></Route>),
       ]
     )
   )

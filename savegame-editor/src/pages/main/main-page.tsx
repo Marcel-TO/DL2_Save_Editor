@@ -59,14 +59,14 @@ export const MainPage = ({currentSaveFile, setCurrentSaveFile, setIdData, settin
                 </ThemeProvider>
             ): (
                 <div className="container">
-                    <NavbarDrawer pagename={"Main"} pagecontent={<MainContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} setIdData={setIdData}/>} settingsManager={settingsManager}></NavbarDrawer>
+                    <NavbarDrawer pagename={"Main"} pagecontent={<MainContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} setIdData={setIdData} settingsManager={settingsManager}/>} settingsManager={settingsManager}></NavbarDrawer>
                 </div>
             )}
         </>
     )
 }
 
-const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function}): JSX.Element => {    
+const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData, settingsManager}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function, settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {    
     const [isOpen, setOpen] = useState(false);
     const [isOpeningSave, setOpeningSave] = useState(false);
     const [currentSavePath, setCurrentSavePath] = useState('');
@@ -109,10 +109,12 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
         });
       
         if (filepath != null && !Array.isArray(filepath)) {
-            let newSave = await invoke<SaveFile>("load_save", {file_path: filepath, is_debugging: false}).catch((err) => {
+            let newSave = await invoke<SaveFile>("load_save", {file_path: filepath, is_debugging: settingsManager.settings.debugMode}).catch((err) => {
               setCatchedError(err);
-            })
-            await setCurrentSaveFile();
+            });
+
+            console.log(newSave);
+            await setCurrentSaveFile(newSave);
             await handleSetIdData();
         };
 
