@@ -5,8 +5,6 @@ import CatchingPokemonIcon from '@mui/icons-material/CatchingPokemon';
 import { Box, Collapse, List, ListItemButton, ListItemIcon, ListItemText, Slide, Snackbar } from '@mui/material';
 import SavedSearchIcon from '@mui/icons-material/SavedSearch';
 import { FixedSizeList } from 'react-window';
-import { SettingsManager } from 'tauri-settings';
-import { SettingsSchema } from '../../models/settings-schema';
 
 
 // The ID selection
@@ -85,11 +83,6 @@ const VirtualizedList = ({
 
   // The handled data
   const [state, setState] = useState<SnackProps>({name: '', isOpen: false});
-
-  // Handles the click event of the snackbar if an id is selected.
-  const handleClick = (props: SnackProps) => {
-    setState(props);
-  };
 
   // Handles the close event of the snackbar after an id is selected.
   const handleClose = () => {
