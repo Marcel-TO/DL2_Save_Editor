@@ -3,4 +3,5 @@ export type SettingsSchema = {
     startFullscreen: boolean;
     debugMode: boolean;
     isNewToEditor: boolean;
+    automaticBackup: boolean;
 }

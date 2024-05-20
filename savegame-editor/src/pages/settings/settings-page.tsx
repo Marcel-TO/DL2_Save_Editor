@@ -5,6 +5,7 @@ import { SettingsManager } from 'tauri-settings';
 import { Box, Button, Divider, Switch, ThemeProvider, Typography, createTheme } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Path } from 'tauri-settings/dist/types/dot-notation';
 
 export const SettingsPage = ({settingsManager}: {settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {
     return (
@@ -18,19 +19,18 @@ export const SettingsPage = ({settingsManager}: {settingsManager: SettingsManage
 
 const SettingsContent = ({settingsManager}: {settingsManager: SettingsManager<SettingsSchema>}) => {
     const [isDebug, setIsDebug] = useState<boolean>(settingsManager ? settingsManager.settings && settingsManager.settings.debugMode : false)
+    const [hasAutomaticBackup, setAutomaticBackup] = useState<boolean>(settingsManager ? settingsManager.settings && settingsManager.settings.automaticBackup : false)
     const navigate = useNavigate();
 
-    async function changeDebugSetting(option: boolean) {
-        setIsDebug(option)
-        settingsManager?.setCache('debugMode', option);
-        // settingsManager.setCache('isNewToEditor', true);
+    async function changeSetting(key: Path<SettingsSchema>, option: boolean, stateFunction: Function) {
+        stateFunction(option)
+        settingsManager?.setCache(key, option);
     }
 
     async function saveSettings() {
         await settingsManager?.syncCache();
         navigate('/main')
     }
-    
 
     return(
         <>
@@ -52,7 +52,23 @@ const SettingsContent = ({settingsManager}: {settingsManager: SettingsManager<Se
                     <Typography sx={{width: '60%'}}>Debug Mode</Typography>
                     <Switch
                         checked={isDebug}
-                        onChange={() => changeDebugSetting(!isDebug)}
+                        onChange={() => changeSetting('debugMode', !isDebug, setIsDebug)}
+                        inputProps={{ 'aria-label': 'controlled' }}
+                    />
+                </Box>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                        width: '60%',
+                        alignItems: 'center',
+                        margin: '2rem',
+                    }}>
+                    <Typography sx={{width: '60%'}}>Automatic Backup</Typography>
+                    <Switch
+                        checked={hasAutomaticBackup}
+                        onChange={() => changeSetting('automaticBackup', !hasAutomaticBackup, setAutomaticBackup)}
                         inputProps={{ 'aria-label': 'controlled' }}
                     />
                 </Box>

@@ -1,4 +1,6 @@
-import * as React from 'react';
+import './navbar-drawer.css'
+
+import { useEffect, useState } from 'react';
 import { styled, useTheme, Theme, CSSObject, createTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import MuiDrawer from '@mui/material/Drawer';
@@ -28,12 +30,13 @@ import AssignmentLateRoundedIcon from '@mui/icons-material/AssignmentLateRounded
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import StoreRoundedIcon from '@mui/icons-material/StoreRounded';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BugReportIcon from '@mui/icons-material/BugReport';
-import { useEffect, useState } from 'react';
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 
 // Themes
 const openedMixin = (theme: Theme): CSSObject => ({
@@ -148,8 +151,9 @@ const otherPages: [string, JSX.Element, string, boolean][] = [
 ];
 const infoPages: [string, JSX.Element, string, boolean][] = [
   ['Home', <HomeRoundedIcon/>, '/main', false],
-  ['Info', <HelpOutlineRoundedIcon/>, '/info', false],
-  ['Caz Outpost', <StoreRoundedIcon/>, '/outpost', false], 
+  ['Info', <InfoOutlinedIcon/>, '/info', false],
+  ['Knowledge', <MenuBookOutlinedIcon/>, '/knowledge-vault', false],
+  // ['Caz Outpost', <StoreRoundedIcon/>, '/outpost', false], 
 ];
 
 // Props

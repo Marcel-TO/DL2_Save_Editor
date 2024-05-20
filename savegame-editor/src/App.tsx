@@ -31,7 +31,8 @@ function App() {
         theme: 'light',
         startFullscreen: true,
         debugMode: false,
-        isNewToEditor: true
+        isNewToEditor: true,
+        automaticBackup: true,
     },
     { // options
         fileName: 'customization-settings'

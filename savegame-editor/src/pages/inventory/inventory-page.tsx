@@ -671,7 +671,7 @@ const VirtualizedList = ({
                                             <IDsSelection idData={idDatas} currentSelectedSize={currentItem ? currentItem.size : 0} setCurrentSelectedID={setCurrentSelectedID} handleCLickChangeItem={handleCLickChangeItem}></IDsSelection>
                                         </Box>
                                     ) : (
-                                        <Tooltip title={currentItem?.name} arrow placement="top-start">
+                                        <Tooltip title={`Current Item: ${currentItem?.name}`} arrow placement="top-start">
                                             <Typography noWrap gutterBottom variant="h5" component="div">
                                                 {currentSelectedID}
                                             </Typography>
