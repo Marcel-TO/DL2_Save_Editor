@@ -15,6 +15,8 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 import { SettingsManager } from 'tauri-settings';
 import { SettingsSchema } from '../../models/settings-schema';
+import { IDsPage } from '../ids/ids-page';
+import { IDsSelection } from '../../components/ids-selection/ids-selection';
 
 export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile, idDatas, settingsManager }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, idDatas: IdData[], settingsManager: SettingsManager<SettingsSchema> }): JSX.Element => (
     <>
@@ -23,7 +25,7 @@ export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile, idDatas, se
                 pagename={"Inventory"} 
                 pagecontent={
                     currentSaveFile ? (
-                        <InventoryContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} idDatas={idDatas} />
+                        <InventoryContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} idDatas={idDatas} settingsManager={settingsManager} />
                     ) : (
                         <h1>You need to load a save first</h1>
                     )}
@@ -33,7 +35,7 @@ export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile, idDatas, se
     </>
 )
 
-const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, idDatas: IdData[] }) => {
+const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas, settingsManager }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, idDatas: IdData[], settingsManager: SettingsManager<SettingsSchema> }) => {
     const [tabIndex, setValue] = useState(0);
     const [isTemplateVisible, setIsTemplateVisible] = useState(false);
     const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
@@ -119,7 +121,8 @@ const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { cu
                                     minWidth={360}
                                     currentSaveFile={currentSaveFile}
                                     setCurrentSaveFile={setCurrentSaveFile}
-                                    idDatas={idDatas} />
+                                    idDatas={idDatas}
+                                    settingsManager={settingsManager} />
                             </CustomTabPanel>
                         ))}
                     </Box>
@@ -286,6 +289,7 @@ const VirtualizedList = ({
     currentSaveFile,
     setCurrentSaveFile,
     idDatas,
+    settingsManager
 }: {
     itemRow: InventoryItemRow,
     itemIndex: number,
@@ -293,18 +297,17 @@ const VirtualizedList = ({
     currentSaveFile: SaveFile | undefined,
     setCurrentSaveFile: Function,
     idDatas: IdData[],
+    settingsManager: SettingsManager<SettingsSchema>
 }): JSX.Element => {
     const [isOpen, setIsOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState<InventoryItem>();
     const [currentItemIndex, setCurrentItemIndex] = useState(itemIndex);
 
-    const [currentSelectedID, setCurrentSelectedID] = useState('');
+    const [currentSelectedID, setCurrentSelectedID] = useState(''); 
     const [currentSelectedItemLevel, setCurrentSelectedItemLevel] = useState('');
     const [currentSelectedItemSeed, setCurrentSelectedItemSeed] = useState('');
     const [currentSelectedItemAmount, setCurrentSelectedItemAmount] = useState('');
     const [currentSelectedItemDurability, setCurrentSelectedItemDurability] = useState('');
-    const [possibleIDs, setPossibleIDs] = useState<string[]>([]);
-    const [currentPossibleIDSection, setCurrentPossibleIDSection] = useState('');
 
     const [changeItemIsOpen, setChangeItemIsOpen] = useState(false);
     const [removeItemIsOpen, setRemoveItemIsOpen] = useState(false);
@@ -335,7 +338,6 @@ const VirtualizedList = ({
         setCurrentSelectedItemSeed(selectedItem.chunk_data.seed_value.toString());
         setCurrentSelectedItemAmount(selectedItem.chunk_data.amount_value.toString());
         setCurrentSelectedItemDurability(selectedItem.chunk_data.durability_value.toString());
-        handlePossibleIDs(selectedItem.size, currentPossibleIDSection);
         setIsOpen(true);
     }
 
@@ -343,47 +345,8 @@ const VirtualizedList = ({
         setCurrentItem(undefined);
         setIsOpen(false);
         setRemoveItemIsOpen(false);
+        setChangeItemIsOpen(false);
     }
-
-    const handlePossibleIDs = (size: number, current_section: string) => {
-        let iDs: string[] = [];
-
-        // Check the current selected ID section.
-        for (let x = 0; x < idDatas.length; x++) {
-            if (idDatas[x].filename == current_section) {
-                let encoder = new TextEncoder();
-
-                for (let i = 0; i < idDatas[x].ids.length; i++) {
-                    idDatas[x].ids.forEach((id) => {
-                        let bytes = encoder.encode(id)
-                        if (bytes.length <= size) {
-                            iDs.push(id);
-                        }
-                    });
-                }
-            }
-        }
-
-        console.log("Updated possible IDs (%d) in section: ", iDs.length, current_section)
-        setPossibleIDs(iDs);
-    };
-
-    const handleCurrentPossibleIDSection = (section: string) => {
-        setCurrentPossibleIDSection(section);
-        if (currentItem != undefined) {
-            handlePossibleIDs(currentItem.size, section)
-        }
-        handleCurrentPossibleIDSectionMenuClose();
-    };
-
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const selectCurrentPossibleIDSection = Boolean(anchorEl);
-    const handleCurrentPossibleIDSectionMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
-    const handleCurrentPossibleIDSectionMenuClose = () => {
-        setAnchorEl(null);
-    };
 
     const handleLevelValue = (event: ChangeEvent<HTMLInputElement>) => {
         const maxValue = 65535;
@@ -689,63 +652,28 @@ const VirtualizedList = ({
 
                             <Box sx={{
                                 display: 'flex',
+                                position: 'relative',
                                 flexDirection: 'row',
                                 justifyContent: 'center',
                                 marginTop: '20px',
+                                maxHeight: '80vh'
                             }}>
-                                <Box sx={{ width: '500px' }}>
+                                <Box sx={{ width: '500px', position: 'relative'  }}>
                                     {changeItemIsOpen ? (
-                                        <Box
-                                            sx={{
-                                                display: 'flex',
-                                                flexDirection: 'row',
-                                            }}
-                                        >
-                                            <Button
-                                                sx={{
-                                                    marginLeft: '10px',
-                                                    cursor: 'pointer',
-                                                    "&:hover": {
-                                                        backgroundColor: '#52626450'
-                                                    }
-                                                }}
-                                                id="basic-button"
-                                                aria-controls={selectCurrentPossibleIDSection ? 'basic-menu' : undefined}
-                                                aria-haspopup="true"
-                                                aria-expanded={selectCurrentPossibleIDSection ? 'true' : undefined}
-                                                onClick={handleCurrentPossibleIDSectionMenu}
-                                            >
-                                                <SettingsSuggestIcon />
-                                            </Button>
-                                            <Menu
-                                                id="basic-menu"
-                                                anchorEl={anchorEl}
-                                                open={selectCurrentPossibleIDSection}
-                                                onClose={handleCurrentPossibleIDSectionMenuClose}
-                                                MenuListProps={{
-                                                'aria-labelledby': 'basic-button',
-                                                }}
-                                            >
-                                                {idDatas.map((idData) => (
-                                                    <>
-                                                        {idData.filename == currentPossibleIDSection ? (
-                                                            <MenuItem sx={{backgroundColor: '#526264'}} onClick={() => handleCurrentPossibleIDSection(idData.filename)}>{idData.filename}</MenuItem>
-                                                        ) : (
-                                                            <MenuItem onClick={() => handleCurrentPossibleIDSection(idData.filename)}>{idData.filename}</MenuItem>
-                                                        )}
-                                                    </>
-                                                ))}
-                                            </Menu>
-                                            <AsyncAutocomplete
-                                                currentID={currentSelectedID}
-                                                iDs={possibleIDs}
-                                                changeCurrentID={setCurrentSelectedID}
-                                            />
+                                        <Box sx={{
+                                            position: 'absolute',
+                                            top: '0',
+                                            height: '60vh',
+                                            width: '100%',
+                                            overflow: 'scroll',
+                                            zIndex: '2'
+                                        }}>
+                                            <IDsSelection idData={idDatas} currentSelectedSize={currentItem ? currentItem.size : 0} setCurrentSelectedID={setCurrentSelectedID} handleCLickChangeItem={handleCLickChangeItem}></IDsSelection>
                                         </Box>
                                     ) : (
                                         <Tooltip title={currentItem?.name} arrow placement="top-start">
                                             <Typography noWrap gutterBottom variant="h5" component="div">
-                                                {currentItem?.name}
+                                                {currentSelectedID}
                                             </Typography>
 
                                         </Tooltip>
@@ -936,6 +864,74 @@ const VirtualizedList = ({
         </>
     );
 };
+
+// Represents the collapsed nested list.
+  // Using FixedSizedList instead of normal list to improve performance when opening a bracket.
+  const SelectNewIDVirtualizedList = ({
+    items,
+    minWidth,
+  }: {
+    items: string[];
+    minWidth: number;
+  }): JSX.Element => { 
+    // Represents the row of the collapsed nested list.
+    const VirtualizedRow = ({ item, style }: { item: string; style: React.CSSProperties }) => {
+      return (
+        <>
+          <ListItemButton key={item} sx={{ pl: 4, minWidth: 360 }} style={style}>
+            <ListItemIcon>
+              <ConstructionRoundedIcon sx={{color: '#e9eecd'}}/>
+            </ListItemIcon>
+            <ListItemText primary={item} />
+          </ListItemButton>
+        </>
+      );
+    };
+  
+    return (
+      <>
+      <Box sx={{ height: '100%', minWidth: minWidth }}>
+        <FixedSizeList
+          height={500}
+          width='100%'
+          itemSize={60}
+          itemCount={items?.length || 0}
+          className='fixedSizeListContainer'
+        >
+          {({ index, style }) => (
+            <>
+              <VirtualizedRow item={items[index]} style={style} />
+            </>
+          )}
+        </FixedSizeList>
+      </Box>
+      </>
+    );
+  };
+
+const searchbarTheme = createTheme({
+    palette: {
+        mode: 'dark',
+    },
+    components: {
+        MuiOutlinedInput: {
+            styleOverrides: {
+                root: {
+                    color: '#e9eecd',
+                    "& fieldset": {
+                    borderColor: "#526264",
+                    },
+                    "&:hover fieldset": {
+                    borderColor: "#899994 !important"
+                    },
+                    "&.Mui-focused fieldset": {
+                    borderColor: "#e9eecd !important"
+                    }
+                }
+            }
+        },
+    }
+});
 
 const selectedItemCardTheme = createTheme({
     palette: {
