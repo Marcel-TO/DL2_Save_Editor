@@ -2,7 +2,7 @@ import './settings-page.css'
 import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
 import { SettingsSchema } from '../../models/settings-schema';
 import { SettingsManager } from 'tauri-settings';
-import { Box, Button, Divider, Switch, ThemeProvider, Typography, createTheme } from '@mui/material';
+import { Box, Button, Switch, ThemeProvider, Typography, createTheme } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Path } from 'tauri-settings/dist/types/dot-notation';

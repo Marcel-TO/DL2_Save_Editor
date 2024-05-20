@@ -1,7 +1,7 @@
-import './inventory-page.css'
-import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
-import { IdData, InventoryChunk, InventoryItem, InventoryItemRow, SaveFile } from '../../models/save-models'
-import { Backdrop, Box, Button, Card, CardContent, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Tab, Tabs, TextField, Tooltip, Typography, createTheme, styled } from '@mui/material'
+import './inventory-page.css';
+import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer';
+import { IdData, InventoryChunk, InventoryItem, InventoryItemRow, SaveFile } from '../../models/save-models';
+import { Backdrop, Box, Button, Card, CardContent, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Tab, Tabs, TextField, Tooltip, Typography, createTheme, styled } from '@mui/material';
 import { ChangeEvent, Fragment, useState } from 'react';
 import { ThemeProvider } from '@emotion/react';
 import ConstructionRoundedIcon from '@mui/icons-material/ConstructionRounded';
@@ -9,13 +9,10 @@ import BorderColorIcon from '@mui/icons-material/BorderColor';
 import templates from '../../models/item-templates.json';
 import { FixedSizeList } from 'react-window';
 import { invoke } from '@tauri-apps/api';
-import AsyncAutocomplete from '../../components/async-autocomplete/async-autocomplete';
 import ShuffleOnIcon from '@mui/icons-material/ShuffleOn';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 import { SettingsManager } from 'tauri-settings';
 import { SettingsSchema } from '../../models/settings-schema';
-import { IDsPage } from '../ids/ids-page';
 import { IDsSelection } from '../../components/ids-selection/ids-selection';
 
 export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile, idDatas, settingsManager }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, idDatas: IdData[], settingsManager: SettingsManager<SettingsSchema> }): JSX.Element => (
@@ -25,7 +22,7 @@ export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile, idDatas, se
                 pagename={"Inventory"} 
                 pagecontent={
                     currentSaveFile ? (
-                        <InventoryContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} idDatas={idDatas} settingsManager={settingsManager} />
+                        <InventoryContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} idDatas={idDatas} />
                     ) : (
                         <h1>You need to load a save first</h1>
                     )}
@@ -35,7 +32,7 @@ export const InventoryPage = ({ currentSaveFile, setCurrentSaveFile, idDatas, se
     </>
 )
 
-const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas, settingsManager }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, idDatas: IdData[], settingsManager: SettingsManager<SettingsSchema> }) => {
+const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas }: { currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, idDatas: IdData[] }) => {
     const [tabIndex, setValue] = useState(0);
     const [isTemplateVisible, setIsTemplateVisible] = useState(false);
     const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
@@ -121,8 +118,7 @@ const InventoryContent = ({ currentSaveFile, setCurrentSaveFile, idDatas, settin
                                     minWidth={360}
                                     currentSaveFile={currentSaveFile}
                                     setCurrentSaveFile={setCurrentSaveFile}
-                                    idDatas={idDatas}
-                                    settingsManager={settingsManager} />
+                                    idDatas={idDatas} />
                             </CustomTabPanel>
                         ))}
                     </Box>
@@ -288,8 +284,7 @@ const VirtualizedList = ({
     minWidth,
     currentSaveFile,
     setCurrentSaveFile,
-    idDatas,
-    settingsManager
+    idDatas
 }: {
     itemRow: InventoryItemRow,
     itemIndex: number,
@@ -297,7 +292,6 @@ const VirtualizedList = ({
     currentSaveFile: SaveFile | undefined,
     setCurrentSaveFile: Function,
     idDatas: IdData[],
-    settingsManager: SettingsManager<SettingsSchema>
 }): JSX.Element => {
     const [isOpen, setIsOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState<InventoryItem>();
@@ -864,74 +858,6 @@ const VirtualizedList = ({
         </>
     );
 };
-
-// Represents the collapsed nested list.
-  // Using FixedSizedList instead of normal list to improve performance when opening a bracket.
-  const SelectNewIDVirtualizedList = ({
-    items,
-    minWidth,
-  }: {
-    items: string[];
-    minWidth: number;
-  }): JSX.Element => { 
-    // Represents the row of the collapsed nested list.
-    const VirtualizedRow = ({ item, style }: { item: string; style: React.CSSProperties }) => {
-      return (
-        <>
-          <ListItemButton key={item} sx={{ pl: 4, minWidth: 360 }} style={style}>
-            <ListItemIcon>
-              <ConstructionRoundedIcon sx={{color: '#e9eecd'}}/>
-            </ListItemIcon>
-            <ListItemText primary={item} />
-          </ListItemButton>
-        </>
-      );
-    };
-  
-    return (
-      <>
-      <Box sx={{ height: '100%', minWidth: minWidth }}>
-        <FixedSizeList
-          height={500}
-          width='100%'
-          itemSize={60}
-          itemCount={items?.length || 0}
-          className='fixedSizeListContainer'
-        >
-          {({ index, style }) => (
-            <>
-              <VirtualizedRow item={items[index]} style={style} />
-            </>
-          )}
-        </FixedSizeList>
-      </Box>
-      </>
-    );
-  };
-
-const searchbarTheme = createTheme({
-    palette: {
-        mode: 'dark',
-    },
-    components: {
-        MuiOutlinedInput: {
-            styleOverrides: {
-                root: {
-                    color: '#e9eecd',
-                    "& fieldset": {
-                    borderColor: "#526264",
-                    },
-                    "&:hover fieldset": {
-                    borderColor: "#899994 !important"
-                    },
-                    "&.Mui-focused fieldset": {
-                    borderColor: "#e9eecd !important"
-                    }
-                }
-            }
-        },
-    }
-});
 
 const selectedItemCardTheme = createTheme({
     palette: {

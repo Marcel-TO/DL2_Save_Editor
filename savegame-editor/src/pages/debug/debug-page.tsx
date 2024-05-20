@@ -3,8 +3,7 @@ import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
 import { SettingsManager } from 'tauri-settings'
 import { SettingsSchema } from '../../models/settings-schema'
 import { SaveFile } from '../../models/save-models'
-import { Box, Button, Card, CardActions, CardContent, CardHeader, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Snackbar, ThemeProvider, Typography, createTheme } from '@mui/material'
-import { Fragment, useState } from 'react'
+import { Box, Card, CardContent, ListItemButton, ListItemText, ThemeProvider, createTheme } from '@mui/material'
 import { FixedSizeList } from 'react-window'
 
 export const DebugPage = ({settingsManager, currentSaveFile}: {settingsManager: SettingsManager<SettingsSchema>, currentSaveFile: SaveFile | undefined}): JSX.Element => {
