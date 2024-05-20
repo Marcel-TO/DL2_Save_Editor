@@ -6,12 +6,23 @@ import { Box, ListItemButton, ListItemIcon, ListItemText, TextField, createTheme
 import { useState, ChangeEvent } from 'react'
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import { FixedSizeList } from 'react-window'
+import { SettingsManager } from 'tauri-settings'
+import { SettingsSchema } from '../../models/settings-schema'
 
-export const UnlockablePage = ({currentSaveFile}: {currentSaveFile: SaveFile | undefined}): JSX.Element => {    
+export const UnlockablePage = ({currentSaveFile, settingsManager}: {currentSaveFile: SaveFile | undefined, settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {    
     return (
         <>
-        <div className="container">
-            <NavbarDrawer pagename={"Unlockables"} pagecontent={<UnlockableContent unlockableItems={currentSaveFile != undefined ? currentSaveFile.unlockable_items : []}/>}></NavbarDrawer>
+          <div className="container">
+            <NavbarDrawer 
+                pagename={"Unlockables"} 
+                pagecontent={
+                    currentSaveFile ? (
+                      <UnlockableContent unlockableItems={currentSaveFile != undefined ? currentSaveFile.unlockable_items : []}/>
+                    ) : (
+                      <h1>You need to load a save first</h1>
+                    )}
+                settingsManager={settingsManager}
+            ></NavbarDrawer>
         </div>
         </>
     )

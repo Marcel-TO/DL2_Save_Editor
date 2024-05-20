@@ -3,6 +3,8 @@ import Autocomplete from '@mui/material/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
 import { Fragment, useEffect, useState } from 'react';
 
+import ShuffleOnIcon from '@mui/icons-material/ShuffleOn';
+
 function sleep(duration: number): Promise<void> {
   return new Promise<void>((resolve) => {
     setTimeout(() => {

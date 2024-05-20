@@ -1,31 +1,27 @@
-import './ids-page.css'
-import { NavbarDrawer } from '../../components/navbar-drawer/navbar-drawer'
+import './ids-selection.css'
 import { Fragment, useState } from 'react'
 import { IdData } from '../../models/save-models';
 import CatchingPokemonIcon from '@mui/icons-material/CatchingPokemon';
-import { Box, Button, Collapse, List, ListItemButton, ListItemIcon, ListItemText, Slide, Snackbar, Tooltip } from '@mui/material';
+import { Box, Collapse, List, ListItemButton, ListItemIcon, ListItemText, Slide, Snackbar } from '@mui/material';
 import SavedSearchIcon from '@mui/icons-material/SavedSearch';
 import { FixedSizeList } from 'react-window';
-import UpdateIcon from '@mui/icons-material/Update';
-import { open } from '@tauri-apps/api/dialog';
-import { invoke } from '@tauri-apps/api';
 import { SettingsManager } from 'tauri-settings';
 import { SettingsSchema } from '../../models/settings-schema';
 
 
-// The ID page
-export const IDsPage = ({idData, settingsManager}: {idData: IdData[], settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {  
+// The ID selection
+export const IDsSelection = ({idData, currentSelectedSize, setCurrentSelectedID, handleCLickChangeItem}: {idData: IdData[], currentSelectedSize: number, setCurrentSelectedID: Function, handleCLickChangeItem: Function}): JSX.Element => {    
   return (
         <>
-        <div className="container">
-            <NavbarDrawer pagename={"IDs"} pagecontent={<IdContent idData={idData}/>} settingsManager={settingsManager}></NavbarDrawer>
+        <div className="ids-selection-container">
+            <IdContent idData={idData} currentSelectedSize={currentSelectedSize} setCurrentSelectedID={setCurrentSelectedID} handleCLickChangeItem={handleCLickChangeItem}/>
         </div>
         </>
     )
 }
 
 // The content of the ID page
-const IdContent = ({idData}: {idData: IdData[]}): JSX.Element => {
+const IdContent = ({idData, currentSelectedSize, setCurrentSelectedID, handleCLickChangeItem}: {idData: IdData[], currentSelectedSize: number, setCurrentSelectedID: Function, handleCLickChangeItem: Function}): JSX.Element => {
   // The handled data
   const [currentSelected, setCurrentSelected] = useState<string>("");
 
@@ -39,20 +35,9 @@ const IdContent = ({idData}: {idData: IdData[]}): JSX.Element => {
       setCurrentSelected(filename);
   } 
 
-  async function updateIDs() {
-    let filepath = await open({
-      multiple: false,
-      directory: true,
-    });
-
-    if (filepath != null && !Array.isArray(filepath)) {
-      await await invoke("update_id_folder", {file_path: filepath})
-    };
-  }
-
   return (
       <>
-          <div className="id-list-container">
+          <div className="id-selection-container">
             <List
               sx={{ width: '100%', minWidth: 360, bgcolor: 'transparent' }}
               component="nav"
@@ -67,36 +52,12 @@ const IdContent = ({idData}: {idData: IdData[]}): JSX.Element => {
                           <ListItemText primary={item.filename} />
                       </ListItemButton>
                       <Collapse in={currentSelected === item.filename} timeout="auto" unmountOnExit>
-                          <VirtualizedList ids={item.ids} minWidth={360}/>
+                          <VirtualizedList ids={item.ids} minWidth={360} currentSelectedSize={currentSelectedSize} setCurrentSelectedID={setCurrentSelectedID} handleCLickChangeItem={handleCLickChangeItem}/>
                       </Collapse>
                   </Fragment>
               ))}
               </List>
           </div>
-
-          <Tooltip title='Update IDs'>
-            <Button
-            sx={{
-              position: 'fixed',
-              right: '1rem',
-              bottom: '1rem',
-              backgroundColor: '#526264',
-              color: '#899994',
-              transition: 'all .2',
-              borderRadius: '50%',
-              width: '4rem',
-              height: '4rem',
-              '&:hover': {
-                backgroundColor: '#899994',
-                color: '#e9eecd'
-              }
-            }}
-            onClick={updateIDs}
-            disabled={true}
-            >
-            <UpdateIcon/>
-          </Button>
-        </Tooltip>
       </>
   )
 }
@@ -106,9 +67,15 @@ const IdContent = ({idData}: {idData: IdData[]}): JSX.Element => {
 const VirtualizedList = ({
   ids,
   minWidth,
+  currentSelectedSize,
+  setCurrentSelectedID,
+  handleCLickChangeItem
 }: {
   ids: string[];
   minWidth: number;
+  currentSelectedSize: number;
+  setCurrentSelectedID: Function;
+  handleCLickChangeItem: Function
 }): JSX.Element => {
   // The Properties of the selected id.
   interface SnackProps {
@@ -134,15 +101,23 @@ const VirtualizedList = ({
 
   // Handles the event if id is selected
   const handleCopyID = (id: string) => {
-    navigator.clipboard.writeText(id);
-    handleClick({name: id, isOpen: true});
+    setCurrentSelectedID(id)
+    handleCLickChangeItem()
   };
 
   // Represents the row of the collapsed nested list.
   const VirtualizedRow = ({ id, style }: { id: string; style: React.CSSProperties }) => {
     return (
       <>
-        <ListItemButton key={id} sx={{ pl: 4, minWidth: 360 }} style={style} onClick={() => handleCopyID(id)}>
+        <ListItemButton 
+          key={id} 
+          sx={{ 
+            pl: 4, 
+            minWidth: 360
+          }} 
+          style={style} 
+          onClick={() => handleCopyID(id)}
+          disabled={id.length > currentSelectedSize}>
           <ListItemIcon>
             <SavedSearchIcon sx={{color: '#e9eecd'}}/>
           </ListItemIcon>

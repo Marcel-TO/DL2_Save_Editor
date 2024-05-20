@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "Dying Light 2 Save Editor",
-    "version": "1.0.5"
+    "version": "1.0.6"
   },
   "tauri": {
     "allowlist": {
@@ -28,9 +28,14 @@
       "fs": {
         "all": true,
         "scope": [
-          "$RESOURCE/*"
+          "$RESOURCE/*",
+          "$APPCONFIG", 
+          "$APPCONFIG/*"
         ]
-      }
+      },
+      "path": {
+        "all": true
+       }
     },
     "bundle": {
       "resources": [

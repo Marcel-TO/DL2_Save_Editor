@@ -2,7 +2,7 @@ use std::mem;
 
 use serde::{Serialize, Deserialize};
 
-use crate::file_analizer::format_bytes_to_string;
+use crate::save_logic::file_analyser::format_bytes_to_string;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum ItemTypeEnum {
@@ -215,6 +215,7 @@ pub struct SaveFile {
     pub skills: Skills,
     pub unlockable_items: Vec<UnlockableItem>,
     pub items: Vec<InventoryItemRow>,
+    pub log_history: Vec<String>,
 }
 
 impl SaveFile {
@@ -224,6 +225,7 @@ impl SaveFile {
         skills: Skills,
         unlockable_items: Vec<UnlockableItem>,
         items: Vec<InventoryItemRow>,
+        log_history: Vec<String>
     ) -> Self {
         SaveFile {
             path,
@@ -232,6 +234,7 @@ impl SaveFile {
             items,
             unlockable_items,
             skills,
+            log_history
         }
     }
 }

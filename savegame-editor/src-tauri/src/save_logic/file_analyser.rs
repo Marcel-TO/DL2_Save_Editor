@@ -9,14 +9,12 @@ use std::io::Write;
 use std::{fs, io::Read};
 use std::error::Error;
 use flate2::read::GzDecoder;
-use log::info;
 use regex::Regex;
 use flate2::write::GzEncoder;
 use flate2::Compression;
-
-
+use crate::logger::{ConsoleLogger, LoggerFunctions};
 // Import all struct datas.
-use crate::struct_data::{
+use crate::save_logic::struct_data::{
     SaveFile, 
     Skills, 
     SkillItem,
@@ -25,14 +23,16 @@ use crate::struct_data::{
     InventoryItem,
     InventoryItemRow,
     InventoryChunk,
-    Mod,
+    IdData,
 };
+
+use super::struct_data::Mod;
 
 // Define global result definition for easier readability.
 type Result<T> = std::result::Result<T,Box<dyn Error>>;
 
 // Defines the first sequence for the skill section.
-static START_SKILLS: &[u8] = "Skills::SkillInstance".as_bytes();
+static START_SKILLS: &[u8] = b"Skills::SkillInstance";
 
 // Defines the last sequence for the skill section.
 static END_SKILLS: [u8; 33] = [
@@ -42,19 +42,6 @@ static END_SKILLS: [u8; 33] = [
     0x6E, 0x74, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6F,
     0x6E
 ];
-
-// Defines the sequence where the inventory starts
-// -> Token.....Unknown
-// static START_INVENTORY: [u8; 18] = [
-//     0x54, 0x6F, 0x6B, 0x65, 0x6E, 0x00, 0x00, 0x00,
-//     0x00, 0x07, 0x00, 0x55, 0x6E, 0x6B, 0x6E, 0x6F, 0x77, 0x6E
-// ];
-
-// -> Special.....Unknown
-// static START_INVENTORY: [u8; 20] = [
-//     0x53, 0x70, 0x65, 0x63, 0x69, 0x61, 0x6C, 0x00, 0x00, 
-//     0x00, 0x00, 0x07, 0x00, 0x55, 0x6E, 0x6B, 0x6E, 0x6F, 0x77, 0x6E
-// ];
 
 static START_INVENTORY: [u8; 15] = [
     0x4D, 0x61, 0x69, 0x6E, 0x01, 0x00, 0x00, 0x00, 0x05, 
@@ -66,55 +53,137 @@ static START_INVENTORY: [u8; 15] = [
 /// ### Parameter
 /// - `file_path`: The filepath of the current selected save.
 /// - `file_content`: The content of the current file.
+/// - `ids`: The list of all IDs.
+/// - `logger`: The console logger that logs every event.
+/// - `is_debugging`: Indicates whether the file analyser is in debugging mode or not.
 /// 
 /// ### Returns `SaveFile`
 /// The save file with all collected data.
-pub fn load_save_file(file_path: &str, file_content: Vec<u8>) -> SaveFile {    
+pub fn load_save_file(
+    file_path: &str,
+    file_content: Vec<u8>,
+    ids: Vec<IdData>,
+    logger: &mut ConsoleLogger,
+    is_debugging: bool
+) -> Result<SaveFile> {   
     // Gets the indices of the skill data.
     let skill_start_index: usize = get_index_from_sequence(&file_content, &0, &START_SKILLS, true);
     let skill_end_index: usize = get_index_from_sequence(&file_content, &skill_start_index, &END_SKILLS, true);
-    let skill_data_range: &[u8] = &file_content[skill_start_index - 1 .. skill_end_index];
-
+    
     // Check if there was an error while trying to get the indices.
-    if skill_data_range.len() <= 0 {
-        info!("Error: index not found");
+    if skill_start_index == 0 || skill_end_index == 0 {
+        return Err("It appears the file provided does not fit the save file structure. Please check if the path is set to a valid save file.".into());
     }
+    
+    let skill_data_range: &[u8] = &file_content[skill_start_index - 1 .. skill_end_index];
 
     // Collect all skills.
     let base_skills: Vec<String> = find_base_skill_matches(&skill_data_range);
     let legend_skills: Vec<String> = find_legend_skill_matches(&skill_data_range);
-    let skills: Skills = analize_skill_data(&file_content, &base_skills, &legend_skills);
     
+    // Check if the editor did not find a base skill which is essential for analysing the save.
+    if base_skills.len() == 0 {
+        return Err("In the skill section, the editor could not validate a single skill.".into());
+    }
+    
+    let skills = analize_skill_data(&file_content, &base_skills, &legend_skills, logger, is_debugging);
+    
+    // Check if the editor did not manage to validate the skills.
+    match &skills {
+        Ok(skills_unwrapped) => {
+            logger.log_message(&format!("{} Skills got validated", skills_unwrapped.base_skills.len() + skills_unwrapped.legend_skills.len()), Vec::new());
+
+            // Wait for user input to continue with the analysation.
+            if is_debugging {
+                logger.wait_for_input();
+            }
+        },
+        Err(err) => return Err(err.to_string().into())
+    }
+
     // Find all unlockable items.
-    let unlockable_items: Vec<UnlockableItem> = analize_unlockable_items_data(&file_content);
-    let index_inventory_items: usize = get_index_for_inventory_items(&unlockable_items, &file_content);
+    let unlockable_result: Result<Vec<UnlockableItem>> = analize_unlockable_items_data(&file_content, logger, is_debugging);
+    
+    // Check if the editor did not manage to validate the unlockables.
+    match &unlockable_result {
+        Ok(unlocks) => {
+            logger.log_message(&format!("{} Unlockables got validated.", unlocks.len()), Vec::new());
+
+            // Wait for user input to continue with the analysation.
+            if is_debugging {
+                logger.wait_for_input();
+            }
+        },
+        Err(err) => return Err(err.to_string().into())
+    }
+    
+    let unlockable_items = unlockable_result?; 
+    let index_inventory_items_result: Result<usize> = get_index_for_inventory_items(&unlockable_items, &file_content, logger, is_debugging);
+
+    // Check if the editor did not manage to validate the inventory index.
+    match &index_inventory_items_result {
+        Ok(_) => {            
+            // Wait for user input to continue with the analysation.
+            if is_debugging {
+                logger.wait_for_input();
+            }
+        },
+        Err(err) => return Err(err.to_string().into())
+    }
+
+    let index_inventory_items: usize = index_inventory_items_result.unwrap();
 
     // Get all items within the inventory.
-    let items: Vec<InventoryItemRow> = get_all_items(&file_content, index_inventory_items);
+    let items_result: Result<Vec<InventoryItemRow>> = get_all_items(&file_content, index_inventory_items, ids, logger, is_debugging);
 
-    SaveFile::new(
+    // Check if the editor did not manage to validate the unlockables.
+    match &items_result {
+        Ok(i) => {
+            logger.log_message(&format!("{} Tabs from inventory got validated.", i.len()), Vec::new());
+
+            // Wait for user input to continue with the analysation.
+            if is_debugging {
+                logger.wait_for_input();
+            }
+        },
+        Err(err) => return Err(err.to_string().into())
+    }
+
+    Ok(SaveFile::new(
         file_path.to_string(),
         file_content,
-        skills,
+        skills.unwrap().clone(),
         unlockable_items,
-        items,
-    )
+        items_result?,
+        logger.log_histroy.clone()
+    ))
 }
 
 /// Represents a method for loading a PC savefile and preparing all necessary information.
 /// 
 /// ### Parameter
 /// - `file_path`: The filepath of the current selected save.
-/// - `file_content`: The content of the current file.
+/// - `compressed`: The compressed content of the current file.
+/// - `ids`: The list of all IDs.
+/// - `logger`: The console logger that logs every event.
+/// - `is_debugging`: Indicates whether the file analyser is in debugging mode or not.
 /// 
 /// ### Returns `SaveFile`
 /// The save file with all collected data.
-pub fn load_save_file_pc(file_path: &str, compressed: Vec<u8>) -> SaveFile {
+pub fn load_save_file_pc(
+    file_path: &str,
+    compressed: Vec<u8>,
+    ids: Vec<IdData>,
+    logger: &mut ConsoleLogger,
+    is_debugging: bool
+) -> Result<SaveFile> {
     let mut gz = GzDecoder::new(&compressed[..]);
     let mut file_content = Vec::new();
-    gz.read_to_end(&mut file_content).unwrap();
+    if let Err(error) = gz.read_to_end(&mut file_content) {
+        return Err(format!("{} -> Make sure that the file you want to decompress is actually compressed.", error.to_string()).into());
+    }
 
-    load_save_file(file_path, file_content)
+    load_save_file(file_path, file_content, ids, logger, is_debugging)
 }
 
 /// Represents a method for exporting the save for PC (compressing).
@@ -179,7 +248,8 @@ pub fn edit_skill(
         replace_content_of_file(&new_skill.index + &new_skill.size, new_skill.points_data.clone(), save_file.file_content),
         save_file.skills,
         save_file.unlockable_items,
-        save_file.items
+        save_file.items,
+        save_file.log_history.clone()
     );
 
     // Changes the current skill to the new one.
@@ -232,9 +302,19 @@ pub fn edit_inventory_item_chunk(
     save_file_content = replace_content_of_file(current_item_index, zero_bytes, save_file_content);
     save_file_content = replace_content_of_file(current_item_index, new_id_bytes, save_file_content);
 
+    // Returns content
     save_file_content
 }
 
+/// Represents a method for editing the durability for all items in a section at once.
+/// 
+/// ### Parameter
+/// - `item_chunks`: The list of all item chunks.
+/// - `value`: The new durability value.
+/// - `save_file_content`: The content of the save file.
+/// 
+/// ### Returns `(Vec<InventoryChunk>, Vec<u8>)`
+/// The new content of the save file and all changed item chunks.
 pub fn change_items_durability(
     item_chunks: Vec<InventoryChunk>,
     value: f32,
@@ -262,6 +342,15 @@ pub fn change_items_durability(
     (new_item_chunks, save_file_content)
 }
 
+/// Represents a method for editing the amount for all items in a section at once.
+/// 
+/// ### Parameter
+/// - `item_chunks`: The list of all item chunks.
+/// - `value`: The new amount value.
+/// - `save_file_content`: The content of the save file.
+/// 
+/// ### Returns `(Vec<InventoryChunk>, Vec<u8>)`
+/// The new content of the save file and all changed item chunks.
 pub fn change_items_amount(
     item_chunks: Vec<InventoryChunk>,
     value: u32,
@@ -289,6 +378,16 @@ pub fn change_items_amount(
     (new_item_chunks, save_file_content)
 }
 
+/// Represents a method for removing an item from the inventory.
+/// 
+/// ### Parameter
+/// - `start_index`: The starting index of the removed item.
+/// - `end_index`: The ending index of the removed item.
+/// - `chunk_index`: The chunk index of the removed item.
+/// - `save_file_content`: The content of the save file.
+/// 
+/// ### Returns `Vec<u8>`
+/// The new content of the save file.
 pub fn remove_inventory_item(
     mut start_index: usize,
     end_index: usize,
@@ -384,14 +483,18 @@ fn find_legend_skill_matches(content: &[u8]) -> Vec<String> {
 /// - `data`: The needed byte data of the current save.
 /// - `base_matches`: All base skill names that match the skill pattern.
 /// - `legend_matches`: All legend skill names that match the skill pattern.
+/// - `logger`: The console logger that logs every event.
+/// - `is_debugging`: Indicates whether the file analyser is in debugging mode or not.
 /// 
-/// ### Returns `Skills`
+/// ### Returns `Result<Skills>`
 /// All matching skills.
 fn analize_skill_data(
     data: &[u8],
     base_matches: &[String],
     legend_matches: &[String],
-) -> Skills {
+    logger: &mut ConsoleLogger,
+    is_debugging: bool
+) -> Result<Skills> {
     // Prepare data.
     let mut base_skills: Vec<SkillItem> = Vec::new();
     let mut legend_skills: Vec<SkillItem> = Vec::new();
@@ -404,6 +507,12 @@ fn analize_skill_data(
         let index: usize = get_index_from_sequence(data, &last_index, match_bytes, true);
         let name: String = base_match.trim().to_string();
         let extracted_bytes: &[u8] = &data[index + match_bytes.len() .. index + match_bytes.len() + 2];
+        
+        // If debuggin is set to true, log found collected data of current skill.
+        if is_debugging {
+            logger.log_message(&format!("Found at offset: [{}] the skill: [{}]", index, name).as_str(), Vec::new());
+        }
+        
         let skill_item: SkillItem = SkillItem::new(
             name,
             index,
@@ -428,6 +537,11 @@ fn analize_skill_data(
         let name: String = legend_match.trim().to_string();
         let extracted_bytes: &[u8] = &data[index + match_bytes.len() .. index + match_bytes.len() + 2];
 
+        // If debugging is set to true, log found collected data of current skill.
+        if is_debugging {
+            logger.log_message(&format!("Found at offset: [{}] the skill: [{}]", index, name).as_str(), Vec::new());
+        }
+
         let skill_item: SkillItem = SkillItem::new(
             name,
             index,
@@ -437,24 +551,26 @@ fn analize_skill_data(
         );
 
         legend_skills.push(skill_item);
-        // Update index to improve performance.
+        // Updates index to improve performance.
         last_index = index;
     }
 
-    Skills::new(
+    Ok(Skills::new(
         base_skills,
         legend_skills,
-    )
+    ))
 }
 
 /// Represents a method for analyzing and extracting the data for each unlockable item.
 /// 
 /// ### Parameter
 /// - `content`: The byte data of the save.
+/// - `logger`: The console logger that logs every event.
+/// - `is_debugging`: Indicates whether the file analyser is in debugging mode or not.
 /// 
-/// ### Returns `Vec<UnlockableItem>`
+/// ### Returns `Result<Vec<UnlockableItem>>`
 /// All unlockable items inside the inventory.
-fn analize_unlockable_items_data(content: &[u8]) -> Vec<UnlockableItem> {
+fn analize_unlockable_items_data(content: &[u8], logger: &mut ConsoleLogger, is_debugging: bool) -> Result<Vec<UnlockableItem>> {    
     // Finds all inventory sequences inside the file.
     let indices: Vec<usize> = get_all_indices_from_sequence(content, &0, &START_INVENTORY, false);
     let mut items: Vec<UnlockableItem> = Vec::new();
@@ -462,11 +578,15 @@ fn analize_unlockable_items_data(content: &[u8]) -> Vec<UnlockableItem> {
 
     // Checks if the sequence is not valid.
     if indices.len() == 0 {
-        panic!("Start pattern(s) not found in file.");
+        return Err("Start pattern(s) for unlockables not found in save".into());
     }
 
-    // Takes the second inventory index for needed information.
+    // Takes the last inventory index for needed information.
     let start_index: usize = indices[indices.len() - 1];
+    if is_debugging {
+        logger.log_message(&format!("The starting index for the unlockables is: [{}]", start_index), Vec::new());
+    }
+
     // Compresses the data and only extracts the inventory part of the file.
     let inventory_data: &[u8] = &content[start_index..];
     // Prepares a list of all matching strings.
@@ -482,7 +602,7 @@ fn analize_unlockable_items_data(content: &[u8]) -> Vec<UnlockableItem> {
     matching_string_indices.append(&mut tool_skin_indices);
 
     if matching_string_indices.len() == 0 {
-        panic!("No matching unlockable item strings found.")
+        return Err("No matching unlockable item strings found. in save".into())
     }
 
     // Iterate through all matching indices.
@@ -492,6 +612,12 @@ fn analize_unlockable_items_data(content: &[u8]) -> Vec<UnlockableItem> {
         let current_index: usize = matching_string_indices[i] + &start_index;
         let size: usize = clean_string.as_bytes().len();
         let sgd: Vec<u8> = inventory_data[matching_string_indices[i]..matching_string_indices[i] + size].to_vec();
+        
+        // If debugging is set to true, log collected data of current unlockable.
+        if is_debugging {
+            logger.log_message(&format!("Found the unlockable: [{}]", clean_string).as_str(), Vec::new());
+        }
+
         items.push(UnlockableItem::new(
             clean_string,
             current_index,
@@ -502,7 +628,7 @@ fn analize_unlockable_items_data(content: &[u8]) -> Vec<UnlockableItem> {
 
     // Sorts the items by their index.
     items.sort_by(|a, b| a.index.cmp(&b.index));
-    items
+    Ok(items)
 }
 
 /// Represents a method for retrieving the index from where the inventory items start.
@@ -510,25 +636,36 @@ fn analize_unlockable_items_data(content: &[u8]) -> Vec<UnlockableItem> {
 /// ### Parameter
 /// - `unlockable_items`: The unlockable items.
 /// - `file_content`: The byte data of the save.
+/// - `logger`: The console logger that logs every event.
+/// - `is_debugging`: Indicates whether the file analyser is in debugging mode or not.
 /// 
 /// ### Returns `usize`
 /// The index from where the inventory items continue.
-fn get_index_for_inventory_items(unlockable_items: &[UnlockableItem], file_content: &[u8]) -> usize {
+fn get_index_for_inventory_items(unlockable_items: &[UnlockableItem], file_content: &[u8], logger: &mut ConsoleLogger, is_debugging: bool) -> Result<usize> {
     let start_index: usize = unlockable_items[0].index + unlockable_items[0].size;
-    let string_content = String::from_utf8_lossy(&file_content[start_index..]);
 
     let sgd_position = get_index_from_sequence(&file_content[start_index..], &0, &[0, 83, 71, 68, 115], true);
     
     // -36 to get the chunk data from the first SGDs
     if sgd_position > 0 {
-        return start_index + sgd_position - 36
+        let inventory_index = start_index + sgd_position - 36;
+        
+        if is_debugging {
+            logger.log_message(format!("The starting index of the inventory is expected to be at [{}]; (the first SGDs Data)", inventory_index).as_str(), Vec::new())
+        }
+
+        return Ok(inventory_index)
     }
 
-    // +75 as jump offset between unlockables and SGDs from items
+    // +76 as jump offset between unlockables and SGDs from items
     if unlockable_items.len() > 0 {
-        return unlockable_items[unlockable_items.len() - 1].index + unlockable_items[unlockable_items.len() - 1].size + 76
+        let inventory_index = unlockable_items[unlockable_items.len() - 1].index + unlockable_items[unlockable_items.len() - 1].size + 76;
+        if is_debugging {
+            logger.log_message(format!("The starting index of the inventory is expected to be at [{}]; (the first SGDs Data)", inventory_index).as_str(), Vec::new())
+        }
+        Ok(inventory_index)
     } else {
-        0 // Default return value if no match is found
+        Err("There was no match regarding the start index of the inventory.".into())
     }
 }
 
@@ -537,11 +674,20 @@ fn get_index_for_inventory_items(unlockable_items: &[UnlockableItem], file_conte
 /// ### Parameter
 /// - `content`: The byte data of the current selected save.
 /// - `start_index`: The start index of the inventory data.
+/// - `ids`: The list of all IDs.
+/// - `logger`: The console logger that logs every event.
+/// - `is_debugging`: Indicates whether the file analyser is in debugging mode or not.
 /// 
 /// ### Returns `Vec<Vec<InventoryItem>>`
 /// The list of all different item sections.
 /// Each section contains a list of items, for example: gear, weapons, etc....
-fn get_all_items(content: &[u8], start_index: usize) -> Vec<InventoryItemRow> {
+fn get_all_items(
+    content: &[u8],
+    start_index: usize,
+    ids: Vec<IdData>,
+    logger: &mut ConsoleLogger,
+    is_debugging: bool
+) -> Result<Vec<InventoryItemRow>> {
     // Prepare data.
     let mut items: Vec<InventoryItemRow> = Vec::new();
     let mut index: usize = start_index;
@@ -550,18 +696,28 @@ fn get_all_items(content: &[u8], start_index: usize) -> Vec<InventoryItemRow> {
         // Prepare the inner item section.
         let mut inner_item_list: Vec<InventoryItem> = Vec::new();
         // Find all data chunks for the section.
-        let (chunks, new_index) = find_all_inventory_chunks(content, index);
-
-        // Check if there are no chunks left.
-        if chunks.len() == 0 {
-            break;
+        let find_result = find_all_inventory_chunks(content, index, logger, is_debugging);
+        
+        match find_result {
+            Ok((ref chunks, ref new_index)) => {
+                logger.log_message(&format!("[{}] inventory chunks found. The new index is: [{}]", chunks.len(), new_index), Vec::new());
+                logger.log_break();
+                // Wait for user input to continue with the analysation.
+                if is_debugging {
+                    logger.wait_for_input();
+                }
+            },
+            Err(_) => {
+                break;
+            }
         }
 
+        let (chunks, new_index) = find_result.unwrap();
+
         // Find the corresponding matches to each chunk (Including Mod data).
-        let (current_item_ids, current_item_indices) = find_amount_of_matches(content, new_index, chunks.len());
+        let (current_item_ids, current_item_indices) = find_amount_of_matches(content, new_index, chunks.len(), logger, is_debugging);
 
         // Preparing iteration data.
-        let mut mod_counter: usize = 0;
         let mut current_item_id: String = String::new();
         let mut current_item_index: usize = 0;
         let mut chunk_counter: usize = chunks.len() - 1;
@@ -572,21 +728,47 @@ fn get_all_items(content: &[u8], start_index: usize) -> Vec<InventoryItemRow> {
         // iterate through each found match and validate the position of the match.
         for i in 0..current_item_ids.len() {
             // Check if the match is an item or a mod.
-            if !&current_item_ids[i].contains("Mod") && !&current_item_ids[i].contains("charm") && &current_item_ids[i] != "NoneSGDs" && &current_item_ids[i] != "SGDs" {
+            if validate_item_or_mod(&current_item_ids[i]) {
                 // Check if the bullet acts as item or mod or if there is a transmog item.
-                if ((current_item_ids[i].contains("Bullet") && mod_counter > 0 && mod_counter < 4) || (current_item_ids[i].contains("Craftplan") && mod_counter < 4)) || mod_counter == 3 {
+                if validate_item_or_transmog(&current_item_ids[i], &current_item_id) {
+                    if is_debugging {
+                        logger.log_message(&format!("Since this item can be item and mod, the editor validated it as a mod: [{}]", current_item_ids[i].to_string()), Vec::new());
+                    }
+                    
                     mods.push(Mod::new(
                         current_item_ids[i].clone(),
                         current_item_indices[i],
                         content[current_item_indices[i] .. current_item_indices[i] + 30].to_vec(),
                     ));
 
-                    mod_counter += 1;
                     continue;
-                }    
+                } else if current_item_ids[i].to_lowercase().contains("outfit") && current_item_id.to_lowercase().contains("outfit") && current_item_indices[i] - (current_item_index + current_item_id.len()) <= 30 {
+                    if is_debugging {
+                        logger.log_message(&format!("Since this item can be item and transmog, the editor validated it as a transmog: [{}]", current_item_ids[i].to_string()), Vec::new());
+                    }
+                    
+                    mods.push(Mod::new(
+                        current_item_ids[i].clone(),
+                        current_item_indices[i],
+                        content[current_item_indices[i] .. current_item_indices[i] + 30].to_vec(),
+                    ));
+
+                    continue;
+                }
+
+                // Set the current item initialization.
+                current_item_id = current_item_ids[i].trim_end_matches("SGDs").to_string();
+                match_bytes = current_item_ids[i].as_bytes();
+                current_item_index = current_item_indices[i];
+                current_inv_chunk = chunks[chunk_counter].clone();
+                
+                // The chunk counter is decreased to get the correct chunk for the item, since the chunk is mirrored to the ids.
+                if chunk_counter > 0 {
+                    chunk_counter -= 1;
+                } 
                 
                 // Add the previous item (if exists) to the list.
-                if current_item_id != String::new() && !mods.is_empty() {
+                if current_item_id != String::new() {
                     inner_item_list.push(InventoryItem::new(
                         current_item_id.replace("\x00", "").replace("\x01", ""),
                         current_item_index,
@@ -596,78 +778,167 @@ fn get_all_items(content: &[u8], start_index: usize) -> Vec<InventoryItemRow> {
                         mods.clone(),
                     ));
 
-                    mod_counter = 0;
-                    mods.clear();
-                }
+                    if is_debugging {
+                        logger.log_message_no_linebreak(&format!("At offset [{}] validated item: ", current_item_index), Vec::new());
+                        logger.log_message(&format!("[{}]", current_item_id.replace("\x00", "").replace("\x01", "")), vec![term::Attr::ForegroundColor(term::color::CYAN)]);
+                    }
 
-                // Set the current item initialization.
-                current_item_id = current_item_ids[i].trim_end_matches("SGDs").to_string();
-                match_bytes = current_item_ids[i].as_bytes();
-                current_item_index = current_item_indices[i];
-                current_inv_chunk = chunks[chunk_counter].clone();
-                
-                if chunk_counter > 0 {
-                    chunk_counter -= 1;
-                }
+                    mods.clear();
+                }   
             }
             // Add mod to mods list
             else {
+                if is_debugging {
+                    logger.log_message(&format!("Validated mod: [{}]", current_item_ids[i].to_string()), Vec::new());
+                }
+
                 mods.push(Mod::new(
                     current_item_ids[i].to_string(),
                     current_item_indices[i],
                     content[current_item_indices[i] .. current_item_indices[i] + 30].to_vec(),
                 ));
-
-                mod_counter += 1;
             }
         }
-    
-        // Add the last item to the inner section.
-        inner_item_list.push(InventoryItem::new(
-            current_item_id.replace("\x00", "").replace("\x01", ""),
-            current_item_index,
-            match_bytes.len(),
-            match_bytes.to_vec(),
-            current_inv_chunk.clone(),
-            mods.clone(),
-        ));
 
-        // Add the inner section to the item list and fix the index by offset.
-        items.push(create_item_row(inner_item_list.clone()));
-        let last_mod: &Mod = &inner_item_list[inner_item_list.clone().len() - 1].mod_data[inner_item_list[inner_item_list.clone().len() - 1].mod_data.len() - 1];
-        index = last_mod.index + last_mod.name.len();
+        // Add the inner section to the item list.
+        let item_row = create_item_row(inner_item_list.clone(), ids.clone());
+        items.push(item_row);
+        let last_inner_item: &InventoryItem = &inner_item_list.last().unwrap();
+        index = last_inner_item.index;
+
+        if last_inner_item.mod_data.len() > 0 {
+            let last_mod: &Mod = last_inner_item.mod_data.last().unwrap();
+            index = last_mod.index + last_mod.name.len();
+        }
+
+        // fix the index by offset.
         index += 75;
+
+        if is_debugging {
+            logger.log_message(&format!("Used the index of from the last mod and added the +75 to the offset for the next item: [{}]", index), Vec::new());
+            logger.log_break();
+            logger.wait_for_input();
+        }
     }
 
-    items
+    Ok(items)
 }
 
-fn create_item_row(items: Vec<InventoryItem>) -> InventoryItemRow {
+fn validate_item_or_mod(current_match: &str) -> bool {
+    if !current_match.to_lowercase().contains("mod") && !current_match.to_lowercase().contains("charm") {
+        return true
+    }
+
+    false
+}
+
+fn validate_item_or_transmog(current_match: &str, last_match: &str) -> bool {
+    if (current_match.to_lowercase().contains("bullet") || current_match.to_lowercase().contains("craftplan")) &&
+    (last_match.to_lowercase().contains("bow") || (last_match.to_lowercase().contains("firearm") && !last_match.to_lowercase().contains("bullet")) || last_match.to_lowercase().contains("gun") || last_match.to_lowercase().contains("harpoon")) {
+        return true
+    }
+
+    false
+}
+
+/// Represents the method for matching the item of each section to its dedicated row.
+/// 
+/// ### Parameter
+/// - `items`: The item of a specific section.
+/// - `ids`: The list of all IDs.
+/// 
+/// ### Returns `InventoryItemRow`
+/// A specific itemrow with name and items inside.
+fn create_item_row(items: Vec<InventoryItem>, ids: Vec<IdData>) -> InventoryItemRow {
+    let mut tab_tokens = 0;
+    let mut tab_equipment = 0;
+    let mut tab_craftresources = 0;
+    let mut tab_consumables = 0;
+    let mut tab_accessories = 0;
+    let mut tab_quest = 0;
+    let mut tab_ammunition = 0;
+    let mut tab_weapons = 0;
+    let mut tab_item = 0;
+
     for item in items.iter() {
-        if item.name.contains("Token") || item.name.contains("Ticket") {
-            return InventoryItemRow::new("Tokens/Tickets".to_string(), items);
+        let mut is_matched = false;
+        for id_section in ids.iter() {
+            if is_matched {
+                break;
+            }
+
+            for id_name in id_section.ids.iter() {
+                if is_matched {
+                    break;
+                }
+
+                if item.name.contains(id_name) {
+                    match id_section.filename.to_lowercase().as_str() {
+                        "ammo" => tab_ammunition += 1,
+                        "cash" => tab_item += 1,
+                        "collectable" => tab_item += 1,
+                        "craftcomponent" => tab_craftresources += 1,
+                        "craftpart" => tab_craftresources += 1,
+                        "equipment" => tab_equipment += 1,
+                        "evolvingitem" => tab_item += 1,
+                        "firearm" => tab_weapons += 1,
+                        "flashlight" => tab_accessories += 1,
+                        "inventoryitem" => tab_accessories += 1,
+                        "itembundle" => tab_item += 1,
+                        "lockpick" => tab_equipment += 1,
+                        "lootpack" => tab_craftresources += 1,
+                        "medkit" => tab_consumables += 1,
+                        "melee" => tab_weapons += 1,
+                        "other" => tab_quest += 1,
+                        "outfitpart" => tab_craftresources += 1,
+                        "powerup" => tab_consumables += 1,
+                        "survivorpack" => tab_item += 1,
+                        "syringeantizin" => tab_consumables += 1,
+                        "throwable" => tab_accessories += 1,
+                        "throwableliquid" => tab_accessories += 1,
+                        "token" => tab_tokens += 1,
+                        "uncategorized" => tab_item += 1,
+                        "valuable" => tab_craftresources += 1,
+                        "vehicleupgrade" => tab_item += 1,
+                        "voucher" => tab_item += 1,
+                        _ => tab_item += 1
+                    }
+
+                    is_matched = true;
+                    break;
+                }
+            }
         }
-        else if item.name.contains("Keyfinder") || item.name.contains("Binoculars") {
-            return InventoryItemRow::new("Equipment".to_string(), items);
-        }
-        else if item.name.contains("Outfit") || item.name.contains("Craft") || item.name.contains("Plant") {
-            return InventoryItemRow::new("Outfits/Craftresources".to_string(), items);
-        }
-        else if item.name.contains("Potion") || item.name.contains("Booster")  || item.name.contains("Medkit") || item.name.contains("Flare") {
-            return InventoryItemRow::new("Consumables".to_string(), items);
-        }
-        else if item.name.contains("KaDoom") || item.name.contains("Broom") || item.name.contains("Throwable") || (item.name.contains("wpn") && item.name.contains("challenge")) {
-            return InventoryItemRow::new("Accessories".to_string(), items);
-        }
-        else if item.name.contains("Quest") {
-            return InventoryItemRow::new("Quest Items".to_string(), items);
-        }
-        else if item.name.contains("Bullet") {
-            return InventoryItemRow::new("Ammunition".to_string(), items);
-        }
-        else if item.name.contains("wpn") && !item.name.contains("challenge") {
-            return InventoryItemRow::new("Weapons".to_string(), items);
-        }
+    }
+
+    // Initialize the counters
+    let counters = vec![
+        tab_tokens, tab_equipment, tab_craftresources, tab_consumables,
+        tab_accessories, tab_quest, tab_ammunition, tab_weapons, tab_item
+    ];
+
+    // Find the maximum value among the counters
+    let highest_counter = counters.iter().max().unwrap();
+
+    // Perform actions based on the highest counter
+    if highest_counter == &tab_tokens {
+        return InventoryItemRow::new("Tokens/Tickets".to_string(), items);
+    } else if highest_counter == &tab_equipment {
+        return InventoryItemRow::new("Equipment".to_string(), items);
+    } else if highest_counter == &tab_craftresources {
+        return InventoryItemRow::new("Outfits/Craftresources".to_string(), items);
+    } else if highest_counter == &tab_consumables {
+        return InventoryItemRow::new("Consumables".to_string(), items);
+    } else if highest_counter == &tab_accessories {
+        return InventoryItemRow::new("Accessories".to_string(), items);
+    } else if highest_counter == &tab_quest {
+        return InventoryItemRow::new("Quest Items".to_string(), items);
+    } else if highest_counter == &tab_ammunition {
+        return InventoryItemRow::new("Ammunition".to_string(), items);
+    } else if highest_counter == &tab_weapons {
+        return InventoryItemRow::new("Weapons".to_string(), items);
+    } else if highest_counter == &tab_item {
+        return InventoryItemRow::new("Items".to_string(), items)
     }
 
     InventoryItemRow::new("Items".to_string(), items)
@@ -678,13 +949,15 @@ fn create_item_row(items: Vec<InventoryItem>) -> InventoryItemRow {
 /// ### Parameter
 /// - `content`: The byte data of the current save file.
 /// - `start_index`: The starting index on where the search begins.
+/// - `logger`: The console logger that logs every event.
+/// - `is_debugging`: Indicates whether the file analyser is in debugging mode or not.
 /// 
-/// ### Returns `(Vec<InventoryItem>, usize)`
+/// ### Returns `Result<(Vec<InventoryItem>, usize)>`
 /// The array of all found chunks inside the inventory and the last position to increase further performance.
-fn find_all_inventory_chunks(content: &[u8], start_index: usize) -> (Vec<InventoryChunk>, usize) {
+fn find_all_inventory_chunks(content: &[u8], start_index: usize, logger: &mut ConsoleLogger, is_debugging: bool) -> Result<(Vec<InventoryChunk>, usize)> {
     // Checks if the index is out of range.
     if start_index > content.len() {
-        panic!("The start_index must not be greater than the content length.")
+        return Err("The start_index must not be greater than the content length.".into());
     }
 
     // Prepare chunk vector.
@@ -698,12 +971,19 @@ fn find_all_inventory_chunks(content: &[u8], start_index: usize) -> (Vec<Invento
     let space_offset: usize = 25;
     let data_offset: usize = level_offset + seed_offset + amount_offset + durability_offset + space_offset;
 
+    // Find the first SGD index.
+    let first_sgds_index_result = find_first_sgd_index(content, start_index);
+
+    if let Err(err) = first_sgds_index_result {
+        return Err(err);
+    }
+
     // Finding all SGD matches and their corresponding indices.
-    let (match_values, match_indices) = get_sgd_matches(&content, start_index);
+    let (match_values, match_indices) = get_sgd_matches(&content, first_sgds_index_result.unwrap());
 
     // Check if no matches where found.
     if match_values.is_empty() {
-        return (chunks, 0);
+        return Err(format!("No matches found from the start index: [{}]", start_index).into());
     } else {
         // Iterate through each value and get the needed 12 Bytes of data.
         for i in 0..match_values.len() {
@@ -721,6 +1001,10 @@ fn find_all_inventory_chunks(content: &[u8], start_index: usize) -> (Vec<Invento
             index += durability_offset;
             let chunk_space: Vec<u8> = content[index..index+space_offset].to_vec();
 
+            if is_debugging {
+                logger.log_message(&format!("SGDs found at offset: [{}]", data_index), Vec::new());
+            }
+
             chunks.push(InventoryChunk::new(
                 level_data,
                 seed_data,
@@ -734,8 +1018,53 @@ fn find_all_inventory_chunks(content: &[u8], start_index: usize) -> (Vec<Invento
         // The 4 is for the SGDs name offset.
         let last_index: usize = chunks.last().map_or(start_index, |chunk| chunk.index + data_offset + 4);
 
-        (chunks, last_index)
+        Ok((chunks, last_index))
     }
+}
+
+/// Represents a method for finding the first sgd chunk after a completed itemrow.
+/// 
+/// ### Parameter
+/// - `content`: The byte data of the current save file.
+/// - `start_index`: The starting index on where the search begins.
+/// 
+/// ### Returns `Result<usize>`
+/// The index of the first sgd chunk after a completed itemrow.
+fn find_first_sgd_index(content: &[u8], start_index: usize) -> Result<usize> {
+    let sgd: [u8; 5] = [0, 83, 71, 68, 115]; // SGDs and the 0 byte in front of it.
+    let zero_bytes: Vec<u8> = vec![0; 2];
+    let mut curr_index: usize = start_index;
+
+    // Iterates through matches, since weapons can contain invalid SGDs too.
+    loop {
+        // Find SGDs.
+        let match_index = get_index_from_sequence(content, &curr_index, &sgd, true);
+        
+        // Check if match did not work.
+        if match_index == 0 {
+            break;
+        }
+        
+        // Check whether savegame is between the start index and the match index.
+        let is_savegame_between = is_savegame_between(content, start_index, match_index);
+        // Get the values in front of the match.
+        let sgds_indicator = content[match_index - 5.. match_index - 3].to_vec();
+        // Validate whether the SGDs is valid or not.
+        if sgds_indicator != zero_bytes {
+            // Check if Savegame indicator is between
+            if is_savegame_between {
+                return Ok(0);
+            }
+    
+            return Ok(match_index);
+        }
+
+        // Didn't find a correct SGDs chunk. Might be an SGDs chunk inside a weapon. So we increase the current index and continue.
+        curr_index = match_index + 4;
+    }
+    
+
+    return Err("No SGDs found.".into());
 }
 
 /// Represents a method for finding all sgd matches inside the range.
@@ -764,15 +1093,9 @@ fn get_sgd_matches(content: &[u8], start_index: usize) -> (Vec<String>, Vec<usiz
         if mat.end() - mat.start() == 4 {
             let tmp_match_value = mat.as_str().to_string();
             let match_index = get_index_from_sequence(content, &curr_index, tmp_match_value.as_bytes(), true);
-            let previous_distance_for_sgds_1 = &content[match_index - 116..match_index - 112];
-            let previous_distance_for_sgds_2 = &content[match_index - 180..match_index - 176];
-
-            if String::from_utf8_lossy(previous_distance_for_sgds_1) == "SGDs" || String::from_utf8_lossy(previous_distance_for_sgds_2) == "SGDs" {
-                curr_index = match_index + 4;
-                match_values.push(tmp_match_value);
-            } else {
-                break;
-            }
+           
+            curr_index = match_index + 4;
+            match_values.push(tmp_match_value);
         } else {
             break;
         }
@@ -798,8 +1121,17 @@ fn get_sgd_matches(content: &[u8], start_index: usize) -> (Vec<String>, Vec<usiz
     (match_values, match_indices)
 }
 
+/// Represents a method for checking whether the savegame indicator is between the start and the end index.
+/// 
+/// ### Parameter
+/// - `content`: The byte data of the current save.
+/// - `start_index`: The index from where the search starts.
+/// - `end_index`: The index from where the search ends.
+/// 
+/// ### Returns `bool`
+/// Indicates whether the savegame indicator is between the start and the end index or not.
 fn is_savegame_between(content: &[u8], start_index: usize, end_index: usize) -> bool {
-    if start_index >= end_index {
+    if start_index > end_index {
         return true;
     }
     
@@ -819,117 +1151,124 @@ fn is_savegame_between(content: &[u8], start_index: usize, end_index: usize) -> 
 /// - `content`: The byte data of the inventory.
 /// - `start_index`: The start index of the search.
 /// - `amount`: The amount of chunks found for the current section. 
+/// - `logger`: The console logger that logs every event.
+/// - `is_debugging`: Indicates whether the file analyser is in debugging mode or not.
 /// 
 /// ### Returns `(Vec<String>, Vec<usize>)`
 /// A tuple that contains the matches for the current chunk and their corresponding index.
-fn find_amount_of_matches(content: &[u8], start_index: usize, amount: usize) -> (Vec<String>, Vec<usize>) {
+fn find_amount_of_matches(content: &[u8], start_index: usize, amount: usize, logger: &mut ConsoleLogger, is_debugging: bool) -> (Vec<String>, Vec<usize>) {
     // Prepare data.
-    let mut counter: usize = 0;
-    let mut mod_counter: i32 = 0;
+    let mut item_counter: usize = 0;
     let mut match_values: Vec<String> = Vec::new();
+    let mut match_indices: Vec<usize> = Vec::new();
+    let mut iteration_index: usize = start_index;
+    let mut last_match: String = String::new();
+    let mut last_index: usize = start_index;
     // Convert the byte data to string to check regex patterns.
     let string_data = String::from_utf8_lossy(&content[start_index..]);
+
+    let nightrunner_items = vec![
+        "NightRunnerItemSGDs",
+        "ParachuteSGDs",
+        "ClimbPickaxeSGDs",
+        "RopeHookSGDs",
+        "BinocularsSGDs",
+        "LockpickItemSGDs",
+        "AntizinContainerSGDs",
+        "BicycleSGDs"
+    ];
+
 
     // The Regex pattern to match the sgds.
     let pattern: &str = r"(?:[a-zA-Z0-9_]{4,}(?:\x00*))*SGDs";
 
     // Defines the regex instances.
     let re: Regex = Regex::new(pattern).expect("Invalid regex pattern.");
-    let savegame_re: Regex = Regex::new("Savegame").expect("Invalid regex pattern.");
-    let is_savegame_match: bool = savegame_re.is_match(&string_data);
 
     for mat in re.find_iter(&string_data) {
         // There are mod slots for each item. Even tokens, I mean why not Techland, right?
         // Check if the amount of item matches is in range and if the length of the match is at least 4.
-        if counter <= amount && mat.as_str().len() >= 4 {
-            // Check if it is an item or a mod.
-            if !mat.as_str().contains("Mod") && !mat.as_str().contains("charm") &&
-                mat.as_str() != "NoneSGDs" && mat.as_str() != "SGDs" {
-                    // Check if the bullet acts as item or mod.
-                    if ((mat.as_str().contains("Bullet") || mat.as_str().contains("Craftplan")) && mod_counter > 0 && mod_counter <= 4) || mod_counter == 4 {                        
-                        // Check if the current SGD is valid
-                        let tmp_matching_value = mat.as_str().to_string();
-                        let index = get_index_from_sequence(content, &start_index, &tmp_matching_value.as_bytes(), true);
-                        let size_bytes = &content[index - 2..index].to_vec();
-                        let size = u16::from_le_bytes(size_bytes.clone().try_into().unwrap()) as usize;
-
-                        // Compares if the SGDs have the correct size
-                        if size > 0 {
-                            if tmp_matching_value.clone().ends_with("SGDs") && size + 4 == tmp_matching_value.clone().len() {
-                                match_values.push(tmp_matching_value.clone());
-                                mod_counter += 1;
-                            } else if !tmp_matching_value.clone().ends_with("SGDs") && size > tmp_matching_value.clone().len() {
-                                // Include spaces between item name and SGDs
-                                let longer_match_value = String::from_utf8_lossy(&content[index..index + size + 4]);
-
-                                if longer_match_value.ends_with("SGDs") {
-                                    match_values.push(longer_match_value.to_string());
-                                    mod_counter += 1;
-                                } else {
-                                    continue;
-                                }
-                            }
-                        } else {
-                            continue;
-                        }
-
-                        continue;
-                    }
-
-                    // update data.
-                    counter += 1;
-                    mod_counter = 0;
-                } 
-                // Checks if the SGDs is at the end of the found list.
-                else if mat.as_str() == "SGDs" && mod_counter != 4 {
-                    break;
-                } 
-                // Checks if the match equals SGDs, since it is also possible for weapon mods.
-                else if mat.as_str() == "SGDs" {
-                    // Check if Savegame indicator is between
-                    if is_savegame_match {
-                        if let Some(savegame) = savegame_re.find(&string_data) {
-                            if savegame.start() < mat.start() {
-                                break;
-                            }
-                        }
-                    }
-
-                    match_values.push(mat.as_str().to_string());
-                    continue;
-                }
-
-                let tmp_matching_value = mat.as_str().to_string();
-                let index = get_index_from_sequence(content, &start_index, &tmp_matching_value.as_bytes(), true);
+        if item_counter < amount && mat.as_str().len() > 4 {
+            // Items normally always have an "_" inside their name.
+            // Except the following items: "NightRunnerItemSGDs", "ParachuteSGDs", "ClimbPickaxeSGDs", "RopeHookSGDs", "BinocularsSGDs"
+            if mat.as_str().contains("_") || nightrunner_items.contains(&mat.as_str()){
+                // set set the current item id.
+                let mut current_matching_value = mat.as_str().to_string();
+                let index = get_index_from_sequence(content, &iteration_index, &current_matching_value.as_bytes(), true);
+                // Check if the current SGD is valid
                 let size_bytes = &content[index - 2..index].to_vec();
                 let size = u16::from_le_bytes(size_bytes.clone().try_into().unwrap()) as usize;
-
+    
+                // Checks if the SGDs has the correct size or if the item has a space between the name and the SGDs.
                 if size > 0 {
-                    if tmp_matching_value.clone().ends_with("SGDs") && size + 4 == tmp_matching_value.clone().len() {
-                        match_values.push(tmp_matching_value.clone());
-                        mod_counter += 1;
-                    } else if !tmp_matching_value.clone().ends_with("SGDs") && size > tmp_matching_value.clone().len() {
-                        let longer_match_value = String::from_utf8_lossy(&content[index..index + size + 4]);
-
-                        if longer_match_value.ends_with("SGDs") {
-                            match_values.push(longer_match_value.to_string());
-                            mod_counter += 1;
-                        } else {
-                            continue;
-                        }
+                    if !current_matching_value.clone().ends_with("SGDs") && size > current_matching_value.clone().len() {
+                        // Include spaces between item name and SGDs
+                        current_matching_value = String::from_utf8_lossy(&content[index..index + size + 4]).to_string();
                     }
                 } else {
                     continue;
                 }
-        } else {
-            break;
+                
+                // Checks whether the match is an item or a mod.
+                if validate_item_or_mod(mat.as_str()) {
+                    // Checks whether the match is bullet that acts as a mod.
+                    if validate_item_or_transmog(mat.as_str(), &last_match) {                
+                        if is_debugging {
+                            logger.log_message(&format!("Found potential SGDs match for mod: [{}]", mat.as_str()), Vec::new());
+                        }
+    
+                        match_values.push(current_matching_value.clone());
+                        match_indices.push(index);
+                        last_match = current_matching_value;
+                        last_index = index;
+                        iteration_index = index + last_match.len();
+    
+                        continue;
+                    } else if mat.as_str().to_lowercase().contains("outfit") && last_match.to_lowercase().contains("outfit") && index - (last_index + last_match.len()) <= 30 {
+                        if is_debugging {
+                            logger.log_message(&format!("Found potential SGDs match for transmog: [{}]", mat.as_str()), Vec::new());
+                        }
+    
+                        match_values.push(current_matching_value.clone());
+                        match_indices.push(index);
+                        last_match = current_matching_value;
+                        last_index = index;
+                        iteration_index = index + last_match.len();
+    
+                        continue;
+                    }
+    
+                    // update data.
+                    item_counter += 1;
+                    match_values.push(current_matching_value.clone());
+                    match_indices.push(index);
+                    last_match = current_matching_value;
+                    last_index = index;
+                    iteration_index = index + last_match.len();
+    
+                    if is_debugging {
+                        logger.log_message_no_linebreak("Found potential SGDs match for item: ", Vec::new());
+                        logger.log_message(&format!("[{}]", mat.as_str()), vec![term::Attr::ForegroundColor(term::color::CYAN)]);
+                    }
+    
+                    continue;
+                } else {
+                    if is_debugging {
+                        logger.log_message(&format!("Found potential SGDs match for mod: [{}]", mat.as_str()), Vec::new());
+                    }
+    
+                    match_values.push(current_matching_value.clone());
+                    match_indices.push(index);
+                    last_match = current_matching_value;
+                    last_index = index;
+                    iteration_index = index + last_match.len();
+                }
+            }
         }
     }
 
-    // Gets indices for all collected matches.
-    let match_indices = get_indices_from_values(&content, start_index, &match_values);
+    // // Gets indices for all collected matches.
     (match_values, match_indices)
-
 }
 
 /// Represents a method for finding the indices for each matching value.

@@ -1,6 +1,6 @@
 use std::{fs, error::Error, path::Path};
 use std::io;
-use crate::struct_data::IdData;
+use crate::save_logic::struct_data::IdData;
 
 // Define global result definition for easier readability.
 type Result<T> = std::result::Result<T,Box<dyn Error>>;

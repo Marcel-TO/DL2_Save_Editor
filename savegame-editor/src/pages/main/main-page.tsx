@@ -9,21 +9,68 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { Fragment, useEffect, useState } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import { SettingsManager } from 'tauri-settings';
+import { SettingsSchema } from '../../models/settings-schema';
+import { useNavigate } from 'react-router-dom';
 
-export const MainPage = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function}): JSX.Element => {    
+export const MainPage = ({currentSaveFile, setCurrentSaveFile, setIdData, settingsManager}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function, settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {    
+    const [isNew, setIsNew] = useState<boolean>(settingsManager ? settingsManager.settings && settingsManager.settings.isNewToEditor : false);
+    const navigate = useNavigate();
+
+    async function handleChangeIsNew(option: boolean) {
+        settingsManager.setCache('isNewToEditor', option);
+        await settingsManager.syncCache();
+        setIsNew(option)
+
+        navigate('/knowledge-vault')
+    }
+
+    async function skipTutorial(option: boolean) {
+        settingsManager.setCache('isNewToEditor', option);
+        await settingsManager.syncCache();
+        setIsNew(option)
+    }
+    
     return (
         <>
-            <div className="container">
-                <NavbarDrawer pagename={"Main"} pagecontent={<MainContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} setIdData={setIdData}/>}></NavbarDrawer>
-            </div>
+            {isNew ? (
+                <ThemeProvider theme={newToTheEditorTheme}>
+                    <Dialog
+                    open={true}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description">
+                    <DialogTitle sx={{color: '#e9eecd'}}>
+                    {"New to the Editor?"}
+                    </DialogTitle>
+                    <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        If you are new to using the Editor, welcome! 
+                        I know the process might seem overwhelming at first, but if you follow the steps below, using the Editor should become a breeze.
+                        You will get directed to the Knowledge Vault. This is a collection where all information regarding this Editor (for example the Tutorial, QnA and more) is stored.
+                    </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button variant='text' disableElevation onClick={() => skipTutorial(!isNew)}>Skip Tutorial</Button>
+                        <Button variant='outlined'onClick={() => handleChangeIsNew(!isNew)} autoFocus>
+                            Getting Started
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+                </ThemeProvider>
+            ): (
+                <div className="container">
+                    <NavbarDrawer pagename={"Main"} pagecontent={<MainContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} setIdData={setIdData} settingsManager={settingsManager}/>} settingsManager={settingsManager}></NavbarDrawer>
+                </div>
+            )}
         </>
     )
 }
 
-const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function}): JSX.Element => {    
+const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData, settingsManager}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function, settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {    
     const [isOpen, setOpen] = useState(false);
     const [isOpeningSave, setOpeningSave] = useState(false);
     const [currentSavePath, setCurrentSavePath] = useState('');
+    const [catchedError, setCatchedError] = useState<string>();
 
     useEffect(() => {
         handleSetIdData();
@@ -37,6 +84,10 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
         setOpen(false);
         setOpeningSave(false);
     };
+
+    const handleCloseErrorMessage = () => {
+        setCatchedError(undefined);
+    }
     
     const handleResetSave = () => {
         setCurrentSaveFile(undefined);
@@ -58,7 +109,12 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
         });
       
         if (filepath != null && !Array.isArray(filepath)) {
-            await setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: filepath}));
+            let newSave = await invoke<SaveFile>("load_save", {file_path: filepath, is_debugging: settingsManager.settings.debugMode, has_automatic_backup: settingsManager.settings.automaticBackup}).catch((err) => {
+              setCatchedError(err);
+            });
+
+            console.log(newSave);
+            await setCurrentSaveFile(newSave);
             await handleSetIdData();
         };
 
@@ -83,7 +139,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
             return;
         }
         
-        setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: currentSavePath}));
+        setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: currentSavePath, is_debugging: settingsManager.settings.debugMode, has_automatic_backup: settingsManager.settings.automaticBackup}));
         await handleSetIdData();
 
         setOpeningSave(false);
@@ -134,7 +190,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
         });
       
         if (filepath != null && !Array.isArray(filepath)) {
-            await setCurrentSaveFile(await invoke<SaveFile>("load_save_pc", {file_path: filepath}));
+            await setCurrentSaveFile(await invoke<SaveFile>("load_save_pc", {file_path: filepath, is_debugging: settingsManager.settings.debugMode, has_automatic_backup: settingsManager.settings.automaticBackup}));
             await handleSetIdData();
         };
 
@@ -253,11 +309,64 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
                         </CardContent>
                     </Card>
                 </Backdrop>
+            </ThemeProvider>
 
+            <ThemeProvider theme={newToTheEditorTheme}>
+                <Dialog
+                    open={catchedError ? true : false}
+                    onClose={handleCloseErrorMessage}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description">
+                    <DialogTitle sx={{color: '#e33e2c'}}>
+                    {'Error'}
+                    </DialogTitle>
+                    <DialogContent>
+                    <DialogContentText sx={{color: '#e9eecd'}}>
+                        {catchedError}
+                    </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button variant='outlined' disableElevation onClick={handleCloseErrorMessage} autoFocus>
+                            I understand
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </ThemeProvider>
         </>
     )
 }
+
+const newToTheEditorTheme = createTheme({
+    palette: {
+        mode: 'dark'
+    },
+    components: {
+        MuiButton: {
+            styleOverrides: {
+                root: {
+                    margin: '0 10px',
+                },
+                outlined: {
+                    color: '#e9eecd', 
+                    borderColor: '#e9eecd',
+                    '&:hover': {
+                        borderColor: '#e9eecd',
+                        color: '#526264',
+                        backgroundColor: '#e9eecd',
+                    },
+                    '&:disabled': {
+                        borderColor: '#526264',
+                        color: '#526264',
+                    }
+                },
+                text: {
+                    backgroundColor: 'transparent',
+                    color: '#e9eecd',
+                }
+            }
+        }
+    }
+})
 
 const cardTheme = createTheme({
     palette: {
