@@ -71,8 +71,8 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData, settingsMa
     const [isOpeningSave, setOpeningSave] = useState(false);
     const [currentSavePath, setCurrentSavePath] = useState('');
     const [catchedError, setCatchedError] = useState<string>();
-    const [isDebug, setIsDebug] = useState<boolean>(settingsManager ? settingsManager.settings && settingsManager.settings.debugMode : false)
-    const [hasAutomaticBackup, setAutomaticBackup] = useState<boolean>(settingsManager ? settingsManager.settings && settingsManager.settings.automaticBackup : false)
+    const isDebug = useState<boolean>(settingsManager ? settingsManager.settings && settingsManager.settings.debugMode : false)
+    const hasAutomaticBackup = useState<boolean>(settingsManager ? settingsManager.settings && settingsManager.settings.automaticBackup : false)
 
     useEffect(() => {
         handleSetIdData();
