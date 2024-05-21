@@ -39,6 +39,7 @@ jobs:
         with:
           node-version: lts/*
           cache: 'npm'
+          working-directory: './savegame-editor'
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
