@@ -71,6 +71,8 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData, settingsMa
     const [isOpeningSave, setOpeningSave] = useState(false);
     const [currentSavePath, setCurrentSavePath] = useState('');
     const [catchedError, setCatchedError] = useState<string>();
+    const [isDebug, setIsDebug] = useState<boolean>(settingsManager ? settingsManager.settings && settingsManager.settings.debugMode : false)
+    const [hasAutomaticBackup, setAutomaticBackup] = useState<boolean>(settingsManager ? settingsManager.settings && settingsManager.settings.automaticBackup : false)
 
     useEffect(() => {
         handleSetIdData();
@@ -109,7 +111,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData, settingsMa
         });
       
         if (filepath != null && !Array.isArray(filepath)) {
-            let newSave = await invoke<SaveFile>("load_save", {file_path: filepath, is_debugging: settingsManager.settings.debugMode, has_automatic_backup: settingsManager.settings.automaticBackup}).catch((err) => {
+            let newSave = await invoke<SaveFile>("load_save", {file_path: filepath, is_debugging: isDebug, has_automatic_backup: hasAutomaticBackup}).catch((err) => {
               setCatchedError(err);
             });
 
@@ -138,7 +140,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData, settingsMa
             return;
         }
 
-        let newSave = await invoke<SaveFile>("load_save", {file_path: currentSavePath, is_debugging: settingsManager.settings.debugMode, has_automatic_backup: settingsManager.settings.automaticBackup}).catch((err) => {
+        let newSave = await invoke<SaveFile>("load_save", {file_path: currentSavePath, is_debugging: isDebug, has_automatic_backup: hasAutomaticBackup}).catch((err) => {
               setCatchedError(err);
             });
         
@@ -193,7 +195,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData, settingsMa
         });
       
         if (filepath != null && !Array.isArray(filepath)) {
-            let newSave = await invoke<SaveFile>("load_save_pc", {file_path: filepath, is_debugging: settingsManager.settings.debugMode, has_automatic_backup: settingsManager.settings.automaticBackup}).catch((err) => {
+            let newSave = await invoke<SaveFile>("load_save_pc", {file_path: filepath, is_debugging: isDebug, has_automatic_backup: hasAutomaticBackup}).catch((err) => {
               setCatchedError(err);
             });
             
