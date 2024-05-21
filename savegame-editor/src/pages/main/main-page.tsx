@@ -113,7 +113,6 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData, settingsMa
               setCatchedError(err);
             });
 
-            console.log(newSave);
             await setCurrentSaveFile(newSave);
             await handleSetIdData();
         };
@@ -138,8 +137,12 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData, settingsMa
         if (currentSavePath.length == 0) {
             return;
         }
+
+        let newSave = await invoke<SaveFile>("load_save", {file_path: filepath, is_debugging: settingsManager.settings.debugMode, has_automatic_backup: settingsManager.settings.automaticBackup}).catch((err) => {
+              setCatchedError(err);
+            });
         
-        setCurrentSaveFile(await invoke<SaveFile>("load_save", {file_path: currentSavePath, is_debugging: settingsManager.settings.debugMode, has_automatic_backup: settingsManager.settings.automaticBackup}));
+        setCurrentSaveFile(newSave);
         await handleSetIdData();
 
         setOpeningSave(false);
@@ -190,7 +193,11 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData, settingsMa
         });
       
         if (filepath != null && !Array.isArray(filepath)) {
-            await setCurrentSaveFile(await invoke<SaveFile>("load_save_pc", {file_path: filepath, is_debugging: settingsManager.settings.debugMode, has_automatic_backup: settingsManager.settings.automaticBackup}));
+            let newSave = await invoke<SaveFile>("load_save_pc", {file_path: filepath, is_debugging: settingsManager.settings.debugMode, has_automatic_backup: settingsManager.settings.automaticBackup}).catch((err) => {
+              setCatchedError(err);
+            });
+            
+            await setCurrentSaveFile(newSave);
             await handleSetIdData();
         };
 
