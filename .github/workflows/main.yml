@@ -39,7 +39,11 @@ jobs:
         with:
           node-version: lts/*
           cache: 'npm'
-          working-directory: './savegame-editor'
+
+      - name: install frontend dependencies
+        # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
+        run: npm install
+        working-directory: './savegame-editor'
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -51,11 +55,6 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './savegame-editor/src-tauri -> target'
-
-      - name: install frontend dependencies
-        # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
-        run: npm install
-        working-directory: './savegame-editor'
 
       - uses: tauri-apps/tauri-action@v0
         env:
