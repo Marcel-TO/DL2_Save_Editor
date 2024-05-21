@@ -15,12 +15,16 @@ jobs:
         settings:
           - platform: 'macos-latest' # for Arm based macs (M1 and above).
             args: '--target aarch64-apple-darwin'
+            name: 'macos-arm64 (M1 and above)'
           - platform: 'macos-latest' # for Intel based macs.
             args: '--target x86_64-apple-darwin'
-          - platform: 'ubuntu-22.04' # for Tauri v1 you could replace this with ubuntu-20.04.
+            name: 'macos-x86_64 (Intel)'
+          - platform: 'ubuntu-22.04'
             args: ''
+            name: 'ubuntu-22.04'
           - platform: 'windows-latest'
             args: ''
+            name: 'windows-latest'
 
     runs-on: ${{ matrix.settings.platform }}
     steps:
@@ -51,7 +55,6 @@ jobs:
           workspaces: './savegame-editor/src-tauri -> target'
 
       - name: install frontend dependencies
-        # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
         run: npm install
         working-directory: './savegame-editor'
 
