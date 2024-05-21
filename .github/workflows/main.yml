@@ -9,18 +9,6 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-20.04
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: 'macos-latest' # for Arm based macs (M1 and above).
-            args: '--target aarch64-apple-darwin'
-          - platform: 'macos-latest' # for Intel based macs.
-            args: '--target x86_64-apple-darwin'
-          - platform: 'ubuntu-22.04' # for Tauri v1 you could replace this with ubuntu-20.04.
-            args: ''
-          - platform: 'windows-latest'
-            args: ''
     outputs:
       release_id: ${{ steps.create-release.outputs.result }}
 
@@ -41,11 +29,11 @@ jobs:
             const { data } = await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag_name: `app-v${process.env.PACKAGE_VERSION}fixed`,
-              name: `Save Editor v${process.env.PACKAGE_VERSION}fixed`,
-              body: 'Quality of Life Improvements to the Editor Backend',
+              tag_name: `app-v${process.env.PACKAGE_VERSION}`,
+              name: `Save Editor v${process.env.PACKAGE_VERSION}`,
+              body: 'Fixes issues regarding inventory offset',
               draft: false,
-              prerelease: false
+              prerelease: true
             })
             return data.id
 
