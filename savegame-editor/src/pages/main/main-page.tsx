@@ -138,7 +138,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData, settingsMa
             return;
         }
 
-        let newSave = await invoke<SaveFile>("load_save", {file_path: filepath, is_debugging: settingsManager.settings.debugMode, has_automatic_backup: settingsManager.settings.automaticBackup}).catch((err) => {
+        let newSave = await invoke<SaveFile>("load_save", {file_path: currentSavePath, is_debugging: settingsManager.settings.debugMode, has_automatic_backup: settingsManager.settings.automaticBackup}).catch((err) => {
               setCatchedError(err);
             });
         
