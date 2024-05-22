@@ -69,7 +69,10 @@ const dialogButtonTheme = createTheme({
                 },
                 text: {
                     backgroundColor: 'transparent',
-                    color: '#e33e2c',
+                    color: '#e9eecd',
+                    '&:hover': {
+                        color: '#e9eecd',
+                    },
                 }
             }
         },
