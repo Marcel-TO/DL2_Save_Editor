@@ -6,11 +6,11 @@ import { ThemeProvider } from '@emotion/react'
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, createTheme } from '@mui/material'
 import { Link } from 'react-router-dom'
 
-export const StartPage = ({settingsManager}: {settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {
+export const StartPage = ({settingsManager}: {settingsManager: SettingsManager<SettingsSchema>, setSettingsManager: Function}): JSX.Element => {
     return (
         <>
         <div className="container">
-            <NavbarDrawer pagename={"Start"} pagecontent={<StartContent/>} settingsManager={settingsManager}></NavbarDrawer>
+            <NavbarDrawer pagename={"Start"} pagecontent={<StartContent />} settingsManager={settingsManager}></NavbarDrawer>
         </div>
         </>
     )

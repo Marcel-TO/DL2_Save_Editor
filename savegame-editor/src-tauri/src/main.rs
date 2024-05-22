@@ -4,6 +4,8 @@
 mod save_logic;
 mod logger;
 
+use std::error::Error;
+
 use dotenv::dotenv;
 use save_logic::file_analyser::{change_items_amount, change_items_durability, create_backup_from_file, edit_inventory_item_chunk, edit_skill, export_save_for_pc, get_contents_from_file, load_save_file, load_save_file_pc, remove_inventory_item};
 use save_logic::struct_data::{SaveFile, InventoryChunk, IdData};
@@ -40,23 +42,23 @@ fn update_id_folder(app_handle: AppHandle, file_path: &str) {
 }
 
 #[tauri::command(rename_all = "snake_case")]
-async fn load_save(app_handle: AppHandle, file_path: &str, is_debugging: bool, has_automatic_backup: bool) -> Result<SaveFile, String> {
+fn load_save(app_handle: AppHandle, file_path: &str, is_debugging: bool, has_automatic_backup: bool) -> Result<SaveFile, String> {
     // Initializes the logger.
     let mut logger: ConsoleLogger = ConsoleLogger::new();
     // Initializes resource path where IDs are stored.
-    let resource_path = app_handle.path_resolver().resolve_resource("./IDs/").unwrap();
+    let resource_path: std::path::PathBuf = app_handle.path_resolver().resolve_resource("./IDs/").unwrap();
 
     // Initializes IDs
-    let ids = fetch_ids(&resource_path.display().to_string()).unwrap();
-
+    let ids: Result<Vec<IdData>, Box<dyn Error>> = fetch_ids(&resource_path.display().to_string());
+    
     let file_content: Vec<u8> = get_contents_from_file(&file_path).unwrap();
     
     // Creates a backup file if the settings are set to true.
     if has_automatic_backup {
         create_backup_from_file(&file_path, &file_content);
     }
-
-    let save_file = load_save_file(&file_path, file_content, ids, &mut logger, is_debugging);
+    
+    let save_file = load_save_file(&file_path, file_content, ids.unwrap(), &mut logger, is_debugging);
 
     match save_file {
         Ok(save) => return Ok(save),

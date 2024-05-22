@@ -26,7 +26,7 @@ import { StartPage } from "./pages/start/start-page";
 function App() {
   const [idDatas, setCurrentIdDatas] = useState<IdData[]>([])
   const [currentSaveFile, setCurrentSaveFile] = useState<SaveFile>();
-  const settingsManager = new SettingsManager<SettingsSchema>(
+  const [settingsManager, setSettingsManager] = useState<SettingsManager<SettingsSchema>>(new SettingsManager<SettingsSchema>(
     { // defaults
         theme: 'light',
         startFullscreen: true,
@@ -37,7 +37,7 @@ function App() {
     { // options
         fileName: 'customization-settings'
     }
-  );
+  ));
 
   // checks whether the settings file exists and created it if not
   // loads the settings if it exists
@@ -46,7 +46,7 @@ function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       [
-        (<Route path={'/'} element={<StartPage settingsManager={settingsManager}/>}></Route>),
+        (<Route path={'/'} element={<StartPage settingsManager={settingsManager} setSettingsManager={setSettingsManager}/>}></Route>),
         (<Route path={'/main'} element={<MainPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} setIdData={setCurrentIdDatas} settingsManager={settingsManager}/>}></Route>),
         (<Route path={'/skills'} element={<SkillPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} settingsManager={settingsManager}/>}></Route>),
         (<Route path={'/unlockables'} element={<UnlockablePage currentSaveFile={currentSaveFile} settingsManager={settingsManager}/>}></Route>),

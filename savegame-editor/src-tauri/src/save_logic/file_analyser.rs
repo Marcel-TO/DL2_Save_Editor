@@ -77,6 +77,8 @@ pub fn load_save_file(
     
     let skill_data_range: &[u8] = &file_content[skill_start_index - 1 .. skill_end_index];
 
+    
+    
     // Collect all skills.
     let base_skills: Vec<String> = find_base_skill_matches(&skill_data_range);
     let legend_skills: Vec<String> = find_legend_skill_matches(&skill_data_range);
@@ -510,7 +512,7 @@ fn analize_skill_data(
         
         // If debuggin is set to true, log found collected data of current skill.
         if is_debugging {
-            logger.log_message(&format!("Found at offset: [{}] the skill: [{}]", index, name).as_str(), Vec::new());
+            logger.log_message(&format!("Found at offset: [{:?}] the skill: [{:?}]", index, name).as_str(), Vec::new());
         }
         
         let skill_item: SkillItem = SkillItem::new(
@@ -539,7 +541,7 @@ fn analize_skill_data(
 
         // If debugging is set to true, log found collected data of current skill.
         if is_debugging {
-            logger.log_message(&format!("Found at offset: [{}] the skill: [{}]", index, name).as_str(), Vec::new());
+            logger.log_message(&format!("Found at offset: [{:?}] the skill: [{:?}]", index, name).as_str(), Vec::new());
         }
 
         let skill_item: SkillItem = SkillItem::new(

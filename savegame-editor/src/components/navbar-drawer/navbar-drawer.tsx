@@ -166,10 +166,10 @@ interface NavbarDrawerProps {
 export const NavbarDrawer = ({pagename, pagecontent, settingsManager}: NavbarDrawerProps): JSX.Element => {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
-  const [isDebugSelected, setIsDebugSelected] = useState(settingsManager ? true : true)
+  const [isDebugSelected, setIsDebugSelected] = useState(settingsManager ? true : false)
 
   useEffect(() => {
-    setIsDebugSelected(settingsManager ? settingsManager.settings && settingsManager.settings.debugMode : false);
+    setIsDebugSelected(true);
   }, [])
 
   const handleDrawerOpen = () => {
