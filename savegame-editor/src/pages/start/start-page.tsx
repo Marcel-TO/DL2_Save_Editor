@@ -34,6 +34,9 @@ const StartContent = (): JSX.Element => {
                 </DialogContent>
                 <DialogActions>
                     <ThemeProvider theme={dialogButtonTheme}>
+                        <Button variant='text' component={Link} to={'/knowledge-vault'} autoFocus>
+                            Knowledge Vault
+                        </Button>
                         <Button variant='outlined' component={Link} to={'/main'} autoFocus>
                             Start Editing
                         </Button>
