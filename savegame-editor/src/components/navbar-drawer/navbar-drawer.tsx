@@ -146,7 +146,7 @@ const itemPages: [string, JSX.Element, string, boolean][] = [
 const otherPages: [string, JSX.Element, string, boolean][] = [
   ['Player', <AccountCircleOutlinedIcon/>, '/player', true],
   ['IDs', <FingerprintIcon/>, '/ids', false], 
-  ['Settings', <SettingsIcon/>, '/settings', false],
+  ['Settings', <SettingsIcon/>, '/settings', true],
 ];
 const infoPages: [string, JSX.Element, string, boolean][] = [
   ['Home', <HomeRoundedIcon/>, '/main', false],
