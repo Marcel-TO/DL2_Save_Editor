@@ -59,26 +59,25 @@ export const MainPage = ({currentSaveFile, setCurrentSaveFile, setIdData, settin
                 </ThemeProvider>
             ): (
                 <div className="container">
-                    <NavbarDrawer pagename={"Main"} pagecontent={<MainContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} setIdData={setIdData} settingsManager={settingsManager}/>} settingsManager={settingsManager}></NavbarDrawer>
+                    <NavbarDrawer pagename={"Main"} pagecontent={<MainContent currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} setIdData={setIdData}/>} settingsManager={settingsManager}></NavbarDrawer>
                 </div>
             )}
         </>
     )
 }
 
-const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData, settingsManager}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function, settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {    
+const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function}): JSX.Element => {    
     const [isOpen, setOpen] = useState(false);
     const [isOpeningSave, setOpeningSave] = useState(false);
     const [currentSavePath, setCurrentSavePath] = useState('');
     const [catchedError, setCatchedError] = useState<string>();
-    const [isDebug, setIsDebug] = useState<boolean>(settingsManager ? true : true)
-    const [hasAutomaticBackup, setAutomaticBackup] = useState<boolean>(settingsManager ? true : true)
-    setIsDebug(true)
-    setAutomaticBackup(true)
+    const isDebug = true;
+    const hasAutomaticBackup = true;
 
     useEffect(() => {
         handleSetIdData();
-      }, []);
+      }, [])
+    ;
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -117,6 +116,7 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData, settingsMa
               setCatchedError(err);
             });
 
+            console.log("found save", newSave)
             await setCurrentSaveFile(newSave);
             await handleSetIdData();
         };

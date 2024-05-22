@@ -19,28 +19,15 @@ pub trait LoggerFunctions {
 
 impl LoggerFunctions for ConsoleLogger {
     fn log_message(&mut self, message: &str, attributes: Vec<term::Attr>) {
-        let mut terminal = term::stdout().unwrap();
-        for attr in attributes {
-            terminal.attr(attr).unwrap();
-        }
-
-        println!("{}", message);
+        println!("{:?}", message);
         // Adding the message to the log history.
         self.log_histroy.push(message.to_string());
-
-        terminal.reset().unwrap();
-
     }
 
     fn log_message_no_linebreak(&mut self, message: &str, attributes: Vec<term::Attr>) {
-        let mut terminal = term::stdout().unwrap();
-        for attr in attributes {
-            terminal.attr(attr).unwrap();
-        }
+        print!("{:?}", message);
 
-        print!("{}", message);
-
-        terminal.reset().unwrap();
+        // terminal.reset().unwrap();
     }
 
     fn log_error(&mut self, message: &str) {
