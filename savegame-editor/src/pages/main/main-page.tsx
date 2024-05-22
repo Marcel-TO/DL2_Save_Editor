@@ -14,7 +14,7 @@ import { SettingsSchema } from '../../models/settings-schema';
 import { useNavigate } from 'react-router-dom';
 
 export const MainPage = ({currentSaveFile, setCurrentSaveFile, setIdData, settingsManager}: {currentSaveFile: SaveFile | undefined, setCurrentSaveFile: Function, setIdData: Function, settingsManager: SettingsManager<SettingsSchema>}): JSX.Element => {    
-    const [isNew, setIsNew] = useState<boolean>(settingsManager ? settingsManager.settings && settingsManager.settings.isNewToEditor : false);
+    const [isNew, setIsNew] = useState<boolean>(false);
     const navigate = useNavigate();
 
     async function handleChangeIsNew(option: boolean) {
@@ -71,8 +71,8 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData, settingsMa
     const [isOpeningSave, setOpeningSave] = useState(false);
     const [currentSavePath, setCurrentSavePath] = useState('');
     const [catchedError, setCatchedError] = useState<string>();
-    const isDebug = useState<boolean>(settingsManager ? settingsManager.settings && settingsManager.settings.debugMode : false)
-    const hasAutomaticBackup = useState<boolean>(settingsManager ? settingsManager.settings && settingsManager.settings.automaticBackup : false)
+    const [isDebug, setIsDebug] = useState<boolean>(settingsManager ? true : true)
+    const [hasAutomaticBackup, setAutomaticBackup] = useState<boolean>(settingsManager ? true : true)
 
     useEffect(() => {
         handleSetIdData();
