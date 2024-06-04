@@ -5,7 +5,7 @@
 # Dying Light 2 Save Editor 
 <p align="center">
   <img alt="GitHub Downloads (all assets, all releases)" src="https://img.shields.io/github/downloads/Marcel-TO/DL2_Save_Editor/total?style=for-the-badge&logo=Github&logoColor=black&label=Editor%20Downloads&labelColor=899994&color=899994">
-  <img alt="GitHub Release" src="https://img.shields.io/github/v/release/Marcel-TO/DL2_Save_Editor?sort=semver&display_name=tag&style=for-the-badge&logo=Github&labelColor=526264&color=526264">
+  <img alt="GitHub Release" src="https://img.shields.io/github/v/release/Marcel-TO/DL2_Save_Editor?include_prereleases&sort=date&display_name=tag&style=for-the-badge&logo=Github&labelColor=526264&color=526264">
   <img alt="GitHub License" src="https://img.shields.io/github/license/Marcel-TO/DL2_Save_Editor?style=for-the-badge&labelColor=2f4045&color=2f4045">
 </p>
 
