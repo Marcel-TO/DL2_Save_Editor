@@ -58,7 +58,7 @@ If you want to test out the Editor yourself, feel free to download the Applicati
   <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Tutorial" target="_blank">
     <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Tutorial-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
   </a>
-  <a href="Downloads" target="_blank">
+  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/releases/tag/app-v1.0.6-no-settings" target="_blank">
     <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Downloads-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
   </a>
 </p>
