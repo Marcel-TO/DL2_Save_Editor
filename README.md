@@ -58,6 +58,9 @@ If you want to test out the Editor yourself, feel free to download the Applicati
   <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Tutorial" target="_blank">
     <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Tutorial-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
   </a>
+  <a href="Downloads" target="_blank">
+    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Downloads-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
+  </a>
 </p>
 
 ## Tech Stack
@@ -75,6 +78,8 @@ This editor uses the *Tauri* Framework for the application.
    React is a JavaScript library for building user interfaces. It follows a component-based architecture, making it easy to create interactive and reusable UI components.
 
 ## Prerequisites for programming
+> For further Details please visit the wiki entry regarding this topic [here](https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Prerequisites-for-Programming).
+
 - Rust:
 
   Installation: Before working with TAURI, ensure that Rust is installed on your system. You can install Rust by following the instructions on the official [Rust website](https://www.rust-lang.org/tools/install).
