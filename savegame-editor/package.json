@@ -21,7 +21,7 @@
     "embla-carousel-auto-height": "^8.0.0-rc22",
     "embla-carousel-autoplay": "^8.0.0-rc22",
     "embla-carousel-react": "^8.0.0-rc22",
-    "gh-pages": "^6.0.0",
+    "gh-pages": "^6.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.18.0",
