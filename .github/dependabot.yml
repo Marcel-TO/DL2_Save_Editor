@@ -8,7 +8,7 @@ updates:
       interval: "weekly"
 
   # Maintain dependencies for Rust / Backend
-  - package-ecosystem: "Cargo"
+  - package-ecosystem: "cargo"
     directory: "/savegame-editor/src-tauri" # Location of package manifests
     schedule:
       interval: "weekly"
