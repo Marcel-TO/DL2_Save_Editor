@@ -14,6 +14,26 @@
 
 We are thrilled to present the first Open-Source Save Editor for the Videogame ***Dying Light 2***. This tool allows players to take control of their game saves, unlocking a realm of possibilities and customization. 
 
+## Getting Started
+If you want to test out the Editor yourself, feel free to download the Application inside the release and visit the wiki for further details (like Tutorial + QnA).
+<p align="center">
+  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Home" target="_blank">
+    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Wiki-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
+  </a>
+  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Getting-Started-with-the-Editor" target="_blank">
+    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Getting_Started-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
+  </a>
+  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Commonly-Asked-Questions-(QnA)" target="_blank">
+    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-QnA-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
+  </a>
+  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Tutorial" target="_blank">
+    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Tutorial-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
+  </a>
+  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/releases/tag/app-v1.0.6-no-settings" target="_blank">
+    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Downloads-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
+  </a>
+</p>
+
 ## What has the Editor to offer?
 1. It is fully open source, fostering a collaborative environment where fellow gamers and developers alike can contribute to its evolution.
 2. The whole User Interface is customized for *Dying Light 2* and provides not only functionality but a fitting design.
@@ -42,26 +62,6 @@ If you are curious about the process and wanna have a little insight regarding f
 <a href="https://github.com/users/Marcel-TO/projects/2/views/2" target="_blank">
     <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Feature_Board-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
 </a>
-
-## Getting Started
-If you want to test out the Editor yourself, feel free to download the Application inside the release and visit the wiki for further details (like Tutorial + QnA).
-<p align="center">
-  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Home" target="_blank">
-    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Wiki-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
-  </a>
-  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Getting-Started-with-the-Editor" target="_blank">
-    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Getting_Started-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
-  </a>
-  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Commonly-Asked-Questions-(QnA)" target="_blank">
-    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-QnA-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
-  </a>
-  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Tutorial" target="_blank">
-    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Tutorial-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
-  </a>
-  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/releases/tag/app-v1.0.6-no-settings" target="_blank">
-    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Downloads-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
-  </a>
-</p>
 
 ## Tech Stack
 This editor uses the *Tauri* Framework for the application.
