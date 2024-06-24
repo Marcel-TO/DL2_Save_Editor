@@ -23,7 +23,7 @@
     "embla-carousel-react": "^8.1.5",
     "gh-pages": "^6.1.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react-dom": "^18.3.1",
     "react-router-dom": "^6.18.0",
     "react-window": "^1.8.10",
     "tauri-plugin-log-api": "github:tauri-apps/tauri-plugin-log",
