@@ -22,7 +22,7 @@
     "embla-carousel-autoplay": "^8.0.0-rc22",
     "embla-carousel-react": "^8.1.5",
     "gh-pages": "^6.1.1",
-    "react": "^18.2.0",
+    "react": "^18.3.1",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.18.0",
     "react-window": "^1.8.10",
@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.5.14",
-    "@types/react": "^18.2.15",
+    "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@types/react-window": "^1.8.8",
     "@vitejs/plugin-react": "^4.3.1",
