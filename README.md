@@ -17,16 +17,16 @@ We are thrilled to present the first Open-Source Save Editor for the Videogame *
 ## Getting Started
 If you want to test out the Editor yourself, feel free to download the Application inside the release and visit the wiki for further details (like Tutorial + QnA).
 <p align="center">
-  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Home" target="_blank">
+  <a href="https://marcel-to.notion.site/DL2-Save-Editor-Docs-d2dc418e1d59403cb55863da261f0b64" target="_blank">
     <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Wiki-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
   </a>
-  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Getting-Started-with-the-Editor" target="_blank">
+  <a href="https://marcel-to.notion.site/Getting-Started-with-the-Editor-496ffcc2b46a4f39b6e7ca04ed1b3b32" target="_blank">
     <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Getting_Started-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
   </a>
-  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Commonly-Asked-Questions-(QnA)" target="_blank">
+  <a href="https://marcel-to.notion.site/Commonly-asked-Questions-QnA-5c05da103a304c3e99b9bc024c35cf7d" target="_blank">
     <img alt="Static Badge" src="https://img.shields.io/badge/Visit-QnA-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
   </a>
-  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Tutorial" target="_blank">
+  <a href="https://marcel-to.notion.site/Tutorial-95ff57c3d2c14314b6e89613f0f14a7a" target="_blank">
     <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Tutorial-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
   </a>
   <a href="https://github.com/Marcel-TO/DL2_Save_Editor/releases/tag/app-v1.0.6-no-settings" target="_blank">
@@ -78,7 +78,8 @@ This editor uses the *Tauri* Framework for the application.
    React is a JavaScript library for building user interfaces. It follows a component-based architecture, making it easy to create interactive and reusable UI components.
 
 ## Prerequisites for programming
-> For further Details please visit the wiki entry regarding this topic [here](https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Prerequisites-for-Programming).
+> For further Details please visit the wiki entry regarding this topic [here](https://marcel-to.notion.site/Prerequisites-for-Programming-bcd84864e7e4454283bac25d619015e7).
+> If you want to understand the structure of the Frontend click [here](https://marcel-to.notion.site/The-Editor-in-Detail-Frontend-9c72b33073eb43c2acfbf9210ff80c71)
 
 - Rust:
 
