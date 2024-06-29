@@ -77,8 +77,6 @@ pub fn load_save_file(
     
     let skill_data_range: &[u8] = &file_content[skill_start_index - 1 .. skill_end_index];
 
-    
-    
     // Collect all skills.
     let base_skills: Vec<String> = find_base_skill_matches(&skill_data_range);
     let legend_skills: Vec<String> = find_legend_skill_matches(&skill_data_range);
@@ -331,6 +329,7 @@ pub fn change_items_durability(
             current_chunk.seed,
             current_chunk.amount,
             durability_bytes.clone(),
+            current_chunk.counter_stats,
             current_chunk.space,
             current_chunk.index
         );
@@ -367,6 +366,7 @@ pub fn change_items_amount(
             current_chunk.seed,
             amount_bytes.clone(),
             current_chunk.durability,
+            current_chunk.counter_stats,
             current_chunk.space,
             current_chunk.index
         );
@@ -512,7 +512,7 @@ fn analize_skill_data(
         
         // If debuggin is set to true, log found collected data of current skill.
         if is_debugging {
-            logger.log_message(&format!("Found at offset: [{:?}] the skill: [{:?}]", index, name).as_str(), Vec::new());
+            logger.log_message(&format!("Found at offset: [{}] the skill: [{}]", index, name).as_str(), Vec::new());
         }
         
         let skill_item: SkillItem = SkillItem::new(
@@ -541,7 +541,7 @@ fn analize_skill_data(
 
         // If debugging is set to true, log found collected data of current skill.
         if is_debugging {
-            logger.log_message(&format!("Found at offset: [{:?}] the skill: [{:?}]", index, name).as_str(), Vec::new());
+            logger.log_message(&format!("Found at offset: [{}] the skill: [{}]", index, name).as_str(), Vec::new());
         }
 
         let skill_item: SkillItem = SkillItem::new(
@@ -970,8 +970,9 @@ fn find_all_inventory_chunks(content: &[u8], start_index: usize, logger: &mut Co
     let seed_offset: usize = 2;
     let amount_offset: usize = 4;
     let durability_offset: usize = 4;
+    let counter_stats_offset: usize = 4;
     let space_offset: usize = 25;
-    let data_offset: usize = level_offset + seed_offset + amount_offset + durability_offset + space_offset;
+    let data_offset: usize = level_offset + seed_offset + amount_offset + durability_offset + counter_stats_offset + space_offset;
 
     // Find the first SGD index.
     let first_sgds_index_result = find_first_sgd_index(content, start_index);
@@ -1001,6 +1002,8 @@ fn find_all_inventory_chunks(content: &[u8], start_index: usize, logger: &mut Co
             index += amount_offset;
             let durability_data: Vec<u8> = content[index..index+durability_offset].to_vec();
             index += durability_offset;
+            let counter_stats_data: Vec<u8> = content[index..index+counter_stats_offset].to_vec();
+            index += counter_stats_offset;
             let chunk_space: Vec<u8> = content[index..index+space_offset].to_vec();
 
             if is_debugging {
@@ -1012,6 +1015,7 @@ fn find_all_inventory_chunks(content: &[u8], start_index: usize, logger: &mut Co
                 seed_data,
                 amount_data,
                 durability_data,
+                counter_stats_data,
                 chunk_space,
                 data_index,
             ));
