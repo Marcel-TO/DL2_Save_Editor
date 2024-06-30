@@ -92,11 +92,6 @@ pub fn load_save_file(
     match &skills {
         Ok(skills_unwrapped) => {
             logger.log_message(&format!("{} Skills got validated", skills_unwrapped.base_skills.len() + skills_unwrapped.legend_skills.len()), Vec::new());
-
-            // Wait for user input to continue with the analysation.
-            if is_debugging {
-                logger.wait_for_input();
-            }
         },
         Err(err) => return Err(err.to_string().into())
     }
@@ -108,11 +103,6 @@ pub fn load_save_file(
     match &unlockable_result {
         Ok(unlocks) => {
             logger.log_message(&format!("{} Unlockables got validated.", unlocks.len()), Vec::new());
-
-            // Wait for user input to continue with the analysation.
-            if is_debugging {
-                logger.wait_for_input();
-            }
         },
         Err(err) => return Err(err.to_string().into())
     }
@@ -123,10 +113,6 @@ pub fn load_save_file(
     // Check if the editor did not manage to validate the inventory index.
     match &index_inventory_items_result {
         Ok(_) => {            
-            // Wait for user input to continue with the analysation.
-            if is_debugging {
-                logger.wait_for_input();
-            }
         },
         Err(err) => return Err(err.to_string().into())
     }
@@ -140,11 +126,6 @@ pub fn load_save_file(
     match &items_result {
         Ok(i) => {
             logger.log_message(&format!("{} Tabs from inventory got validated.", i.len()), Vec::new());
-
-            // Wait for user input to continue with the analysation.
-            if is_debugging {
-                logger.wait_for_input();
-            }
         },
         Err(err) => return Err(err.to_string().into())
     }
@@ -704,10 +685,6 @@ fn get_all_items(
             Ok((ref chunks, ref new_index)) => {
                 logger.log_message(&format!("[{}] inventory chunks found. The new index is: [{}]", chunks.len(), new_index), Vec::new());
                 logger.log_break();
-                // Wait for user input to continue with the analysation.
-                if is_debugging {
-                    logger.wait_for_input();
-                }
             },
             Err(_) => {
                 break;
@@ -819,7 +796,6 @@ fn get_all_items(
         if is_debugging {
             logger.log_message(&format!("Used the index of from the last mod and added the +75 to the offset for the next item: [{}]", index), Vec::new());
             logger.log_break();
-            logger.wait_for_input();
         }
     }
 

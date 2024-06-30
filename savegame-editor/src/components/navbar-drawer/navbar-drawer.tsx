@@ -36,6 +36,7 @@ import LockOpenIcon from '@mui/icons-material/LockOpen';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
 // Themes
 const openedMixin = (theme: Theme): CSSObject => ({
@@ -136,7 +137,7 @@ const drawerTheme = createTheme({
 const drawerWidth = 240;
 
 // The different pages
-const itemPages: [string, JSX.Element, string, boolean][] = [
+const editPages: [string, JSX.Element, string, boolean][] = [
   ['Skills', <AccountTreeRoundedIcon/>, '/skills', false], 
   ['Unlockables', <LockOpenIcon/>, '/unlockables', false], 
   ['Inventory', <Inventory2RoundedIcon/>, '/inventory', false], 
@@ -257,8 +258,45 @@ export const NavbarDrawer = ({pagename, pagecontent, settingsManager}: NavbarDra
                   ))}
                 </List>
                 <Divider sx={{ backgroundColor: '#e9eecd60' }} />
+                  <List>
+                  <ListItem key='sponsor' disablePadding sx={{
+                        display: 'block',
+                        color: '#e9eecd',
+                      }}>
+                        <ListItemButton
+                          sx={{
+                            minHeight: 48,
+                            justifyContent: open ? 'initial' : 'center',
+                            px: 2.5,
+                            '&:hover': {
+                              color: '#e9eecd',
+                              backgroundColor: '#526264',
+                            },
+                          }}
+                          component={Link} to='/sponsor'
+                          disabled={!isDebugSelected}
+                        >
+                          <ListItemIcon
+                            sx={{
+                              minWidth: 0,
+                              mr: open ? 3 : 'auto',
+                              justifyContent: 'center',
+                              color: '#e9eecd',
+                            }}
+                          >
+                            {<FavoriteBorderIcon/>}
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={'Sponsor'}
+                            sx={{
+                              opacity: open ? 1 : 0,
+                            }} />
+                        </ListItemButton>
+                      </ListItem>
+                  </List>
+                <Divider sx={{ backgroundColor: '#e9eecd60' }} />
                 <List>
-                  {itemPages.map(([text, icon, link, isDisabled]) => (
+                  {editPages.map(([text, icon, link, isDisabled]) => (
                     <ListItem key={text} disablePadding sx={{
                       display: 'block',
                       color: '#e9eecd',
