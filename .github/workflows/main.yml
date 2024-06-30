@@ -62,7 +62,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: app-v__VERSION__-no-settings # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: 'Save Editor v__VERSION__'
           releaseBody: 'Good night and good luck'
           releaseDraft: false
