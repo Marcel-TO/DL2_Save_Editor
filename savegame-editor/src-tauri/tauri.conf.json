@@ -57,7 +57,7 @@
     },
     "windows": [
       {
-        "fullscreen": true,
+        "fullscreen": false,
         "resizable": true,
         "title": "Dying Light 2 Save Editor",
         "width": 1080,
