@@ -212,10 +212,12 @@ const MainContent = ({currentSaveFile, setCurrentSaveFile, setIdData}: {currentS
     return (
         <>
             <ThemeProvider theme={cardTheme}>
-                <Card>
+                <Card sx={{
+                    overflow: 'hidden'
+                }}>
                     <CardHeader>Current Save:</CardHeader>
                     <CardContent sx={{height: '70vh'}}>
-                    <Box sx={{height: '100%', overflow: 'scroll', display: 'flex', flexDirection: 'column', textAlign: 'left'}}>
+                    <Box sx={{height: '100%', display: 'flex', flexDirection: 'column', textAlign: 'left'}}>
                         <Typography gutterBottom variant="h6" component="div" sx={{ height: 50, display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
                             Selected File: {currentSaveFile?.path}
                         </Typography>

@@ -5,7 +5,7 @@
 # Dying Light 2 Save Editor 
 <p align="center">
   <img alt="GitHub Downloads (all assets, all releases)" src="https://img.shields.io/github/downloads/Marcel-TO/DL2_Save_Editor/total?style=for-the-badge&logo=Github&logoColor=black&label=Editor%20Downloads&labelColor=899994&color=899994">
-  <img alt="GitHub Release" src="https://img.shields.io/github/v/release/Marcel-TO/DL2_Save_Editor?sort=semver&display_name=tag&style=for-the-badge&logo=Github&labelColor=526264&color=526264">
+  <img alt="GitHub Release" src="https://img.shields.io/github/v/release/Marcel-TO/DL2_Save_Editor?include_prereleases&sort=date&display_name=tag&style=for-the-badge&logo=Github&labelColor=526264&color=526264">
   <img alt="GitHub License" src="https://img.shields.io/github/license/Marcel-TO/DL2_Save_Editor?style=for-the-badge&labelColor=2f4045&color=2f4045">
 </p>
 
@@ -13,6 +13,26 @@
 *Greetings Pilgrims!*
 
 We are thrilled to present the first Open-Source Save Editor for the Videogame ***Dying Light 2***. This tool allows players to take control of their game saves, unlocking a realm of possibilities and customization. 
+
+## Getting Started
+If you want to test out the Editor yourself, feel free to download the Application inside the release and visit the wiki for further details (like Tutorial + QnA).
+<p align="center">
+  <a href="https://marcel-to.notion.site/DL2-Save-Editor-Docs-d2dc418e1d59403cb55863da261f0b64" target="_blank">
+    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Wiki-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
+  </a>
+  <a href="https://marcel-to.notion.site/Getting-Started-with-the-Editor-496ffcc2b46a4f39b6e7ca04ed1b3b32" target="_blank">
+    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Getting_Started-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
+  </a>
+  <a href="https://marcel-to.notion.site/Commonly-asked-Questions-QnA-5c05da103a304c3e99b9bc024c35cf7d" target="_blank">
+    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-QnA-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
+  </a>
+  <a href="https://marcel-to.notion.site/Tutorial-95ff57c3d2c14314b6e89613f0f14a7a" target="_blank">
+    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Tutorial-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
+  </a>
+  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/releases/tag/app-v1.0.6-no-settings" target="_blank">
+    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Downloads-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
+  </a>
+</p>
 
 ## What has the Editor to offer?
 1. It is fully open source, fostering a collaborative environment where fellow gamers and developers alike can contribute to its evolution.
@@ -43,23 +63,6 @@ If you are curious about the process and wanna have a little insight regarding f
     <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Feature_Board-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
 </a>
 
-## Getting Started
-If you want to test out the Editor yourself, feel free to download the Application inside the release and visit the wiki for further details (like Tutorial + QnA).
-<p align="center">
-  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Home" target="_blank">
-    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Wiki-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
-  </a>
-  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Getting-Started-with-the-Editor" target="_blank">
-    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Getting_Started-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
-  </a>
-  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Commonly-Asked-Questions-(QnA)" target="_blank">
-    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-QnA-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
-  </a>
-  <a href="https://github.com/Marcel-TO/DL2_Save_Editor/wiki/Tutorial" target="_blank">
-    <img alt="Static Badge" src="https://img.shields.io/badge/Visit-Tutorial-899994?style=for-the-badge&logo=readthedocs&logoColor=fff">
-  </a>
-</p>
-
 ## Tech Stack
 This editor uses the *Tauri* Framework for the application.
 - **Tauri Framework**
@@ -75,6 +78,9 @@ This editor uses the *Tauri* Framework for the application.
    React is a JavaScript library for building user interfaces. It follows a component-based architecture, making it easy to create interactive and reusable UI components.
 
 ## Prerequisites for programming
+> For further Details please visit the wiki entry regarding this topic [here](https://marcel-to.notion.site/Prerequisites-for-Programming-bcd84864e7e4454283bac25d619015e7).
+> If you want to understand the structure of the Frontend click [here](https://marcel-to.notion.site/The-Editor-in-Detail-Frontend-9c72b33073eb43c2acfbf9210ff80c71)
+
 - Rust:
 
   Installation: Before working with TAURI, ensure that Rust is installed on your system. You can install Rust by following the instructions on the official [Rust website](https://www.rust-lang.org/tools/install).

@@ -22,6 +22,7 @@ import { KnowledgeVaultPage } from "./pages/knowledge-vault/knowledge-vault";
 import { SettingsPage } from "./pages/settings/settings-page";
 import { DebugPage } from "./pages/debug/debug-page";
 import { StartPage } from "./pages/start/start-page";
+import { SponsorPage } from "./pages/sponsor/sponsor-page";
 
 function App() {
   const [idDatas, setCurrentIdDatas] = useState<IdData[]>([])
@@ -62,6 +63,7 @@ function App() {
         (<Route path={'/knowledge-vault'} element={<KnowledgeVaultPage settingsManager={settingsManager}/>}></Route>),
         (<Route path={'/settings'} element={<SettingsPage settingsManager={settingsManager}/>}></Route>),
         (<Route path={'/debug'} element={<DebugPage settingsManager={settingsManager} currentSaveFile={currentSaveFile}/>}></Route>),
+        (<Route path={'/sponsor'} element={<SponsorPage settingsManager={settingsManager}/>}></Route>),
       ]
     )
   )

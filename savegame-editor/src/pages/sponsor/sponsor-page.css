@@ -1,0 +1,7 @@
+.sponsor-button {
+    position: fixed;
+    display: flex;
+    bottom: 5%;
+    right: 5%;
+    z-index: 100;
+}

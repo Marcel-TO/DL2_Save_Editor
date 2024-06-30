@@ -33,12 +33,14 @@ pub struct InventoryChunk {
     pub seed: Vec<u8>,
     pub amount: Vec<u8>,
     pub durability: Vec<u8>,
+    pub counter_stats: Vec<u8>,
     pub space: Vec<u8>,
     pub index: usize,
     pub level_value: u16,
     pub seed_value: u16,
     pub amount_value: u32,
     pub durability_value: String,
+    pub counter_stats_value: u32,
 }
 
 impl InventoryChunk {
@@ -47,6 +49,7 @@ impl InventoryChunk {
         seed: Vec<u8>,
         amount: Vec<u8>,
         durability: Vec<u8>,
+        counter_stats: Vec<u8>,
         space: Vec<u8>,
         index: usize,
     ) -> Self {
@@ -55,12 +58,14 @@ impl InventoryChunk {
             seed: seed.clone(),
             amount: amount.clone(),
             durability: durability.clone(),
+            counter_stats: counter_stats.clone(),
             space: space.clone(),
             index,
             level_value: u16::from_le_bytes(level.clone().try_into().unwrap()),
             seed_value: u16::from_le_bytes(seed.clone().try_into().unwrap()),
             amount_value: u32::from_le_bytes(amount.clone().try_into().unwrap()),
             durability_value: format!("{:.1}", unsafe { mem::transmute::<u32, f32>(u32::from_le_bytes(durability.clone().try_into().unwrap())) }),
+            counter_stats_value: u32::from_le_bytes(counter_stats.clone().try_into().unwrap()),
         }
     }
 }
