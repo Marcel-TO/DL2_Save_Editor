@@ -70,8 +70,10 @@ export default function SponsorsAvatar({ sponsors }: { sponsors: Sponsor[] }) {
                 <Avatar 
                   alt={sponsor.name}
                   sx={{ width: 56, height: 56, backgroundColor: '#e9eecd' }}
-                  src={sponsor.avatar} 
-                />
+                >
+
+                  <div className="sponsor-easily-spooked-image"></div>
+                </Avatar>
               </StyledBadge>
             </a>
           </CustomToolTip>
