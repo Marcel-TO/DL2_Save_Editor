@@ -6,7 +6,6 @@ import { Box, Button, Typography } from "@mui/material";
 import { Sponsor } from "../../models/models";
 import SponsorsAvatar from "../../components/sponsors/sponsors-avatar";
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import { Link } from "react-router-dom";
 
 export const SponsorPage = ({
   settingsManager,
@@ -30,7 +29,7 @@ const Sponsors: Sponsor[] = [
   {
     name: "Easily Spooked",
     avatar: "src/assets/pictures/sponsors/easily-spooked.jpeg",
-    link: "https://discord.com/users/1250386184379564103",
+    link: "https://discordapp.com/users/1250386184379564103",
     tier: "Top Sonsor",
   },
 ];
@@ -75,24 +74,26 @@ const SponsorContent = (): JSX.Element => {
         <SponsorsAvatar sponsors={Sponsors} />
 
         <div className="sponsor-button">
-          <Button
-            id="basic-button"
-            variant="outlined"
-            component={Link} to={'https://github.com/sponsors/Marcel-TO'} target="blank"
-            sx={{
-              borderColor: "#e9eecd",
-              color: "#e9eecd",
-              backgroundColor: "#52626450",
-              "&:hover": {
-                backgroundColor: "#e9eecd",
-                color: "#526264",
-                borderColor: "#526264",
-              },
-            }}
-          >
-            <FavoriteBorderIcon sx={{marginRight: '10px'}}/>
-            Sponsor the Editor
-          </Button>
+          <a href="https://github.com/sponsors/Marcel-TO" target="_blank">
+            <Button
+              id="basic-button"
+              variant="outlined"
+              sx={{
+                borderColor: "#e9eecd",
+                color: "#e9eecd",
+                backgroundColor: "#52626450",
+                "&:hover": {
+                  backgroundColor: "#e9eecd",
+                  color: "#526264",
+                  borderColor: "#526264",
+                },
+              }}
+            >
+              <FavoriteBorderIcon sx={{marginRight: '10px'}}/>
+              Sponsor the Editor
+            </Button>
+
+          </a>
         </div>
       </Box>
     </>

@@ -1,21 +1,5 @@
-.contributor-mchawk-image {
-    background-image: url('/src/assets/pictures/mchawk.jpg');
-    width: 100%;
-    height: 100%;
-    background-position: center;
-    background-size: cover;
-}
-
-.contributor-caz-image {
-    background-image: url('/src/assets/pictures/caz.png');
-    width: 100%;
-    height: 100%;
-    background-position: center;
-    background-size: cover;
-}
-
-.contributor-batang-image {
-    background-image: url('/src/assets/pictures/batang.png');
+.sponsor-easily-spooked-image {
+    background-image: url('/src/assets/pictures/sponsors/easily-spooked.jpeg');
     width: 100%;
     height: 100%;
     background-position: center;
