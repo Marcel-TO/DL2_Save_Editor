@@ -6,6 +6,7 @@ import {
   File,
   ListFilter,
   MoreVertical,
+  Save,
   Truck} from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -50,6 +51,7 @@ import {
 } from "@/components/ui/tabs"
 import { NavbarComponent } from "@/components/custom/custom-navbar-component"
 import { SaveFile } from "@/models/save-models"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 type MainPageProps = {
   currentSaveFile: SaveFile | undefined
@@ -351,28 +353,35 @@ export function MainPage({currentSaveFile}: MainPageProps) {
               <CardHeader className="flex flex-row items-start bg-muted/50">
                 <div className="grid gap-0.5">
                   <CardTitle className="group flex items-center gap-2 text-lg">
-                    Order Oe31b70H
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
-                    >
-                      <Copy className="h-3 w-3" />
-                      <span className="sr-only">Copy Order ID</span>
-                    </Button>
+                    {currentSaveFile?.path ?? "No Save Selected"}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
+                          >
+                            <Save className="h-3 w-3" />
+                            <span className="sr-only">Save</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Copy Path</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </CardTitle>
-                  <CardDescription>Date: November 23, 2023</CardDescription>
+                  <CardDescription>Length: {currentSaveFile?.file_content.byteLength}</CardDescription>
                 </div>
                 <div className="ml-auto flex items-center gap-1">
-                  <Button size="sm" variant="outline" className="h-8 gap-1">
-                    <Truck className="h-3.5 w-3.5" />
+                  <Button size="sm" variant="outline" className="h-8 gap-1" disabled={currentSaveFile ? false : true}>
+                    <Save className="h-3.5 w-3.5" />
                     <span className="lg:sr-only xl:not-sr-only xl:whitespace-nowrap">
-                      Track Order
+                      Save File
                     </span>
                   </Button>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button size="icon" variant="outline" className="h-8 w-8">
+                      <Button size="icon" variant="outline" className="h-8 w-8" disabled={currentSaveFile ? false : true}>
                         <MoreVertical className="h-3.5 w-3.5" />
                         <span className="sr-only">More</span>
                       </Button>
@@ -388,19 +397,19 @@ export function MainPage({currentSaveFile}: MainPageProps) {
               </CardHeader>
               <CardContent className="p-6 text-sm">
                 <div className="grid gap-3">
-                  <div className="font-semibold">Order Details</div>
+                  <div className="font-semibold">Skills</div>
                   <ul className="grid gap-3">
                     <li className="flex items-center justify-between">
                       <span className="text-muted-foreground">
-                        Glimmer Lamps x <span>2</span>
+                        Base Skills
                       </span>
-                      <span>$250.00</span>
+                      <span>{currentSaveFile?.skills.base_skills.length}</span>
                     </li>
                     <li className="flex items-center justify-between">
-                      <span className="text-muted-foreground">
-                        Aqua Filters x <span>1</span>
+                    <span className="text-muted-foreground">
+                        Legend Skills
                       </span>
-                      <span>$49.00</span>
+                      <span>{currentSaveFile?.skills.legend_skills.length}</span>
                     </li>
                   </ul>
                   <Separator className="my-2" />
