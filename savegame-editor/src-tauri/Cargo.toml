@@ -1,6 +1,6 @@
 [package]
 name = "savegame-editor"
-version = "1.0.6"
+version = "1.0.8"
 description = "A Dying Light 2 Save Editor. Allows to edit inventory and skills."
 authors = ["Marcel-TO", "zCaazual"]
 license = "MIT License"
