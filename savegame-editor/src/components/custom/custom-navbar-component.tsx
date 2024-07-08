@@ -17,36 +17,9 @@ import {
   Swords,
   User,
   Heart,
-  LineChart,
-  Package,
-  Package2,
-  ShoppingCart,
-  Users2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { SheetTrigger, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetClose, SheetFooter } from "../ui/sheet";
-import { BreadcrumbComponent } from "./breadcrums-component";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuItem,
-  Label,
-} from "@radix-ui/react-dropdown-menu";
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
-  BreadcrumbPage,
-} from "../ui/breadcrumb";
-import { Drawer, DrawerTrigger, DrawerContent } from "../ui/drawer";
 
 // The different pages
 const editPages: [string, JSX.Element, string, boolean][] = [
@@ -57,15 +30,15 @@ const editPages: [string, JSX.Element, string, boolean][] = [
     false,
   ],
   [
-    "Unlockables",
-    <LockKeyholeOpen className="h-5 w-5 transition-all group-hover:scale-110" />,
-    "/unlockables",
-    false,
-  ],
-  [
     "Inventory",
     <Swords className="h-5 w-5 transition-all group-hover:scale-110" />,
     "/inventory",
+    false,
+  ],
+  [
+    "Unlockables",
+    <LockKeyholeOpen className="h-5 w-5 transition-all group-hover:scale-110" />,
+    "/unlockables",
     false,
   ],
   [

@@ -65,5 +65,6 @@ export interface SaveFile {
     skills: Skills,
     unlockable_items: UnlockableItem[],
     items: InventoryItemRow[],
-    log_history: string[]
+    log_history: string[],
+    save_version: string
 }
