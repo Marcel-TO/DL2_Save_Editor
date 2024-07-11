@@ -371,24 +371,13 @@ export function MainPage({ currentSaveFile }: MainPageProps) {
                   </CardHeader>
                 </Card>
               </Link>
-              <Card x-chunk="dashboard-05-chunk-2">
+              <Card>
                 <CardHeader className="pb-2">
-                  <CardDescription>Downloads</CardDescription>
+                  <CardDescription>Code</CardDescription>
                   <CardTitle className="text-4xl">
-                    {amountOfDownloads}
+                    Repository
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-xs text-muted-foreground">
-                    {100 - percentageToNextThousand}% to next thousand
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Progress
-                    value={percentageToNextThousand}
-                    aria-label="Progress to next thousands"
-                  />
-                </CardFooter>
               </Card>
               <Card className="sm:col-span-2" x-chunk="dashboard-05-chunk-0">
                 <CardHeader className="pb-3">
