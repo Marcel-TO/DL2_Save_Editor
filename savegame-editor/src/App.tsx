@@ -5,6 +5,7 @@ import { MainPage } from "./pages/main-page";
 import { LandingPage } from "./pages/landing-page";
 import { useState } from "react";
 import { SaveFile } from "./models/save-models";
+import { SettingsPage } from "./pages/settings-page";
 
 function App() {
   const [currentSaveFile, setCurrentSaveFile] = useState<SaveFile>();
@@ -14,6 +15,7 @@ function App() {
       [
         // (<Route path={'/'} element={<LandingPage />}></Route>),
         (<Route path={'/'} element={<MainPage currentSaveFile={currentSaveFile}/>}></Route>),
+        (<Route path={'/settings'} element={<SettingsPage />}></Route>),
       ]
     )
   )
