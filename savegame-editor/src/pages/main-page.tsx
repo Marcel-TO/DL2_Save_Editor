@@ -34,6 +34,7 @@ import packageJson from "../../package.json";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from "@/components/ui/drawer";
 
 type MainPageProps = {
   currentSaveFile: SaveFile | undefined;
@@ -279,7 +280,26 @@ export function MainPage({ currentSaveFile }: MainPageProps) {
                   </CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Button>Load Save</Button>
+                <Drawer>
+      <DrawerTrigger asChild>
+      <Button>Load Save</Button>
+      </DrawerTrigger>
+      <DrawerContent>
+        <div className="mx-auto w-full max-w-sm">
+          <DrawerHeader>
+            <DrawerTitle>Load a Save</DrawerTitle>
+            <DrawerDescription>Set your daily activity goal.</DrawerDescription>
+          </DrawerHeader>
+          <DrawerFooter>
+            <Button>Submit</Button>
+            <DrawerClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </div>
+      </DrawerContent>
+    </Drawer>
+                  
                 </CardFooter>
               </Card>
               <Card x-chunk="dashboard-05-chunk-1">
@@ -335,6 +355,7 @@ export function MainPage({ currentSaveFile }: MainPageProps) {
                 </CardFooter>
               </Card>
             </div>
+            <Separator />
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
               <Link to={"/settings"}>
                 <Card className="transform transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg w-full h-full">
@@ -351,21 +372,22 @@ export function MainPage({ currentSaveFile }: MainPageProps) {
                   <CardHeader className="pb-2">
                     <CardDescription>Select to visit</CardDescription>
                     <CardTitle className="text-4xl">
-                      IDs
+                      Github
                     </CardTitle>
                   </CardHeader>
                 </Card>
               </Link>
               <Card className="sm:col-span-2" x-chunk="dashboard-05-chunk-0">
                 <CardHeader className="pb-3">
-                  <CardTitle>Code Repository</CardTitle>
+                  <CardTitle>Knowledge-Vault</CardTitle>
                   <CardDescription className="max-w-lg text-balance leading-relaxed">
-                    If you want to see the code or contribute to the project, you can visit the repository.
+                    A collection of guides, tutorials and information on how to
+                    use the editor and what you can do with it.
                   </CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Link to={"https://github.com/Marcel-TO/DL2_Save_Editor"} target="_blank">
-                    <Button>Visit Github</Button>
+                  <Link to={"/knowledge-vault"}>
+                    <Button>Learn More</Button>
                   </Link>
                 </CardFooter>
               </Card>

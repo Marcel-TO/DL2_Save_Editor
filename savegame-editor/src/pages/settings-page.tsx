@@ -1,4 +1,4 @@
-import { CircleUser, HelpCircle, Menu, Package2, Search } from "lucide-react";
+import { HelpCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,20 +10,38 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 
 import { NavbarComponent } from "@/components/custom/custom-navbar-component";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  HoverCard,
+  HoverCardTrigger,
+  HoverCardContent,
+} from "@/components/ui/hover-card";
+import { useState } from "react";
+
+type CRCSettings = { isChecked: boolean; filepath: string; storageKey: string };
 
 export const SettingsPage = () => {
+  const [isCRC, setIsCRC] = useState<CRCSettings>(
+    () =>
+      (localStorage.getItem("crc-settings") as unknown as CRCSettings) || {
+        isChecked: false,
+        filepath: "",
+        storageKey: "crc-settings",
+      }
+  );
+  const [gameFolderPath, setGameFolderPath] = useState<string>(isCRC.filepath);
+
+  const changeCrcData = () => {
+    console.log(isCRC.isChecked);
+    setIsCRC({ ...isCRC, isChecked: !isCRC.isChecked });
+  };
+
+  const saveCrcDataToLocalStorage = () => {
+    localStorage.setItem(isCRC.storageKey, JSON.stringify(isCRC));
+  }
+
   return (
     <>
       <div className="flex min-h-screen w-full flex-col">
@@ -36,23 +54,29 @@ export const SettingsPage = () => {
             <Card x-chunk="dashboard-04-chunk-2">
               <CardHeader>
                 <div className="relative">
-                <CardTitle>DL2 Game Folder</CardTitle>
-                <CardDescription>
-                  The path where Dying Light 2 Game is installed.
-                </CardDescription>
-                <TooltipProvider>
-
-                <Tooltip>
-                  <TooltipTrigger>
-                    <HelpCircle className="absolute top-0 right-0 w-6 h-6 text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-sm">
-                      Due to a collaboration with @EricPlayZ, we are able to provide a way to bypass the CRC check. This will allow you to use and modify PC save files as well. The editor will deploy a .dll file to the game folder to bypass the CRC check.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-                </TooltipProvider>
+                  <CardTitle>DL2 Game Folder</CardTitle>
+                  <CardDescription>
+                    The path where Dying Light 2 Game is installed.
+                  </CardDescription>
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <HelpCircle className="absolute top-0 right-0 w-6 h-6 text-muted-foreground cursor-pointer" />
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-80">
+                      <div className="flex justify-between space-x-4">
+                        <div className="space-y-1">
+                          <h4 className="text-sm font-semibold">PC only</h4>
+                          <p className="text-sm">
+                            Due to a collaboration with @EricPlayZ, we are able
+                            to provide a way to bypass the CRC check. This will
+                            allow you to use and modify PC save files as well.
+                            The editor will deploy a .dll file to the game
+                            folder and with that bypass the check.
+                          </p>
+                        </div>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
                 </div>
               </CardHeader>
               <CardContent>
@@ -60,9 +84,11 @@ export const SettingsPage = () => {
                   <Input
                     placeholder="File path"
                     defaultValue="/fullpath/where/game/is/installed"
+                    value={gameFolderPath}
+                    onChange={(e) => setGameFolderPath(e.target.value)}
                   />
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="CRC" defaultChecked />
+                    <Checkbox id="CRC" checked={isCRC.isChecked} onChange={() => changeCrcData()}/>
                     <label
                       htmlFor="CRC"
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -73,10 +99,10 @@ export const SettingsPage = () => {
                 </form>
               </CardContent>
               <CardFooter className="border-t px-6 py-4">
-                <Button>Save</Button>
+                <Button onClick={saveCrcDataToLocalStorage}>Save</Button>
               </CardFooter>
             </Card>
-            </div>
+          </div>
         </main>
       </div>
     </>
