@@ -19,7 +19,7 @@ export function ThemeModeToggle() {
         <Button variant="ghost" size="icon" className="transition-all">
           {theme === 'light' && <Sun className="h-[1.2rem] w-[1.2rem] transition-all" />}
           {theme === 'dark' && <Moon className="h-[1.2rem] w-[1.2rem] transition-all" />}
-          {theme === 'pastel' && <PaintBucket className="h-[1.2rem] w-[1.2rem] transition-all" />}
+          {theme === 'dl2' && <PaintBucket className="h-[1.2rem] w-[1.2rem] transition-all" />}
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
@@ -34,8 +34,8 @@ export function ThemeModeToggle() {
           System
         </DropdownMenuItem>
         <Separator />
-        <DropdownMenuItem onClick={() => setTheme("pastel")}>
-          Pastel
+        <DropdownMenuItem onClick={() => setTheme("dl2")}>
+          DL2
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

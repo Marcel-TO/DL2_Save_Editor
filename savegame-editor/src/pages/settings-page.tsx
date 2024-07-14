@@ -1,4 +1,4 @@
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, Link } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,27 +19,48 @@ import {
   HoverCardContent,
 } from "@/components/ui/hover-card";
 import { useState } from "react";
+import { ThemeModeToggle } from "@/components/custom/theme-button";
+import { AppSettings } from "@/models/settings-model";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form"
 
-type CRCSettings = { isChecked: boolean; filepath: string; storageKey: string };
+type SettingsProps = {
+  appSettings: AppSettings;
+}
 
-export const SettingsPage = () => {
-  const [isCRC, setIsCRC] = useState<CRCSettings>(
-    () =>
-      (localStorage.getItem("crc-settings") as unknown as CRCSettings) || {
-        isChecked: false,
-        filepath: "",
-        storageKey: "crc-settings",
-      }
-  );
-  const [gameFolderPath, setGameFolderPath] = useState<string>(isCRC.filepath);
+export const SettingsPage = ({appSettings}: SettingsProps) => {
+  const [isCRC, setIsCRC] = useState<boolean>(appSettings.crc.value);
+  const [gameFolderPath, setGameFolderPath] = useState<string>(appSettings.gameFolderPath.value);
 
-  const changeCrcData = () => {
-    console.log(isCRC.isChecked);
-    setIsCRC({ ...isCRC, isChecked: !isCRC.isChecked });
-  };
+  const CrCSchema = z.object({
+    crc: z.boolean().default(false).optional(),
+  })
+
+  export function CheckboxReactHookFormSingle() {
+    const form = useForm<z.infer<typeof CrCSchema>>({
+      resolver: zodResolver(CrCSchema),
+      defaultValues: {
+        crc: false,
+      },
+    })
+   
+    function onSubmitCRC(data: z.infer<typeof CrCSchema>) {
+      
+    }
 
   const saveCrcDataToLocalStorage = () => {
-    localStorage.setItem(isCRC.storageKey, JSON.stringify(isCRC));
+    if (appSettings.crc.storageKey) {
+      localStorage.setItem(appSettings.crc.storageKey, JSON.stringify(isCRC));
+    }
   }
 
   return (
@@ -51,6 +72,7 @@ export const SettingsPage = () => {
             <h1 className="text-3xl font-semibold">Settings</h1>
           </div>
           <div className="mx-auto grid w-full max-w-6xl gap-2">
+            <ThemeModeToggle/>
             <Card x-chunk="dashboard-04-chunk-2">
               <CardHeader>
                 <div className="relative">
@@ -88,13 +110,37 @@ export const SettingsPage = () => {
                     onChange={(e) => setGameFolderPath(e.target.value)}
                   />
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="CRC" checked={isCRC.isChecked} onChange={() => changeCrcData()}/>
+                  <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmitCRC)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="crc"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
+              <FormControl>
+              <Checkbox id="CRC" checked={isCRC}/>
                     <label
                       htmlFor="CRC"
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
                       Allow to bypass CRC check.
                     </label>
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>
+                  Use different settings for my mobile devices
+                </FormLabel>
+                <FormDescription>
+                  You can manage your mobile notifications in the{" "}
+                  <Link href="/examples/forms">mobile settings</Link> page.
+                </FormDescription>
+              </div>
+            </FormItem>
+          )}
+        />
+        <Button type="submit">Submit</Button>
+      </form>
+    </Form>
                   </div>
                 </form>
               </CardContent>
@@ -107,4 +153,4 @@ export const SettingsPage = () => {
       </div>
     </>
   );
-};
+}

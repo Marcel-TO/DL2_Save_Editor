@@ -1,8 +1,4 @@
-import {
-  Download,
-  MoreVertical,
-  Save,
-} from "lucide-react";
+import { Copy, Download, MoreVertical, Save } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -34,18 +30,43 @@ import packageJson from "../../package.json";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerTrigger,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerClose,
+} from "@/components/ui/drawer";
+import { listen } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/tauri";
+import { writeBinaryFile } from "@tauri-apps/api/fs";
+import { open, save } from "@tauri-apps/api/dialog";
+import { AppSettings, SettingState } from "@/models/settings-model";
+import { useToast } from "@/components/ui/use-toast";
+import { ToastAction } from "@/components/ui/toast";
+import { Toaster } from "@/components/ui/toaster";
 
 type MainPageProps = {
-  currentSaveFile: SaveFile | undefined;
+  appSettings: AppSettings;
+  currentSaveFile: SettingState<SaveFile | undefined>;
 };
 
-export function MainPage({ currentSaveFile }: MainPageProps) {
+export function MainPage({ currentSaveFile, appSettings }: MainPageProps) {
+  // States for the Card Details
   const [latestEditorVersion, setLatestEditorVersion] = useState<string>("");
   const [amountOfDownloads, setAmountOfDownloads] = useState<number | null>(
     null
   );
   const [percentageToNextThousand, setPercentageToNextThousand] = useState(0);
+
+  // States for the Save File
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // initialize toast for error messages
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchReleaseInfo = async () => {
@@ -91,6 +112,156 @@ export function MainPage({ currentSaveFile }: MainPageProps) {
     fetchReleaseInfo();
   }, []);
 
+  async function listenDragDrop() {
+    listen<string>("tauri://file-drop", async (event) => {
+      let filepath = event.payload[0];
+
+      if (filepath == null) {
+        toast({
+          title: "Uh oh! Something went wrong. :/",
+          description: "No file path found.",
+          action: (
+            <ToastAction
+              altText="Try again"
+              onClick={() => setIsDrawerOpen(true)}
+            >
+              Try again
+            </ToastAction>
+          ),
+        });
+        return;
+      } else if (event.payload.length > 1) {
+        toast({
+          title: "Uh oh! Something went wrong.",
+          description: "Please only drop one file at a time.",
+          action: (
+            <ToastAction
+              altText="Try again"
+              onClick={() => setIsDrawerOpen(true)}
+            >
+              Try again
+            </ToastAction>
+          ),
+        });
+        return;
+      } else if (!filepath.endsWith(".sav")) {
+        toast({
+          title: "Uh oh! Something went wrong.",
+          description:
+            "Please only drop .sav files that contain your save data.",
+          action: (
+            <ToastAction
+              altText="Try again"
+              onClick={() => setIsDrawerOpen(true)}
+            >
+              Try again
+            </ToastAction>
+          ),
+        });
+        return;
+      }
+
+      loadSave(filepath);
+      setIsDrawerOpen(false);
+    });
+  }
+
+  const loadSave = async (filepath: string) => {
+    let newSave = await invoke<SaveFile>("load_save", {
+      file_path: filepath,
+      is_debugging: appSettings.isDebugging.value,
+      has_automatic_backup: appSettings.hasAutomaticBackup.value,
+    }).catch((err) => {
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description:
+          err ?? "An error occured while loading the save file.",
+        action: (
+          <ToastAction
+            altText="Try again"
+            onClick={() => setIsDrawerOpen(true)}
+          >
+            Try again
+          </ToastAction>
+        ),
+      });
+      return;
+    });
+
+    if (newSave) {
+      currentSaveFile.setValue(newSave);
+    }
+  };
+
+  async function selectCurrentSaveFile() {
+    let filepath = await open({
+      multiple: false,
+      filters: [
+        {
+          name: "SAV File",
+          extensions: ["sav"],
+        },
+      ],
+    });
+
+    if (filepath != null && !Array.isArray(filepath)) {
+      loadSave(filepath);
+      setIsDrawerOpen(false);
+    }
+  }
+
+  async function saveCurrentSaveFile() {
+    let filePath = await save({
+      defaultPath: "/save_main_0",
+      filters: [
+        {
+          name: "SAV File",
+          extensions: ["sav"],
+        },
+      ],
+    });
+
+    if (filePath != null && currentSaveFile.value != undefined) {
+      // Save data to file
+      await writeBinaryFile(filePath, currentSaveFile.value.file_content).catch(
+        (err) => {
+          toast({
+            title: "Uh oh! Something went wrong. :/",
+            description:
+              "The Editor stumbled accross the following error: " + err,
+          });
+          return;
+        }
+      );
+    }
+  }
+
+  async function saveBackupSaveFile() {
+    let filePath = await save({
+      defaultPath: "/save_main_0",
+      filters: [
+        {
+          name: "SAV Backup File",
+          extensions: ["sav.bak"],
+        },
+      ],
+    });
+
+    if (filePath != null && currentSaveFile.value != undefined) {
+      // Save data to file
+      await writeBinaryFile(filePath, currentSaveFile.value.file_content).catch(
+        (err) => {
+          toast({
+            title: "Uh oh! Something went wrong. :/",
+            description:
+              "The Editor stumbled accross the following error: " + err,
+          });
+          return;
+        }
+      );
+    }
+  }
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <NavbarComponent />
@@ -101,7 +272,8 @@ export function MainPage({ currentSaveFile }: MainPageProps) {
               <CardHeader className="flex flex-row items-start bg-muted/50">
                 <div className="grid gap-0.5">
                   <CardTitle className="group flex items-center gap-2 text-lg">
-                    {currentSaveFile?.path ?? "No Save Selected"}
+                    {currentSaveFile.value?.path.split(/[/\\]/).pop() ??
+                      "No Save Selected"}
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -109,9 +281,10 @@ export function MainPage({ currentSaveFile }: MainPageProps) {
                             size="icon"
                             variant="outline"
                             className="h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
+                            onClick={() => navigator.clipboard.writeText(currentSaveFile.value?.path ?? "")}
                           >
-                            <Save className="h-3 w-3" />
-                            <span className="sr-only">Save</span>
+                            <Copy className="h-3 w-3" />
+                            <span className="sr-only">Copy</span>
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>Copy Path</TooltipContent>
@@ -119,7 +292,7 @@ export function MainPage({ currentSaveFile }: MainPageProps) {
                     </TooltipProvider>
                   </CardTitle>
                   <CardDescription>
-                    Save Version: {currentSaveFile?.save_version}
+                    Save Version: {currentSaveFile.value?.save_version}
                   </CardDescription>
                 </div>
                 <div className="ml-auto flex items-center gap-1">
@@ -127,7 +300,8 @@ export function MainPage({ currentSaveFile }: MainPageProps) {
                     size="sm"
                     variant="outline"
                     className="h-8 gap-1"
-                    disabled={currentSaveFile ? false : true}
+                    disabled={currentSaveFile.value ? false : true}
+                    onClick={() => saveCurrentSaveFile()}
                   >
                     <Save className="h-3.5 w-3.5" />
                     <span className="lg:sr-only xl:not-sr-only xl:whitespace-nowrap">
@@ -140,17 +314,21 @@ export function MainPage({ currentSaveFile }: MainPageProps) {
                         size="icon"
                         variant="outline"
                         className="h-8 w-8"
-                        disabled={currentSaveFile ? false : true}
+                        disabled={currentSaveFile.value ? false : true}
                       >
                         <MoreVertical className="h-3.5 w-3.5" />
                         <span className="sr-only">More</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Export</DropdownMenuItem>
+                      <Link to={"/inventory"}>
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                      </Link>
+                      <DropdownMenuItem>Hex View</DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem>Backup</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => saveBackupSaveFile()}>
+                        Backup
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -160,13 +338,13 @@ export function MainPage({ currentSaveFile }: MainPageProps) {
                   <div className="font-semibold">Skills</div>
                   <ul className="grid gap-3">
                     <li className="flex items-center justify-between">
-                      {currentSaveFile ? (
+                      {currentSaveFile.value ? (
                         <>
                           <span className="text-muted-foreground">
                             Base Skills
                           </span>
                           <span>
-                            {currentSaveFile?.skills.base_skills.length}
+                            {currentSaveFile.value?.skills.base_skills.length}
                           </span>
                         </>
                       ) : (
@@ -174,13 +352,13 @@ export function MainPage({ currentSaveFile }: MainPageProps) {
                       )}
                     </li>
                     <li className="flex items-center justify-between">
-                      {currentSaveFile ? (
+                      {currentSaveFile.value ? (
                         <>
                           <span className="text-muted-foreground">
                             Legend Skills
                           </span>
                           <span>
-                            {currentSaveFile?.skills.legend_skills.length}
+                            {currentSaveFile.value?.skills.legend_skills.length}
                           </span>
                         </>
                       ) : (
@@ -192,9 +370,9 @@ export function MainPage({ currentSaveFile }: MainPageProps) {
                 <Separator className="my-2" />
                 <div className="font-semibold">Inventory</div>
                 <ul className="grid gap-3">
-                  {currentSaveFile ? (
+                  {currentSaveFile.value ? (
                     <>
-                      {currentSaveFile.items.map((item) => (
+                      {currentSaveFile.value.items.map((item) => (
                         <li
                           key={item.name}
                           className="flex items-center justify-between"
@@ -213,10 +391,12 @@ export function MainPage({ currentSaveFile }: MainPageProps) {
                 <Separator className="my-4" />
                 <div className="font-semibold">Unlockables</div>
                 <ul className="grid gap-3">
-                  {currentSaveFile ? (
+                  {currentSaveFile.value ? (
                     <li className="flex items-center justify-between">
                       <span className="text-muted-foreground">Amount</span>
-                      <span>{currentSaveFile?.unlockable_items.length}</span>
+                      <span>
+                        {currentSaveFile.value?.unlockable_items.length}
+                      </span>
                     </li>
                   ) : (
                     <Skeleton className="w-full h-4" />
@@ -224,7 +404,7 @@ export function MainPage({ currentSaveFile }: MainPageProps) {
                 </ul>
                 <Separator className="my-4" />
                 <div className="font-semibold mb-2">Campaign</div>
-                {currentSaveFile ? (
+                {currentSaveFile.value ? (
                   <>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="grid">
@@ -264,7 +444,7 @@ export function MainPage({ currentSaveFile }: MainPageProps) {
               </CardContent>
               <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
                 <div className="text-xs text-muted-foreground">
-                  Path: {currentSaveFile?.path}
+                  Path: {currentSaveFile.value?.path}
                 </div>
               </CardFooter>
             </Card>
@@ -280,26 +460,45 @@ export function MainPage({ currentSaveFile }: MainPageProps) {
                   </CardDescription>
                 </CardHeader>
                 <CardFooter>
-                <Drawer>
-      <DrawerTrigger asChild>
-      <Button>Load Save</Button>
-      </DrawerTrigger>
-      <DrawerContent>
-        <div className="mx-auto w-full max-w-sm">
-          <DrawerHeader>
-            <DrawerTitle>Load a Save</DrawerTitle>
-            <DrawerDescription>Set your daily activity goal.</DrawerDescription>
-          </DrawerHeader>
-          <DrawerFooter>
-            <Button>Submit</Button>
-            <DrawerClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </div>
-      </DrawerContent>
-    </Drawer>
-                  
+                  <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+                    <DrawerTrigger asChild>
+                      <Button onClick={() => listenDragDrop()}>
+                        Load Save
+                      </Button>
+                    </DrawerTrigger>
+                    <DrawerContent>
+                      <div className="mx-auto w-full max-w-sm">
+                        <DrawerHeader>
+                          <DrawerTitle>Load a Save</DrawerTitle>
+                          <DrawerDescription>
+                            Select or drag your save file to load.
+                          </DrawerDescription>
+                        </DrawerHeader>
+                        <div className="p-4">
+                          <div className="mt-3 h-[120px] bg-muted">
+                            <div className="flex flex-col items-center justify-center h-full">
+                              <Save
+                                className="h-12 w-12 text-muted-foreground"
+                                strokeWidth={1}
+                              />
+                              <span className="text-muted-foreground">
+                                Drag and drop your save file here.
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <Toaster />
+                        <DrawerFooter>
+                          <Button onClick={selectCurrentSaveFile}>
+                            Select
+                          </Button>
+                          <DrawerClose asChild>
+                            <Button variant="outline">Cancel</Button>
+                          </DrawerClose>
+                        </DrawerFooter>
+                      </div>
+                    </DrawerContent>
+                  </Drawer>
                 </CardFooter>
               </Card>
               <Card x-chunk="dashboard-05-chunk-1">
@@ -367,13 +566,14 @@ export function MainPage({ currentSaveFile }: MainPageProps) {
                   </CardHeader>
                 </Card>
               </Link>
-              <Link to={"https://github.com/Marcel-TO/DL2_Save_Editor"} target="_blank">
+              <Link
+                to={"https://github.com/Marcel-TO/DL2_Save_Editor"}
+                target="_blank"
+              >
                 <Card className="transform transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg w-full h-full">
                   <CardHeader className="pb-2">
                     <CardDescription>Select to visit</CardDescription>
-                    <CardTitle className="text-4xl">
-                      Github
-                    </CardTitle>
+                    <CardTitle className="text-4xl">Github</CardTitle>
                   </CardHeader>
                 </Card>
               </Link>
