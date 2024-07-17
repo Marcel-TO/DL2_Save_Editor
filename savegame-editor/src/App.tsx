@@ -10,17 +10,18 @@ import { AppSettings, SettingState } from "./models/settings-model";
 
 function App() {
   // Declare all app settings
+  console.log();
   const [crcValue, setCrcValue] = useState<boolean>(
-      (localStorage.getItem("crc-check-settings") as unknown as boolean) || false
+      (JSON.parse(localStorage.getItem("crc-check-settings") ?? "false") === true) || false
   );
   const [gameFolderPath, setGameFolderPath] = useState<string>(
     (localStorage.getItem("game-folder-settings") as unknown as string) || ""
   );
   const [isDebugging, setIsDebugging] = useState<boolean>(
-    (localStorage.getItem("debug-settings") as unknown as boolean) || false
+    (JSON.parse(localStorage.getItem("debug-settings") ?? "false") === true) || false
   );
   const [hasAutomaticBackup, setHasAutomaticBackup] = useState<boolean>(
-    (localStorage.getItem("backup-settings") as unknown as boolean) || false
+    (JSON.parse(localStorage.getItem("backup-settings") ?? "false") === true) || false
   );
 
   const appSettings: AppSettings = {

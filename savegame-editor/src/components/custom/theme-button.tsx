@@ -24,17 +24,29 @@ export function ThemeModeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
+        <DropdownMenuItem  
+          onClick={() => setTheme("light")}
+          className={`${theme === "light" ? "bg-muted/70" : "bg-transparent"} p-2`}
+          >
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <DropdownMenuItem 
+          onClick={() => setTheme("dark")}
+          className={`${theme === "dark" ? "bg-muted" : "bg-transparent"} p-2`}
+        >
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
+        <DropdownMenuItem 
+          onClick={() => setTheme("system")}
+          className={`${theme === "system" ? "bg-muted" : "bg-transparent"} p-2`}
+        >
           System
         </DropdownMenuItem>
         <Separator />
-        <DropdownMenuItem onClick={() => setTheme("dl2")}>
+        <DropdownMenuItem 
+          onClick={() => setTheme("dl2")}
+          className={`${theme === "dl2" ? "bg-muted" : "bg-transparent"} p-2`}
+        >
           DL2
         </DropdownMenuItem>
       </DropdownMenuContent>
