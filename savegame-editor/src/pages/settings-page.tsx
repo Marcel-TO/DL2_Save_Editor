@@ -1,4 +1,4 @@
-import { Car, HelpCircle, Save } from "lucide-react";
+import { HelpCircle, Save } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,7 +22,7 @@ import { useState } from "react";
 import { ThemeModeToggle } from "@/components/custom/theme-button";
 import { AppSettings } from "@/models/settings-model";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 

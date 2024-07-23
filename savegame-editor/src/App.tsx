@@ -2,7 +2,7 @@ import "./App.css";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from "react-router-dom";
 import { MainPage } from "./pages/main-page";
-import { LandingPage } from "./pages/landing-page";
+import { InfoPage } from "./pages/info-page";
 import { useState } from "react";
 import { SaveFile } from "./models/save-models";
 import { SettingsPage } from "./pages/settings-page";
@@ -10,7 +10,6 @@ import { AppSettings, SettingState } from "./models/settings-model";
 
 function App() {
   // Declare all app settings
-  console.log();
   const [crcValue, setCrcValue] = useState<boolean>(
       (JSON.parse(localStorage.getItem("crc-check-settings") ?? "false") === true) || false
   );
@@ -59,9 +58,9 @@ function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       [
-        // (<Route path={'/'} element={<LandingPage />}></Route>),
         (<Route path={'/'} element={<MainPage appSettings={appSettings} currentSaveFile={currentSaveFile}/>}></Route>),
         (<Route path={'/settings'} element={<SettingsPage appSettings={appSettings}/>}></Route>),
+        (<Route path={'/info'} element={<InfoPage/>}></Route>),
       ]
     )
   )
