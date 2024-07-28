@@ -7,6 +7,7 @@ import { useState } from "react";
 import { SaveFile } from "./models/save-models";
 import { SettingsPage } from "./pages/settings-page";
 import { AppSettings, SettingState } from "./models/settings-model";
+import { SkillsPage } from "./pages/skills-page";
 
 function App() {
   // Declare all app settings
@@ -61,6 +62,7 @@ function App() {
         (<Route path={'/'} element={<MainPage appSettings={appSettings} currentSaveFile={currentSaveFile}/>}></Route>),
         (<Route path={'/settings'} element={<SettingsPage appSettings={appSettings}/>}></Route>),
         (<Route path={'/info'} element={<InfoPage/>}></Route>),
+        (<Route path={'/skills'} element={<SkillsPage skills={currentSaveFileValue?.skills}/>}></Route>),
       ]
     )
   )
