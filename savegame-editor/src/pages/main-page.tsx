@@ -1,4 +1,4 @@
-import { Copy, Download, MoreVertical, Save } from "lucide-react";
+import { Copy, Download, MoreVertical, Save, ExternalLink } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -572,7 +572,10 @@ export function MainPage({ currentSaveFile, appSettings }: MainPageProps) {
               >
                 <Card className="transform transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg w-full h-full">
                   <CardHeader className="pb-2">
-                    <CardDescription>Select to visit</CardDescription>
+                    <CardDescription className="flex flex-row gap-2">
+                      Select to visit
+                      <ExternalLink className="w-4"/>
+                    </CardDescription>
                     <CardTitle className="text-4xl">Github</CardTitle>
                   </CardHeader>
                 </Card>
