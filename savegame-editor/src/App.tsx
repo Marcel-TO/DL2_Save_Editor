@@ -9,6 +9,12 @@ import { SettingsPage } from "./pages/settings-page";
 import { AppSettings, SettingState } from "./models/settings-model";
 import { SkillsPage } from "./pages/skills-page";
 import { InventoryPage } from "./pages/inventory-page";
+import { UnlockablesPage } from "./pages/unlockables-page";
+import { BackpackPage } from "./pages/backpack-page";
+import { CampaignPage } from "./pages/campaign-page";
+import { IDsPage } from "./pages/ids-page";
+import { PlayerPage } from "./pages/player-page";
+import { KnowledgeVaultPage } from "./pages/knowledge-vault";
 
 function App() {
   // Declare all app settings
@@ -65,6 +71,12 @@ function App() {
         (<Route path={'/info'} element={<InfoPage/>}></Route>),
         (<Route path={'/skills'} element={<SkillsPage skills={currentSaveFileValue?.skills}/>}></Route>),
         (<Route path={'/inventory'} element={<InventoryPage item_rows={currentSaveFileValue?.items}/>}></Route>),
+        (<Route path={'/unlockables'} element={<UnlockablesPage unlockables={currentSaveFileValue?.unlockable_items}/>}></Route>),
+        (<Route path={'/backpack'} element={<BackpackPage/>}></Route>),
+        (<Route path={'/campaign'} element={<CampaignPage/>}></Route>),
+        (<Route path={'/player'} element={<PlayerPage/>}></Route>),
+        (<Route path={'/ids'} element={<IDsPage/>}></Route>),
+        (<Route path={'/knowledge-vault'} element={<KnowledgeVaultPage/>}></Route>),
       ]
     )
   )
