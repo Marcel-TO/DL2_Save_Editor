@@ -21,7 +21,7 @@ tauri-plugin-log = { git = "https://github.com/tauri-apps/plugins-workspace", br
 regex = "1.10.5"
 dotenv = "0.15.0"
 flate2 = "1.0.30"
-term = "0.7.0"
+term = "1.0.0"
 term_size = "0.3.2"
 
 [features]
