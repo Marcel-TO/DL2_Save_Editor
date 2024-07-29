@@ -83,7 +83,9 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-      <RouterProvider router={router}></RouterProvider> 
+      <div className="bg-muted/40 background-image-container">
+        <RouterProvider router={router}></RouterProvider> 
+      </div>
     </ThemeProvider>
   );
 }

@@ -9,9 +9,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useTheme } from "@/components/ui/theme-provider"
 import { Separator } from "@/components/ui/separator"
+import { useNavigate } from "react-router-dom"
 
 export function ThemeModeToggle() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
 
   return (
     <DropdownMenu>
@@ -25,26 +27,38 @@ export function ThemeModeToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem  
-          onClick={() => setTheme("light")}
+          onClick={() => {
+            setTheme("light")
+            navigate('/')
+          }}
           className={`${theme === "light" ? "bg-muted/70" : "bg-transparent"} p-2`}
           >
           Light
         </DropdownMenuItem>
         <DropdownMenuItem 
-          onClick={() => setTheme("dark")}
+          onClick={() => {
+            setTheme("dark")
+            navigate('/')
+          }}
           className={`${theme === "dark" ? "bg-muted" : "bg-transparent"} p-2`}
         >
           Dark
         </DropdownMenuItem>
         <DropdownMenuItem 
-          onClick={() => setTheme("system")}
+          onClick={() => {
+            setTheme("system")
+            navigate('/')
+          }}
           className={`${theme === "system" ? "bg-muted" : "bg-transparent"} p-2`}
         >
           System
         </DropdownMenuItem>
         <Separator />
         <DropdownMenuItem 
-          onClick={() => setTheme("dl2")}
+          onClick={() => {
+            setTheme("dl2")
+            navigate('/')
+          }}
           className={`${theme === "dl2" ? "bg-muted" : "bg-transparent"} p-2`}
         >
           DL2
