@@ -343,7 +343,7 @@ export function MainPage({ currentSaveFile, appSettings }: MainPageProps) {
                             </DialogDescription>
                             <DialogFooter>
                               <DialogClose asChild>
-                                <Button onClick={() => currentSaveFile.setValue(undefined)}>Reset</Button>
+                                <Button onClick={() => currentSaveFile.setValue(undefined)} variant="destructive">Reset</Button>
                               </DialogClose>
                             </DialogFooter>
                           </DialogContent>

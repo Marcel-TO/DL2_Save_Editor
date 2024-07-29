@@ -97,7 +97,7 @@ export const InventoryPage = ({ item_rows }: InventoryPageProps) => {
                     </DropdownMenu>
                   </div>
                 </div>
-                <div className="bg-card">
+                <Card className="my-4">
                   {item_rows?.map((item_row, index) => (
                     <TabsContent key={item_row.name} value={index.toString()}>
                       <DataTable
@@ -106,7 +106,7 @@ export const InventoryPage = ({ item_rows }: InventoryPageProps) => {
                       />
                     </TabsContent>
                   ))}
-                </div>
+                </Card>
               </Tabs>
                 </>
               ) : (

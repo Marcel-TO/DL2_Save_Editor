@@ -30,12 +30,12 @@ export const UnlockablesPage = ({ unlockables }: UnlockablesPageProps) => {
               <h1 className="text-3xl font-semibold mb-4">Unlockables Page</h1>
 
               {unlockables ? (
-                <div className="bg-card">
+                <Card className="my-4">
                   <DataTable
                     columns={columns}
                     data={unlockables ? unlockables : []}
                   />
-                </div>
+                </Card>
               ) : (
                 <>
                   <div className="flex align-center justify-center w-full h-full">

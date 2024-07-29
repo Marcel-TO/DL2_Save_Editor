@@ -78,20 +78,22 @@ export const SkillsPage = ({ skills }: SkillsPageProps) => {
                     </DropdownMenu>
                   </div>
                 </div>
-                <div className="bg-card">
                   <TabsContent value="base">
+                  <Card className="my-4">
                     <DataTable
                       columns={columns}
                       data={skills ? skills.base_skills : []}
                     />
+                  </Card>
                   </TabsContent>
                   <TabsContent value="legend">
+                  <Card className="my-4">
                     <DataTable
                       columns={columns}
                       data={skills ? skills.legend_skills : []}
                     />
+                  </Card>
                   </TabsContent>
-                </div>
               </Tabs>
               ) : (
                 <>
