@@ -16,7 +16,7 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^5.15.20",
-    "@mui/material": "^5.14.16",
+    "@mui/material": "^5.16.5",
     "@tauri-apps/api": "^1.5.1",
     "embla-carousel-auto-height": "^8.1.5",
     "embla-carousel-autoplay": "^8.1.5",
