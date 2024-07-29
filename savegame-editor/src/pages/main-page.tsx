@@ -50,6 +50,7 @@ import { ToastAction } from "@/components/ui/toast";
 import { Toaster } from "@/components/ui/toaster";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader } from "@/components/ui/dialog";
 import { DialogTrigger } from "@radix-ui/react-dialog";
+import { TypographyH1 } from "@/components/ui/typography";
 
 type MainPageProps = {
   appSettings: AppSettings;
@@ -63,6 +64,7 @@ export function MainPage({ currentSaveFile, appSettings }: MainPageProps) {
     null
   );
   const [percentageToNextThousand, setPercentageToNextThousand] = useState(0);
+  const [userName, setUserName] = useState<string>("");
 
   // States for the Save File
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -111,7 +113,17 @@ export function MainPage({ currentSaveFile, appSettings }: MainPageProps) {
       }
     };
 
+    // Function to get the value of the --background-image CSS variable
+    const getUserName = () => {
+      const element = document.documentElement; // Target the root element
+      if (element) {
+        return getComputedStyle(element).getPropertyValue('--user-name');
+      }
+      return '';
+    };
+
     fetchReleaseInfo();
+    setUserName(getUserName());
   }, []);
 
   async function listenDragDrop() {
@@ -323,8 +335,8 @@ export function MainPage({ currentSaveFile, appSettings }: MainPageProps) {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <Link to={"/inventory"}>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <Link to={"/debug"}>
+                        <DropdownMenuItem>Debug</DropdownMenuItem>
                       </Link>
                       <DropdownMenuItem>Hex View</DropdownMenuItem>
                       <DropdownMenuItem onClick={() => saveBackupSaveFile()}>
@@ -470,6 +482,7 @@ export function MainPage({ currentSaveFile, appSettings }: MainPageProps) {
             </Card>
           </div>
           <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
+            <TypographyH1 text={`Welcome ${userName}`} className="text-primary mt-4 text-7xl"/>
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
               <Card className="sm:col-span-2" x-chunk="dashboard-05-chunk-0">
                 <CardHeader className="pb-3">
@@ -482,7 +495,10 @@ export function MainPage({ currentSaveFile, appSettings }: MainPageProps) {
                 <CardFooter>
                   <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
                     <DrawerTrigger asChild>
-                      <Button onClick={() => listenDragDrop()}>
+                      <Button 
+                        className="bg-primary hover:bg-secondary"
+                        onClick={() => listenDragDrop()}
+                      >
                         Load Save
                       </Button>
                     </DrawerTrigger>

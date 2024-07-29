@@ -18,13 +18,14 @@ import {
   HoverCardTrigger,
   HoverCardContent,
 } from "@/components/ui/hover-card";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ThemeModeToggle } from "@/components/custom/theme-button";
 import { AppSettings } from "@/models/settings-model";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { getTheme } from "@/components/ui/theme-provider";
 
 type SettingsProps = {
   appSettings: AppSettings;
@@ -39,6 +40,11 @@ export const SettingsPage = ({ appSettings }: SettingsProps) => {
     appSettings.gameFolderPath.value
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState<string>("");
+
+  useEffect(() => {
+    setCurrentTheme(getTheme())
+  }, []);
 
   const saveCrcDataToLocalStorage = (crc: boolean, path: string) => {
     if (appSettings.crc.storageKey) {
@@ -109,7 +115,7 @@ export const SettingsPage = ({ appSettings }: SettingsProps) => {
                                   htmlFor="theme-toggle"
                                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                 >
-                                  Selected Theme
+                                  Selected Theme: {currentTheme.toUpperCase()}
                                 </label>
                         </div>
                         </CardContent>

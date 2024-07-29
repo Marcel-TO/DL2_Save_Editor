@@ -18,7 +18,6 @@ const Card = React.forwardRef<
     };
 
     const backgroundImage = getBackgroundImage();
-    console.log(backgroundImage);
 
     // Determine if the background image is none or empty
     setIsBackgroundImageNoneOrEmpty(backgroundImage === 'none' || backgroundImage === '');
@@ -30,7 +29,7 @@ const Card = React.forwardRef<
       className={cn(
         "rounded-lg border bg-card text-card-foreground shadow-sm",
         className,
-        isBackgroundImageNoneOrEmpty ? '' : 'bg-card/70 backdrop-blur-sm'
+        isBackgroundImageNoneOrEmpty ? '' : 'bg-card/60 backdrop-blur-sm'
       )}
       {...props}
     />

@@ -1,6 +1,12 @@
-export const TypographyH1 = ({text}: {text: string}) => {
+import { cn } from "@/lib/utils";
+
+
+export const TypographyH1 = ({text, className}: {text: string, className?: string}) => {
     return (
-        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+        <h1 className={cn(
+          "scroll-m-20 text-4xl font-extrabold tracking-widest lg:text-5xl font-drip",
+          className
+        )}>
         {text}
         </h1>
     )

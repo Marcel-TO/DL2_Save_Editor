@@ -1,4 +1,4 @@
-import { Ghost, Moon, PaintBucket, Sun } from "lucide-react"
+import { Droplet, Ghost, Moon, Sun } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -21,7 +21,7 @@ export function ThemeModeToggle() {
         <Button variant="ghost" size="icon" className="transition-all">
           {theme === 'light' && <Sun className="h-[1.2rem] w-[1.2rem] transition-all" />}
           {theme === 'dark' && <Moon className="h-[1.2rem] w-[1.2rem] transition-all" />}
-          {theme === 'dl2' && <PaintBucket className="h-[1.2rem] w-[1.2rem] transition-all" />}
+          {theme === 'dl2' && <Droplet className="h-[1.2rem] w-[1.2rem] transition-all" />}
           {theme === 'spooked' && <Ghost className="h-[1.2rem] w-[1.2rem] transition-all" />}
           <span className="sr-only">Toggle theme</span>
         </Button>

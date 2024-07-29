@@ -15,6 +15,7 @@ import { CampaignPage } from "./pages/campaign-page";
 import { IDsPage } from "./pages/ids-page";
 import { PlayerPage } from "./pages/player-page";
 import { KnowledgeVaultPage } from "./pages/knowledge-vault";
+import { DebugPage } from "./pages/debug-page";
 
 function App() {
   // Declare all app settings
@@ -77,6 +78,7 @@ function App() {
         (<Route path={'/player'} element={<PlayerPage/>}></Route>),
         (<Route path={'/ids'} element={<IDsPage/>}></Route>),
         (<Route path={'/knowledge-vault'} element={<KnowledgeVaultPage/>}></Route>),
+        (<Route path={'/debug'} element={<DebugPage log_history={currentSaveFileValue?.log_history}/>}></Route>),
       ]
     )
   )

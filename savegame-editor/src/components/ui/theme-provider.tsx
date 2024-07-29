@@ -64,7 +64,7 @@ export function ThemeProvider({
 }
 
 export const getTheme = () => {
-  localStorage.getItem("vite-ui-theme") as Theme
+  return localStorage.getItem("vite-ui-theme") as Theme
 }
 
 export const useTheme = () => {
