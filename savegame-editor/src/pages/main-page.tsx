@@ -48,6 +48,8 @@ import { AppSettings, SettingState } from "@/models/settings-model";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { Toaster } from "@/components/ui/toaster";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader } from "@/components/ui/dialog";
+import { DialogTrigger } from "@radix-ui/react-dialog";
 
 type MainPageProps = {
   appSettings: AppSettings;
@@ -325,10 +327,28 @@ export function MainPage({ currentSaveFile, appSettings }: MainPageProps) {
                         <DropdownMenuItem>Edit</DropdownMenuItem>
                       </Link>
                       <DropdownMenuItem>Hex View</DropdownMenuItem>
-                      <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => saveBackupSaveFile()}>
                         Backup
                       </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="destructive" className="w-full">Reset</Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>Are you sure that you want to reset?</DialogHeader>
+                            <DialogDescription>
+                            When resetting, the current save will be deselcted. This means that all unsaved changes
+                            to the save will be lost. If this is not your intention, please save before continuing. 
+                            </DialogDescription>
+                            <DialogFooter>
+                              <DialogClose asChild>
+                                <Button onClick={() => currentSaveFile.setValue(undefined)}>Reset</Button>
+                              </DialogClose>
+                            </DialogFooter>
+                          </DialogContent>
+                      </Dialog>
+
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>

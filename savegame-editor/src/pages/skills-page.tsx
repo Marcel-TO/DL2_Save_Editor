@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
 import { SortAsc } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 type SkillsPageProps = {
   skills?: Skills;
@@ -42,6 +43,8 @@ export const SkillsPage = ({ skills }: SkillsPageProps) => {
           <main className="grid flex-1 items-start gap-4 p-4">
             <div>
               <h1 className="text-3xl font-semibold mb-4">Skills Page</h1>
+
+              {skills ? (
 
               <Tabs defaultValue="base">
                 <div className="flex items-center">
@@ -90,6 +93,22 @@ export const SkillsPage = ({ skills }: SkillsPageProps) => {
                   </TabsContent>
                 </div>
               </Tabs>
+              ) : (
+                <>
+                  <div className="flex align-center justify-center w-full h-full">
+                    <Card className="">
+                      <CardHeader>
+                        <CardTitle>There is nothing to see here</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-center">
+                          No skills found. Please make sure that you have loaded a valid save file.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </>
+              )}
             </div>
           </main>
         </div>

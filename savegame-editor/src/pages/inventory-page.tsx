@@ -2,7 +2,7 @@ import { NavbarComponent } from "@/components/custom/custom-navbar-component";
 import { DataTable } from "@/components/custom/data-table-component";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { InventoryItem, InventoryItemRow } from "@/models/save-models";
+import { InventoryItem, InventoryItemRow, Mod } from "@/models/save-models";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { CellContext, ColumnDef } from "@tanstack/react-table";
 import { SortAsc } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type InventoryPageProps = {
   item_rows?: InventoryItemRow[];
@@ -39,14 +40,14 @@ export const columns: ColumnDef<InventoryItem>[] = [
     accessorKey: "chunk_data.durability_value",
     header: "Durability",
   },
-    {
-      accessorKey: "mod_data",
-      header: "Mods",
-      cell: ({ getValue }: CellContext<InventoryItem, any>) => {
-        const modData = getValue() as any[];
-        return modData.length;
-      },
+  {
+    accessorKey: "mod_data",
+    header: "Mods",
+    cell: ({ getValue }: CellContext<InventoryItem, any>) => {
+      const modData = getValue() as Mod[];
+      return modData.length;
     },
+  },
 ];
 
 export const InventoryPage = ({ item_rows }: InventoryPageProps) => {
@@ -59,7 +60,9 @@ export const InventoryPage = ({ item_rows }: InventoryPageProps) => {
             <div>
               <h1 className="text-3xl font-semibold mb-4">Inventory Page</h1>
 
-              <Tabs defaultValue={item_rows ? "0" : ""}>
+              {item_rows ? (
+                <>
+                <Tabs defaultValue={item_rows ? "0" : ""}>
                 <div className="flex items-center">
                   <TabsList>
                     {item_rows?.map((item_row, index) => (
@@ -105,6 +108,25 @@ export const InventoryPage = ({ item_rows }: InventoryPageProps) => {
                   ))}
                 </div>
               </Tabs>
+                </>
+              ) : (
+                <>
+                  <div className="flex align-center justify-center w-full h-full">
+                    <Card className="">
+                      <CardHeader>
+                        <CardTitle>There is nothing to see here</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-center">
+                          No inventory items found. Please make sure that you have loaded a valid save file.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </>
+              )
+              }
+              
             </div>
           </main>
         </div>
