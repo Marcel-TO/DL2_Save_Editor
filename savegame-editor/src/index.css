@@ -33,6 +33,8 @@
       --ring: 222.2 84% 4.9%;
 
       --radius: 0.5rem;
+
+      --user-name: 'Pilgrim';
     }
 
     .dark {
@@ -66,36 +68,6 @@
     }
 
     .dl2 {
-      --background: 186, 10%, 10%;
-      --foreground: 60, 22%, 92%;
-
-      --card: 186, 10%, 10%;
-      --card-foreground: 60, 22%, 92%;
-
-      --popover: 186, 10%, 10%;
-      --popover-foreground: 60, 22%, 92%;
-
-      --primary: 135, 100%, 58%;
-      --primary-foreground: 222.2 47.4% 11.2%;
-
-      --secondary: 187, 10%, 36%;
-      --secondary-foreground: 60, 22%, 92%;
-
-      --muted: 187, 10%, 36%;
-      --muted-foreground: 215 20.2% 65.1%;
-
-      --accent: 187, 10%, 36%;
-      --accent-foreground: 60, 22%, 92%;
-
-      --destructive: 0 62.8% 30.6%;
-      --destructive-foreground: 60, 22%, 92%;
-
-      --border: 187, 10%, 36%;
-      --input: 187, 10%, 36%;
-      --ring: 212.7 26.8% 83.9%;
-    }
-
-    .dl2 {
       --background: 20 14.3% 4.1%;
       --foreground: 60, 22%, 92%;
       --card: 24 9.8% 10%;
@@ -116,10 +88,34 @@
       --input: 240 3.7% 15.9%;
       --ring: 142.4 71.8% 29.2%;
 
-      --background-image: url('/assets/pictures/Background.jpg');
+      --background-image: url('/assets/pictures/backgrounds/Background.jpg');
     }
 
-    
+    .spooked {
+      --background: 20 14.3% 4.1%;
+      --foreground: 0 0% 95%;
+      --card: 24 9.8% 10%;
+      --card-foreground: 0 0% 95%;
+      --popover: 0 0% 9%;
+      --popover-foreground: 0 0% 95%;
+      --primary: 346.8 77.2% 49.8%;
+      --primary-foreground: 355.7 100% 97.3%;
+      --secondary: 240 3.7% 15.9%;
+      --secondary-foreground: 0 0% 98%;
+      --muted: 0 0% 15%;
+      --muted-foreground: 240 5% 64.9%;
+      --accent: 12 6.5% 15.1%;
+      --accent-foreground: 0 0% 98%;
+      --destructive: 0 62.8% 30.6%;
+      --destructive-foreground: 0 85.7% 97.3%;
+      --border: 240 3.7% 15.9%;
+      --input: 240 3.7% 15.9%;
+      --ring: 346.8 77.2% 49.8%;
+
+      --background-image: url('/assets/pictures/backgrounds/spooked.webp');
+
+      --user-name: 'Easily Spooked';
+    }
   }
 
   @layer base {

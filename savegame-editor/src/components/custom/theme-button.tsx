@@ -1,4 +1,4 @@
-import { Moon, PaintBucket, Sun } from "lucide-react"
+import { Ghost, Moon, PaintBucket, Sun } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -22,6 +22,7 @@ export function ThemeModeToggle() {
           {theme === 'light' && <Sun className="h-[1.2rem] w-[1.2rem] transition-all" />}
           {theme === 'dark' && <Moon className="h-[1.2rem] w-[1.2rem] transition-all" />}
           {theme === 'dl2' && <PaintBucket className="h-[1.2rem] w-[1.2rem] transition-all" />}
+          {theme === 'spooked' && <Ghost className="h-[1.2rem] w-[1.2rem] transition-all" />}
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
@@ -62,6 +63,15 @@ export function ThemeModeToggle() {
           className={`${theme === "dl2" ? "bg-muted" : "bg-transparent"} p-2`}
         >
           DL2
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={() => {
+            setTheme("spooked")
+            navigate('/')
+          }}
+          className={`${theme === "spooked" ? "bg-muted" : "bg-transparent"} p-2`}
+        >
+          Spooked
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
