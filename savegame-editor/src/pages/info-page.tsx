@@ -95,7 +95,7 @@ export const InfoPage = () => {
                         name: "zCaazual",
                         role: "Reverse Engineer",
                         github: "https://github.com/zCaazual",
-                        background: "bg-white",
+                        background: "white",
                       }}
                     />
                     <ContributorAvatarComponent

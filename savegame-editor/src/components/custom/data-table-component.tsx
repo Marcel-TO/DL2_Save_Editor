@@ -20,11 +20,13 @@ import { useState } from "react";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  executeFunctionForRow?: Function
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  executeFunctionForRow
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -62,10 +64,11 @@ export function DataTable<TData, TValue>({
         </TableHeader>
         <TableBody>
           {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
+            table.getRowModel().rows.map((row, index) => (
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                onClick={() => executeFunctionForRow ? executeFunctionForRow(row.original) : {}}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
