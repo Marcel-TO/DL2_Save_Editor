@@ -496,7 +496,7 @@ export function MainPage({ currentSaveFile, appSettings }: MainPageProps) {
                   <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
                     <DrawerTrigger asChild>
                       <Button 
-                        className="bg-primary hover:bg-secondary"
+                        className="bg-primary"
                         onClick={() => listenDragDrop()}
                       >
                         Load Save

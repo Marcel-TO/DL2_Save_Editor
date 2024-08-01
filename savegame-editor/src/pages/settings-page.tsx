@@ -43,7 +43,7 @@ export const SettingsPage = ({ appSettings }: SettingsProps) => {
   const [currentTheme, setCurrentTheme] = useState<string>("");
 
   useEffect(() => {
-    setCurrentTheme(getTheme())
+    setCurrentTheme(getTheme());
   }, []);
 
   const saveCrcDataToLocalStorage = (crc: boolean, path: string) => {
@@ -73,53 +73,62 @@ export const SettingsPage = ({ appSettings }: SettingsProps) => {
 
   return (
     <>
-      <div className="flex min-h-screen w-full flex-col bg-muted/40">
+      <div className="flex min-h-screen w-full flex-col">
         <NavbarComponent />
         <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
           <main className="grid flex-1 items-start gap-4 p-4">
             <div>
               <h1 className="text-3xl font-semibold mb-4">Settings</h1>
 
-              <Card className="mx-20 my-10">
-                      <CardHeader>
-                        <div className="relative">
-                          <CardTitle>Editor Theme</CardTitle>
-                          <CardDescription>
-                            People have different preferences when it comes to the theme of choice. Choose the one that suits you best.
-                          </CardDescription>
-                          <HoverCard>
-                            <HoverCardTrigger asChild>
-                              <HelpCircle className="absolute top-0 right-0 w-6 h-6 text-muted-foreground cursor-pointer" />
-                            </HoverCardTrigger>
-                            <HoverCardContent className="w-80">
-                              <div className="flex justify-between space-x-4">
-                                <div className="space-y-1">
-                                  <p className="text-sm">
-                                    Choose between light and dark theme. The
-                                    editor will remember your choice. If you want a custom theme, you can always create one yourself. Follow the instructions in the documentation to create your own theme.
+              <div className="relative">
 
-                                    If you dont want to bother with creating a custom theme, but really want a personalized one, you can always support the Editor by joining the Sponsor program. There you can request custom theme only for you.
-                                  </p>
-                                </div>
-                              </div>
-                            </HoverCardContent>
-                          </HoverCard>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-row gap-1.5 items-center">
-                          <div id="theme-toggle">
-                            <ThemeModeToggle/>
+                <Card className="mx-20 my-10">
+                  <CardHeader>
+                    <div className="relative">
+                      <CardTitle>Editor Theme</CardTitle>
+                      <CardDescription>
+                        People have different preferences when it comes to the
+                        theme of choice. Choose the one that suits you best.
+                      </CardDescription>
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <HelpCircle className="absolute top-0 right-0 w-6 h-6 text-muted-foreground cursor-pointer" />
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-80">
+                          <div className="flex justify-between space-x-4">
+                            <div className="space-y-1">
+                              <p className="text-sm">
+                                Choose between light and dark theme. The editor
+                                will remember your choice. If you want a custom
+                                theme, you can always create one yourself. Follow
+                                the instructions in the documentation to create
+                                your own theme. If you dont want to bother with
+                                creating a custom theme, but really want a
+                                personalized one, you can always support the
+                                Editor by joining the Sponsor program. There you
+                                can request custom theme only for you.
+                              </p>
+                            </div>
                           </div>
-                          <label
-                                  htmlFor="theme-toggle"
-                                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                >
-                                  Selected Theme: {currentTheme.toUpperCase()}
-                                </label>
-                        </div>
-                        </CardContent>
-                      </Card>
+                        </HoverCardContent>
+                      </HoverCard>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-row gap-1.5 items-center">
+                      <div id="theme-toggle">
+                        <ThemeModeToggle />
+                      </div>
+                      <label
+                        htmlFor="theme-toggle"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        Selected Theme: {currentTheme.toUpperCase()}
+                      </label>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
               <Form {...form}>
                 <form

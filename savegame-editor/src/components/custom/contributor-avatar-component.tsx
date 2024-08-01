@@ -15,7 +15,7 @@ export const ContributorAvatarComponent = ({contributor}: {contributor: Contribu
   return (
     <>
       <div className="flex items-center gap-4 border rounded-md my-5 p-5">
-        <Avatar className={`hidden h-9 w-9 sm:flex bg-${contributor.background}`}>
+        <Avatar className={`hidden h-9 w-9 sm:flex ${contributor.background}`}>
           <AvatarImage src={contributor.avatar} alt="Avatar" />
           <AvatarFallback>{contributor.initials}</AvatarFallback>
         </Avatar>

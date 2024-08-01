@@ -23,8 +23,8 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
+  DialogPortal,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
 type InventoryPageProps = {
@@ -75,7 +75,7 @@ export const InventoryPage = ({ item_rows }: InventoryPageProps) => {
 
   return (
     <>
-      <div className="flex min-h-screen w-full flex-col bg-muted/40">
+      <div className="flex min-h-screen w-full flex-col">
         <NavbarComponent />
         <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
           <main className="grid flex-1 items-start gap-4 p-4">
@@ -145,7 +145,7 @@ export const InventoryPage = ({ item_rows }: InventoryPageProps) => {
                             key={item_row.name}
                             value={index.toString()}
                           >
-                            <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 p-4 px-8 sm:px-4 md:px-6 lg:px-8">
+                            <div className="grid gap-10 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 p-4 px-8 sm:px-4 md:px-6 lg:px-8">
                               {item_row.inventory_items.map(
                                 (item: InventoryItem) => (
                                   <InventoryItemCard item={item} />
@@ -192,7 +192,7 @@ export const InventoryPage = ({ item_rows }: InventoryPageProps) => {
               )}
             </div>
 
-            <Dialog open={isSelectingItem}>
+            <Dialog open={isSelectingItem} onOpenChange={setIsSelectingItem}>
               <DialogContent>
               <DialogHeader>
                 <DialogTitle>{currentItem?.name}</DialogTitle>
@@ -225,7 +225,7 @@ export const InventoryPage = ({ item_rows }: InventoryPageProps) => {
                 <DialogFooter>
                   <DialogClose asChild>
                     <Button onClick={() => setIsSelectingItem(false)}>
-                      Reset
+                      Save
                     </Button>
                   </DialogClose>
                 </DialogFooter>

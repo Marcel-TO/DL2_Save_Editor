@@ -29,7 +29,7 @@ const Card = React.forwardRef<
       className={cn(
         "rounded-lg border bg-card text-card-foreground shadow-sm",
         className,
-        isBackgroundImageNoneOrEmpty ? '' : 'bg-card/60 backdrop-blur-sm'
+        isBackgroundImageNoneOrEmpty ? '' : 'bg-card/55 backdrop-blur-sm'
       )}
       {...props}
     />
