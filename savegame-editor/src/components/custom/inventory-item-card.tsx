@@ -3,12 +3,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InventoryItem } from "@/models/save-models";
 import { Separator } from "../ui/separator";
 
-export const InventoryItemCard = ({ item }: { item: InventoryItem }) => {
+type InventoryItemCardProps = {
+  item: InventoryItem;
+  executeAction?: Function;
+};
+
+export const InventoryItemCard = ({ item, executeAction }: InventoryItemCardProps) => {
   return (
-    <Card className="overflow-hidden transform transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg w-full h-full">
+    <Card className="overflow-hidden transform transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg w-full h-full"
+      onClick={() => executeAction && executeAction(item)}
+    >
       <CardHeader className="flex flex-row items-start bg-muted/50">
-        <CardTitle className="group flex items-center gap-2 text-lg">
-          {item.name}
+        <CardTitle className="w-full group flex items-center gap-2 text-lg">
+          <div className="w full truncate">
+            {item.name}
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="text-sm">

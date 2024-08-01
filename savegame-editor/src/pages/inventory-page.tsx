@@ -12,20 +12,30 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { CellContext, ColumnDef } from "@tanstack/react-table";
-import { GalleryHorizontal, List } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { GalleryHorizontal, List, Split } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useState } from "react";
 import { InventoryItemCard } from "@/components/custom/inventory-item-card";
 import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogPortal,
-  DialogTitle,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type InventoryPageProps = {
   item_rows?: InventoryItemRow[];
@@ -148,7 +158,10 @@ export const InventoryPage = ({ item_rows }: InventoryPageProps) => {
                             <div className="grid gap-10 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 p-4 px-8 sm:px-4 md:px-6 lg:px-8">
                               {item_row.inventory_items.map(
                                 (item: InventoryItem) => (
-                                  <InventoryItemCard item={item} />
+                                  <InventoryItemCard
+                                    item={item}
+                                    executeAction={handleSelectItem}
+                                  />
                                 )
                               )}
                             </div>
@@ -193,36 +206,65 @@ export const InventoryPage = ({ item_rows }: InventoryPageProps) => {
             </div>
 
             <Dialog open={isSelectingItem} onOpenChange={setIsSelectingItem}>
-              <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{currentItem?.name}</DialogTitle>
-                <DialogDescription>
-                  Feel free to edit the values to your liking
-                </DialogDescription>
-              </DialogHeader>
-              <div className="font-semibold mb-2">Values</div>
-                  <ul className="grid gap-3">
-                    <li className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Level</span>
-                      <span>{currentItem?.chunk_data.level_value}</span>
-                    </li>
-
-                    <li className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Seed</span>
-                      <span>{currentItem?.chunk_data.seed_value}</span>
-                    </li>
-
-                    <li className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Amount</span>
-                      <span>{currentItem?.chunk_data.amount_value}</span>
-                    </li>
-
-                    <li className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Durability</span>
-                      <span>{currentItem?.chunk_data.durability_value}</span>
-                    </li>
-                  </ul>
-                <DialogFooter>
+              <DialogContent className="w-1/3">
+                <DialogHeader>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="w-4/5 truncate">
+                          {currentItem?.name}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>{currentItem?.name}</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </DialogHeader>
+                <div className="grid gap-4 py-4 mr-8">
+                  <div className="grid grid-cols-8 items-center gap-4">
+                    <Label htmlFor="level" className="text-right">
+                      Level
+                    </Label>
+                    <Input
+                      id="level"
+                      value={currentItem?.chunk_data.level_value}
+                      className="col-span-7"
+                    />
+                  </div>
+                  <div className="grid grid-cols-8 items-center gap-2">
+                    <Label htmlFor="seed" className="text-right col-span-1">
+                      Seed
+                    </Label>
+                    <Input
+                      id="seed"
+                      value={currentItem?.chunk_data.seed_value}
+                      className="col-span-6"
+                    />
+                    <Button className="col-span-1" variant="outline" size="sm">
+                      <Split className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-8 items-center gap-4">
+                    <Label htmlFor="amount" className="text-right">
+                      Amount
+                    </Label>
+                    <Input
+                      id="amount"
+                      value={currentItem?.chunk_data.amount_value}
+                      className="col-span-7"
+                    />
+                  </div>
+                  <div className="grid grid-cols-8 items-center gap-4">
+                    <Label htmlFor="durability" className="text-right">
+                      Durability
+                    </Label>
+                    <Input
+                      id="durability"
+                      value={currentItem?.chunk_data.durability_value}
+                      className="col-span-7"
+                    />
+                  </div>
+                </div>
+                <DialogFooter className="mr-8">
                   <DialogClose asChild>
                     <Button onClick={() => setIsSelectingItem(false)}>
                       Save

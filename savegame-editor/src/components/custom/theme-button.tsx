@@ -44,43 +44,6 @@ export function ThemeModeToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuGroup>
-          <DropdownMenuLabel>Simple</DropdownMenuLabel>
-          <DropdownMenuItem
-            onClick={() => {
-              setTheme("light");
-              navigate("/");
-            }}
-            className={`${
-              theme === "light" ? "bg-muted/70" : "bg-transparent"
-            } p-2`}
-          >
-            Light
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => {
-              setTheme("dark");
-              navigate("/");
-            }}
-            className={`${
-              theme === "dark" ? "bg-muted" : "bg-transparent"
-            } p-2`}
-          >
-            Dark
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => {
-              setTheme("system");
-              navigate("/");
-            }}
-            className={`${
-              theme === "system" ? "bg-muted" : "bg-transparent"
-            } p-2`}
-          >
-            System
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <Separator />
-        <DropdownMenuGroup>
           <DropdownMenuLabel>Background</DropdownMenuLabel>
           <DropdownMenuItem
             onClick={() => {
@@ -123,6 +86,43 @@ export function ThemeModeToggle() {
             } p-2`}
           >
             Hope
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <Separator />
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Simple</DropdownMenuLabel>
+          <DropdownMenuItem
+            onClick={() => {
+              setTheme("light");
+              navigate("/");
+            }}
+            className={`${
+              theme === "light" ? "bg-muted/70" : "bg-transparent"
+            } p-2`}
+          >
+            Light
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => {
+              setTheme("dark");
+              navigate("/");
+            }}
+            className={`${
+              theme === "dark" ? "bg-muted" : "bg-transparent"
+            } p-2`}
+          >
+            Dark
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => {
+              setTheme("system");
+              navigate("/");
+            }}
+            className={`${
+              theme === "system" ? "bg-muted" : "bg-transparent"
+            } p-2`}
+          >
+            System
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
