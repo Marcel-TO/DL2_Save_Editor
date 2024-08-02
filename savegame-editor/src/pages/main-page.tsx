@@ -276,6 +276,25 @@ export function MainPage({ currentSaveFile, appSettings }: MainPageProps) {
     }
   }
 
+  const openSecondWindow = async () =>  {
+    let newSave = await invoke("open_second_window").catch((err) => {
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description:
+          err ?? "An error occured while loading the save file.",
+        action: (
+          <ToastAction
+            altText="Try again"
+            onClick={() => setIsDrawerOpen(true)}
+          >
+            Try again
+          </ToastAction>
+        ),
+      });
+      return;
+    });
+  }
+
   return (
     <div className="flex min-h-screen w-full flex-col">
       <NavbarComponent />
@@ -625,9 +644,7 @@ export function MainPage({ currentSaveFile, appSettings }: MainPageProps) {
                   </CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Link to={"/knowledge-vault"}>
-                    <Button>Learn More</Button>
-                  </Link>
+                  <Button onClick={() => openSecondWindow()}>Open Second Window</Button>
                 </CardFooter>
               </Card>
             </div>

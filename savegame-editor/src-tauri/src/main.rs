@@ -223,6 +223,15 @@ async fn remove_item(
     Ok(new_save_data)
 }
 
+#[tauri::command(rename_all = "snake_case")]
+async fn open_second_window(app_handle: AppHandle) {
+    let local_window = tauri::WindowBuilder::new(
+        &app_handle,
+        "local",
+        tauri::WindowUrl::App("index.html".into())
+      ).build();
+}
+
 fn main() {
     dotenv().ok();
     // Comment tauri builder if debugging.
@@ -242,6 +251,7 @@ fn main() {
             change_items_durability_1_negative,
             change_items_amount_max,
             change_items_amount_1,
+            open_second_window
             ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
