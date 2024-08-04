@@ -3,6 +3,7 @@ import { DataTable } from "@/components/custom/data-table-component";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  IdData,
   InventoryItem,
   InventoryItemRow,
   Mod,
@@ -39,9 +40,11 @@ import {
 } from "@/components/ui/tooltip";
 import { invoke } from "@tauri-apps/api/tauri";
 import { SettingState } from "@/models/settings-model";
+import { ItemIdComboboxComponent } from "@/components/custom/item-id-combobox-component";
 
 type InventoryPageProps = {
   currentSaveFile: SettingState<SaveFile | undefined>;
+  currentIdData: SettingState<IdData[] | undefined>;
 };
 
 export const columns: ColumnDef<InventoryItem>[] = [
@@ -77,6 +80,7 @@ export const columns: ColumnDef<InventoryItem>[] = [
 
 export const InventoryPage = ({
   currentSaveFile,
+  currentIdData,
 }: InventoryPageProps) => {
   const [isGalleryView, setIsGalleryView] = useState<boolean>(false);
   const [isSelectingItem, setIsSelectingItem] = useState<boolean>(false);
@@ -297,7 +301,6 @@ export const InventoryPage = ({
           <main className="grid flex-1 items-start gap-4 p-4">
             <div>
               <h1 className="text-3xl font-semibold mb-4">Inventory Page</h1>
-
               {item_rows ? (
                 <>
                   <Tabs defaultValue={item_rows ? "0" : ""}>

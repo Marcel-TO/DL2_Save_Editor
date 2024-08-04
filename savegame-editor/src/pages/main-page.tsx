@@ -19,7 +19,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { NavbarComponent } from "@/components/custom/custom-navbar-component";
-import { SaveFile } from "@/models/save-models";
+import { IdData, SaveFile } from "@/models/save-models";
 import {
   Tooltip,
   TooltipContent,
@@ -55,9 +55,10 @@ import { TypographyH1 } from "@/components/ui/typography";
 type MainPageProps = {
   appSettings: AppSettings;
   currentSaveFile: SettingState<SaveFile | undefined>;
+  idData: SettingState<IdData[] | undefined>;
 };
 
-export function MainPage({ currentSaveFile, appSettings }: MainPageProps) {
+export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps) {
   // States for the Card Details
   const [latestEditorVersion, setLatestEditorVersion] = useState<string>("");
   const [amountOfDownloads, setAmountOfDownloads] = useState<number | null>(
@@ -124,6 +125,7 @@ export function MainPage({ currentSaveFile, appSettings }: MainPageProps) {
 
     fetchReleaseInfo();
     setUserName(getUserName());
+    handleSetIdData();
   }, []);
 
   async function listenDragDrop() {
@@ -273,6 +275,23 @@ export function MainPage({ currentSaveFile, appSettings }: MainPageProps) {
           return;
         }
       );
+    }
+  }
+
+  async function handleSetIdData() {
+    let ids = await invoke<IdData[]>("get_ids", {}).catch((err) => {
+      toast({
+        title: "Uh oh! Something went wrong!",
+        description:
+          err ??
+          "An error occured while trying to load the IDs file. Please make sure the IDs folder exists in the editor's directory.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
+      return;
+    });
+
+    if (ids) {
+      idData.setValue(ids);
     }
   }
 
