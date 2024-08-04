@@ -357,7 +357,7 @@ export function MainPage({ currentSaveFile, appSettings }: MainPageProps) {
                       <Link to={"/debug"}>
                         <DropdownMenuItem>Debug</DropdownMenuItem>
                       </Link>
-                      <DropdownMenuItem>Hex View</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => openSecondWindow()}>Hex View</DropdownMenuItem>
                       <DropdownMenuItem onClick={() => saveBackupSaveFile()}>
                         Backup
                       </DropdownMenuItem>
@@ -515,7 +515,8 @@ export function MainPage({ currentSaveFile, appSettings }: MainPageProps) {
                   <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
                     <DrawerTrigger asChild>
                       <Button 
-                        className="bg-primary"
+                        variant="outline"
+                        className="border-primary text-primary"
                         onClick={() => listenDragDrop()}
                       >
                         Load Save
@@ -644,7 +645,9 @@ export function MainPage({ currentSaveFile, appSettings }: MainPageProps) {
                   </CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Button onClick={() => openSecondWindow()}>Open Second Window</Button>
+                  <Button 
+                    variant="outline"
+                    className="border-primary text-primary">Learn more</Button>
                 </CardFooter>
               </Card>
             </div>

@@ -227,9 +227,10 @@ async fn remove_item(
 async fn open_second_window(app_handle: AppHandle) {
     let local_window = tauri::WindowBuilder::new(
         &app_handle,
-        "local",
+        "HEX",
         tauri::WindowUrl::App("index.html".into())
-      ).build();
+      )
+      .title("Hex View").build().unwrap();
 }
 
 fn main() {

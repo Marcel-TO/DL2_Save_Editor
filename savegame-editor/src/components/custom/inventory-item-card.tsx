@@ -5,13 +5,14 @@ import { Separator } from "../ui/separator";
 
 type InventoryItemCardProps = {
   item: InventoryItem;
+  itemIndex: number;
   executeAction?: Function;
 };
 
-export const InventoryItemCard = ({ item, executeAction }: InventoryItemCardProps) => {
+export const InventoryItemCard = ({ item, itemIndex, executeAction }: InventoryItemCardProps) => {
   return (
     <Card className="overflow-hidden transform transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg w-full h-full"
-      onClick={() => executeAction && executeAction(item)}
+      onClick={() => executeAction && executeAction(item, itemIndex)}
     >
       <CardHeader className="flex flex-row items-start bg-muted/50">
         <CardTitle className="w-full group flex items-center gap-2 text-lg">
