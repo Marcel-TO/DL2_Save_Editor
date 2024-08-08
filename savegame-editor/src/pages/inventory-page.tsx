@@ -40,7 +40,18 @@ import {
 } from "@/components/ui/tooltip";
 import { invoke } from "@tauri-apps/api/tauri";
 import { SettingState } from "@/models/settings-model";
-import { ItemIdComboboxComponent } from "@/components/custom/item-id-combobox-component";
+import { set, useForm } from "react-hook-form";
+import { z, ZodError } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 type InventoryPageProps = {
   currentSaveFile: SettingState<SaveFile | undefined>;
@@ -86,155 +97,91 @@ export const InventoryPage = ({
   const [isSelectingItem, setIsSelectingItem] = useState<boolean>(false);
   const [currentItem, setCurrentItem] = useState<InventoryItem>();
   const [currentItemRow, setCurrentItemRow] = useState<InventoryItemRow>();
-  const [item_rows, setItemRows] = useState<InventoryItemRow[]>(currentSaveFile.value?.items ?? []);
+  const [item_rows, setItemRows] = useState<InventoryItemRow[]>(
+    currentSaveFile.value?.items ?? []
+  );
 
   // initialize the current item values
   const [currentItemIndex, setCurrentItemIndex] = useState<number>(0);
-  const [currentSelectedItemName, setCurrentSelectedItemName] =
-    useState<string>("");
-  const [currentSelectedItemLevel, setCurrentSelectedItemLevel] =
-    useState<string>("0");
-  const [currentSelectedItemSeed, setCurrentSelectedItemSeed] =
-    useState<string>("0");
-  const [currentSelectedItemAmount, setCurrentSelectedItemAmount] =
-    useState<string>("0");
-  const [currentSelectedItemDurability, setCurrentSelectedItemDurability] =
-    useState<string>("0");
+
+  // initialize the current item values and their requriements
+  const ItemFormSchema = z.object({
+    name: z.string({
+      required_error: "Name is required",
+      invalid_type_error: "Name must be a string",
+    }),
+    level: z
+      .number()
+      .max(65535, { message: "Level must be less than 65535" })
+      .positive({ message: "Level must be a positive number" }),
+    seed: z
+      .number()
+      .max(65535, { message: "Seed must be less than 65535" })
+      .positive({ message: "Seed must be a positive number" }),
+    amount: z
+      .number()
+      .max(4294967295, { message: "Amount must be less than 4294967295" })
+      .positive({ message: "Amount must be a positive number" }),
+    durability: z
+      .number()
+      .max(4294967295, { message: "Durability must be less than 4294967295" }),
+  });
 
   const handleSelectItem = (item: InventoryItem, index: number) => {
     setCurrentItem(item);
     setIsSelectingItem(true);
     setCurrentItemIndex(index);
-    setCurrentSelectedItemName(item.name);
-    setCurrentSelectedItemLevel(item.chunk_data.level_value.toString());
-    setCurrentSelectedItemSeed(item.chunk_data.seed_value.toString());
-    setCurrentSelectedItemAmount(item.chunk_data.amount_value.toString());
-    setCurrentSelectedItemDurability(
-      item.chunk_data.durability_value.toString()
-    );
+    form.setValue("name", item.name);
+    form.setValue("level", item.chunk_data.level_value);
+    form.setValue("seed", item.chunk_data.seed_value);
+    form.setValue("amount", item.chunk_data.amount_value);
+    form.setValue("durability", item.chunk_data.durability_value);
   };
 
-  const handleLevelValue = (event: ChangeEvent<HTMLInputElement>) => {
-    const maxValue = 65535;
+  const form = useForm<z.infer<typeof ItemFormSchema>>({
+    resolver: zodResolver(ItemFormSchema),
+    defaultValues: {
+      name: currentItem?.name,
+      level: currentItem?.chunk_data.level_value,
+      seed: currentItem?.chunk_data.seed_value,
+      amount: currentItem?.chunk_data.amount_value,
+      durability: currentItem?.chunk_data.durability_value,
+    },
+  });
 
-    // Allow only numbers
-    var value = event.target.value.replace(/[^0-9]/g, "");
-
-    // Check Max Range
-    if (Number(value) > maxValue) {
-      value = maxValue.toString();
-    }
-
-    // If the input is empty, set it to '0'
-    if (value === "") {
-      setCurrentSelectedItemLevel("0");
-    } else if (value.charAt(0) === "0") {
-      setCurrentSelectedItemLevel(value.substring(1));
-    } else {
-      setCurrentSelectedItemLevel(value);
-    }
-  };
-
-  const handleSeedValue = (event: ChangeEvent<HTMLInputElement>) => {
-    const maxValue = 65535;
-
-    // Allow only numbers
-    var value = event.target.value.replace(/[^0-9]/g, "");
-
-    // Check Max Range
-    if (Number(value) > maxValue) {
-      value = maxValue.toString();
-    }
-
-    // If the input is empty, set it to '0'
-    if (value === "") {
-      setCurrentSelectedItemSeed("0");
-    } else if (value.charAt(0) === "0") {
-      setCurrentSelectedItemSeed(value.substring(1));
-    } else {
-      setCurrentSelectedItemSeed(value);
-    }
-  };
-
-  const handleAmountValue = (event: ChangeEvent<HTMLInputElement>) => {
-    const maxValue = 4294967295;
-
-    // Allow only numbers
-    var value = event.target.value.replace(/[^0-9]/g, "");
-
-    // Check Max Range
-    if (Number(value) > maxValue) {
-      value = maxValue.toString();
-    }
-
-    // If the input is empty, set it to '0'
-    if (value === "") {
-      setCurrentSelectedItemAmount("0");
-    } else if (value.charAt(0) === "0") {
-      setCurrentSelectedItemAmount(value.substring(1));
-    } else {
-      setCurrentSelectedItemAmount(value);
-    }
-  };
-
-  const handleDurabilityValue = (event: ChangeEvent<HTMLInputElement>) => {
-    const maxValue = 4294967295;
-
-    // Allow only numbers
-    var value = event.target.value.replace(/[^-0-9]/g, "");
-
-    // Check Max Range
-    if (Number(value) > maxValue) {
-      value = maxValue.toString();
-    }
-
-    // If the input is empty, set it to '0'
-    if (value === "") {
-      setCurrentSelectedItemDurability("0");
-    } else if (value.charAt(0) === "0") {
-      setCurrentSelectedItemDurability(value.substring(1));
-    } else {
-      setCurrentSelectedItemDurability(value);
-    }
-  };
-
-  async function handleChangeValues(
-    itemName: string,
-    level: string,
-    seed: string,
-    amount: string,
-    durability: string
-  ) {
-    let levelValue = Number(level);
-    let seedValue = Number(seed);
-    let amountValue = Number(amount);
-    let durabilityValue = Number(durability);
-
+  function onSubmitChangeValues(data: z.infer<typeof ItemFormSchema>) {
     // Rewrite locally for performance reasons.
     if (currentItemRow?.inventory_items != undefined) {
-      currentItemRow.inventory_items[currentItemIndex].name = itemName;
+      currentItemRow.inventory_items[currentItemIndex].name = data.name;
       currentItemRow.inventory_items[currentItemIndex].chunk_data.level_value =
-        levelValue;
+        data.level;
       currentItemRow.inventory_items[currentItemIndex].chunk_data.seed_value =
-        seedValue;
+        data.seed;
       currentItemRow.inventory_items[currentItemIndex].chunk_data.amount_value =
-        amountValue;
+        data.amount;
       currentItemRow.inventory_items[
         currentItemIndex
-      ].chunk_data.durability_value = durabilityValue;
+      ].chunk_data.durability_value = data.durability;
       setCurrentItemRow(currentItemRow);
       setItemRows(item_rows);
     }
 
-    // setIsOpen(false);
     submitItemValues(
-      itemName,
-      levelValue,
-      seedValue,
-      amountValue,
-      durabilityValue,
+      data.name,
+      data.level,
+      data.seed,
+      data.amount,
+      data.durability,
       currentSaveFile.value
     );
+
+    try {
+      let validation = ItemFormSchema.parse(data);
+    } catch (error: any) {
+      return;
+    }
+
+    setIsSelectingItem(false);
   }
 
   async function submitItemValues(
@@ -245,15 +192,6 @@ export const InventoryPage = ({
     durabilityValue: number,
     saveFile?: SaveFile
   ) {
-    console.log("Submitting item values...");
-    console.log("Current Item: " + currentItem);
-    console.log("Item Name: " + itemName);
-    console.log("Level: " + levelValue);
-    console.log("Seed: " + seedValue);
-    console.log("Amount: " + amountValue);
-    console.log("Durability: " + durabilityValue);
-    console.log("Save File: " + saveFile);
-
     invoke<Uint8Array>("handle_edit_item_chunk", {
       current_item_index: currentItem?.index,
       new_id: itemName,
@@ -290,7 +228,7 @@ export const InventoryPage = ({
     const max = 65334; // Maximum 5-digit value (exclusive)
 
     const randomValue = Math.floor(Math.random() * (max - min) + min);
-    setCurrentSelectedItemSeed(randomValue.toString());
+    form.setValue("seed", randomValue);
   };
 
   return (
@@ -301,7 +239,7 @@ export const InventoryPage = ({
           <main className="grid flex-1 items-start gap-4 p-4">
             <div>
               <h1 className="text-3xl font-semibold mb-4">Inventory Page</h1>
-              {item_rows ? (
+              {currentSaveFile.value ? (
                 <>
                   <Tabs defaultValue={item_rows ? "0" : ""}>
                     <div className="flex items-center">
@@ -421,93 +359,44 @@ export const InventoryPage = ({
               <DialogContent className="w-1/3">
                 <DialogHeader>
                   <DialogTitle>Edit Item</DialogTitle>
-                <TooltipProvider>
+                  <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div className="w-4/5 truncate">
-                          {currentSelectedItemName}
+                          {form.getValues("name")}
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent>{currentSelectedItemName}</TooltipContent>
+                      <TooltipContent>{form.getValues("name")}</TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </DialogHeader>
-                <div className="grid gap-4 py-4 mr-8">
-                  <div className="grid grid-cols-8 items-center gap-4">
-                    <Label htmlFor="level" className="text-right col-span-2">
-                      Level
-                    </Label>
-                    <Input
-                      id="level"
-                      value={currentSelectedItemLevel}
-                      className="col-span-6"
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmitChangeValues)}>
+                    <FormField
+                      control={form.control}
+                      name="level"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Level</FormLabel>
+                          <FormControl>
+                            <Input placeholder="level" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            The level of the desired item. The maximum level is
+                            65535.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </div>
-                  <div className="grid grid-cols-8 items-center gap-2">
-                    <Label htmlFor="seed" className="text-right col-span-2">
-                      Seed
-                    </Label>
-                    <Input
-                      id="seed"
-                      value={currentSelectedItemSeed}
-                      className="col-span-5"
-                    />
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            className="col-span-1"
-                            variant="outline"
-                            size="sm"
-                            onClick={generateRandomSeed}
-                          >
-                            <Split className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Generate Random Seed</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <div className="grid grid-cols-8 items-center gap-4">
-                    <Label htmlFor="amount" className="text-right col-span-2">
-                      Amount
-                    </Label>
-                    <Input
-                      id="amount"
-                      value={currentSelectedItemAmount}
-                      className="col-span-6"
-                    />
-                  </div>
-                  <div className="grid grid-cols-8 items-center gap-4">
-                    <Label
-                      htmlFor="durability"
-                      className="text-right col-span-2"
-                    >
-                      Durability
-                    </Label>
-                    <Input
-                      id="durability"
-                      value={currentSelectedItemDurability}
-                      className="col-span-6"
-                    />
-                  </div>
-                </div>
-                <DialogFooter className="mr-8">
-                  <DialogClose asChild>
-                    <Button onClick={() => {
-                      handleChangeValues(
-                        currentSelectedItemName,
-                        currentSelectedItemLevel,
-                        currentSelectedItemSeed,
-                        currentSelectedItemAmount,
-                        currentSelectedItemDurability
-                      );
-                      setIsSelectingItem(false)
-                    }}>
-                      Save
-                    </Button>
-                  </DialogClose>
-                </DialogFooter>
+
+                    <DialogFooter className="mr-8">
+                      <DialogClose asChild>
+                        <Button type="submit">Save</Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </form>
+                </Form>
               </DialogContent>
             </Dialog>
           </main>

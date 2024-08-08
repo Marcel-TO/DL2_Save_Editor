@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -29,6 +29,7 @@ export function DataTable<TData, TValue>({
   executeFunctionForRow
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [displayedData, setDisplayedData] = useState<TData[]>(data);
 
   const table = useReactTable({
     data,
@@ -40,6 +41,10 @@ export function DataTable<TData, TValue>({
       sorting,
     },
   });
+
+  useEffect(() => {
+    setDisplayedData(data);
+  }, [data]);
 
   return (
     <div className="rounded-md border">
