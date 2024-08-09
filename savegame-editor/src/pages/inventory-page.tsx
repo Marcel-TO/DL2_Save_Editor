@@ -52,6 +52,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { toast } from "@/components/ui/use-toast";
+import { IdComboBox } from "@/components/custom/item-id-combobox-component";
 
 type InventoryPageProps = {
   currentSaveFile: SettingState<SaveFile | undefined>;
@@ -93,7 +95,7 @@ export const InventoryPage = ({
   currentSaveFile,
   currentIdData,
 }: InventoryPageProps) => {
-  const [isGalleryView, setIsGalleryView] = useState<boolean>(false);
+  const [isGalleryView, setIsGalleryView] = useState<boolean>(true);
   const [isSelectingItem, setIsSelectingItem] = useState<boolean>(false);
   const [currentItem, setCurrentItem] = useState<InventoryItem>();
   const [currentItemRow, setCurrentItemRow] = useState<InventoryItemRow>();
@@ -110,19 +112,22 @@ export const InventoryPage = ({
       required_error: "Name is required",
       invalid_type_error: "Name must be a string",
     }),
-    level: z
+    level: z.coerce
       .number()
+      .multipleOf(1, { message: "Level must be a whole number" })
       .max(65535, { message: "Level must be less than 65535" })
       .positive({ message: "Level must be a positive number" }),
-    seed: z
+    seed: z.coerce
       .number()
+      .multipleOf(1, { message: "Seed must be a whole number" })
       .max(65535, { message: "Seed must be less than 65535" })
       .positive({ message: "Seed must be a positive number" }),
-    amount: z
+    amount: z.coerce
       .number()
+      .multipleOf(1, { message: "Amount must be a whole number" })
       .max(4294967295, { message: "Amount must be less than 4294967295" })
       .positive({ message: "Amount must be a positive number" }),
-    durability: z
+    durability: z.coerce
       .number()
       .max(4294967295, { message: "Durability must be less than 4294967295" }),
   });
@@ -149,7 +154,13 @@ export const InventoryPage = ({
     },
   });
 
-  function onSubmitChangeValues(data: z.infer<typeof ItemFormSchema>) {
+  async function onSubmitChangeValues(data: z.infer<typeof ItemFormSchema>) {
+    form.setValue("name", data.name);
+    form.setValue("level", Number(data.level));
+    form.setValue("seed", data.seed);
+    form.setValue("amount", data.amount);
+    form.setValue("durability", data.durability);
+
     // Rewrite locally for performance reasons.
     if (currentItemRow?.inventory_items != undefined) {
       currentItemRow.inventory_items[currentItemIndex].name = data.name;
@@ -166,7 +177,14 @@ export const InventoryPage = ({
       setItemRows(item_rows);
     }
 
-    submitItemValues(
+    // Check whether the validation went through and it is ok to save values.
+    try {
+      ItemFormSchema.parse(data);
+    } catch (error: any) {
+      return;
+    }
+
+    await submitItemValues(
       data.name,
       data.level,
       data.seed,
@@ -174,13 +192,6 @@ export const InventoryPage = ({
       data.durability,
       currentSaveFile.value
     );
-
-    try {
-      let validation = ItemFormSchema.parse(data);
-    } catch (error: any) {
-      return;
-    }
-
     setIsSelectingItem(false);
   }
 
@@ -202,25 +213,35 @@ export const InventoryPage = ({
       new_amount: amountValue,
       new_durability: durabilityValue,
       save_file_content: currentSaveFile.value?.file_content,
-    }).then((new_save_content) => {
-      if (saveFile != undefined && currentItemRow != undefined) {
-        saveFile.file_content = new_save_content;
+    })
+      .then((new_save_content) => {
+        if (saveFile != undefined && currentItemRow != undefined) {
+          saveFile.file_content = new_save_content;
 
-        for (let i = 0; i < item_rows.length; i++) {
-          if (
-            currentItemRow.name == item_rows[i].name &&
-            currentItemRow.inventory_items.length ==
-              item_rows[i].inventory_items.length
-          ) {
-            item_rows[i] = currentItemRow;
-            setItemRows(item_rows);
-            saveFile.items = item_rows;
-            currentSaveFile.setValue(saveFile);
-            return;
+          for (let i = 0; i < item_rows.length; i++) {
+            if (
+              currentItemRow.name == item_rows[i].name &&
+              currentItemRow.inventory_items.length ==
+                item_rows[i].inventory_items.length
+            ) {
+              item_rows[i] = currentItemRow;
+              setItemRows(item_rows);
+              saveFile.items = item_rows;
+              currentSaveFile.setValue(saveFile);
+              return;
+            }
           }
         }
-      }
-    });
+      })
+      .catch((err) => {
+        console.error(err);
+        toast({
+          title: "Uh oh! Something went wrong. :/",
+          description:
+            "The Editor stumbled accross the following error: " + err,
+        });
+        return;
+      });
   }
 
   const generateRandomSeed = () => {
@@ -261,7 +282,7 @@ export const InventoryPage = ({
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-7 gap-1 text-sm"
+                              className="h-7 gap-2 text-sm"
                             >
                               {isGalleryView ? (
                                 <GalleryHorizontal className="h-3.5 w-3.5" />
@@ -277,20 +298,20 @@ export const InventoryPage = ({
                             <DropdownMenuLabel>View Items as</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuCheckboxItem
-                              checked={!isGalleryView}
-                              onClick={() => setIsGalleryView(false)}
-                              className="h-7 gap-1 text-sm"
-                            >
-                              <List className="h-3.5 w-3.5" />
-                              List
-                            </DropdownMenuCheckboxItem>
-                            <DropdownMenuCheckboxItem
                               checked={isGalleryView}
                               onClick={() => setIsGalleryView(true)}
                               className="h-7 gap-1 text-sm"
                             >
                               <GalleryHorizontal className="h-3.5 w-3.5" />
                               Gallery
+                            </DropdownMenuCheckboxItem>
+                            <DropdownMenuCheckboxItem
+                              checked={!isGalleryView}
+                              onClick={() => setIsGalleryView(false)}
+                              className="h-7 gap-1 text-sm"
+                            >
+                              <List className="h-3.5 w-3.5" />
+                              List
                             </DropdownMenuCheckboxItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -299,10 +320,7 @@ export const InventoryPage = ({
                     {isGalleryView ? (
                       <>
                         {item_rows?.map((item_row, index) => (
-                          <TabsContent
-                            key={item_row.name}
-                            value={index.toString()}
-                          >
+                          <TabsContent key={index} value={index.toString()}>
                             <div className="grid gap-10 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 p-4 px-8 sm:px-4 md:px-6 lg:px-8">
                               {item_row.inventory_items.map(
                                 (item: InventoryItem, index: number) => (
@@ -321,10 +339,7 @@ export const InventoryPage = ({
                     ) : (
                       <Card className="my-4">
                         {item_rows?.map((item_row, index) => (
-                          <TabsContent
-                            key={item_row.name}
-                            value={index.toString()}
-                          >
+                          <TabsContent key={index} value={index.toString()}>
                             <DataTable
                               columns={columns}
                               data={item_row.inventory_items}
@@ -359,7 +374,7 @@ export const InventoryPage = ({
               <DialogContent className="w-1/3">
                 <DialogHeader>
                   <DialogTitle>Edit Item</DialogTitle>
-                  <TooltipProvider>
+                  {/* <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div className="w-4/5 truncate">
@@ -368,32 +383,97 @@ export const InventoryPage = ({
                       </TooltipTrigger>
                       <TooltipContent>{form.getValues("name")}</TooltipContent>
                     </Tooltip>
-                  </TooltipProvider>
+                  </TooltipProvider> */}
                 </DialogHeader>
+
+                <IdComboBox ids={currentIdData.value ?? []} />
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmitChangeValues)}>
-                    <FormField
+                  <FormField
                       control={form.control}
-                      name="level"
+                      name="name"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Level</FormLabel>
-                          <FormControl>
-                            <Input placeholder="level" {...field} />
-                          </FormControl>
-                          <FormDescription>
-                            The level of the desired item. The maximum level is
-                            65535.
-                          </FormDescription>
-                          <FormMessage />
+                        <FormItem className="grid grid-cols-8 items-center gap-4">
+                          <FormLabel className="text-right col-span-2">
+                            Name
+                          </FormLabel>
+                          <div className="col-span-6">
+                            <FormControl className="">
+                              <Input
+                                placeholder="name"
+                                {...field}
+                              />
+                            </FormControl>
+                            <div className="px-4">
+                              <FormDescription>
+                                The name of the desired item.
+                              </FormDescription>
+                              <FormMessage />
+                            </div>
+                          </div>
                         </FormItem>
                       )}
                     />
 
+                    <FormField
+                      control={form.control}
+                      name="level"
+                      render={({ field }) => (
+                        <FormItem className="grid grid-cols-8 items-center gap-4">
+                          <FormLabel className="text-right col-span-2">
+                            Level
+                          </FormLabel>
+                          <div className="col-span-6">
+                            <FormControl className="">
+                              <Input
+                                type="number"
+                                placeholder="level"
+                                min={0}
+                                {...field}
+                              />
+                            </FormControl>
+                            <div className="px-4">
+                              <FormDescription>
+                                The level of the desired item. The maximum level
+                                is 9999.
+                              </FormDescription>
+                              <FormMessage />
+                            </div>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="durability"
+                      render={({ field }) => (
+                        <FormItem className="grid grid-cols-8 items-center gap-4">
+                          <FormLabel className="text-right col-span-2">
+                            Durability
+                          </FormLabel>
+                          <div className="col-span-6">
+                            <FormControl className="">
+                              <Input
+                                type="number"
+                                placeholder="durability"
+                                min={-1}
+                                {...field}
+                              />
+                            </FormControl>
+                            <div className="px-4">
+                              <FormDescription>
+                                The Durability of the desired item. The maximum
+                                durability is 4294967295.
+                              </FormDescription>
+                              <FormMessage />
+                            </div>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
                     <DialogFooter className="mr-8">
-                      <DialogClose asChild>
-                        <Button type="submit">Save</Button>
-                      </DialogClose>
+                      <Button type="submit">Save</Button>
                     </DialogFooter>
                   </form>
                 </Form>

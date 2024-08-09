@@ -26,6 +26,7 @@
     "@radix-ui/react-tabs": "^1.1.0",
     "@radix-ui/react-toast": "^1.2.1",
     "@radix-ui/react-tooltip": "^1.1.2",
+    "@tanstack/react-query": "^5.51.23",
     "@tanstack/react-table": "^8.19.3",
     "@tauri-apps/api": "^1.6.0",
     "class-variance-authority": "^0.7.0",
@@ -38,6 +39,7 @@
     "react-router-dom": "^6.24.1",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
+    "use-debounce": "^10.0.2",
     "vaul": "^0.9.1",
     "zod": "^3.23.8"
   },

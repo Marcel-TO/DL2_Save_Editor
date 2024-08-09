@@ -3,3 +3,7 @@ export type Sponsor = {
     avatar: string;
     tier: string;
 }
+  
+export interface SearchResponse {
+    ids: string[];
+}

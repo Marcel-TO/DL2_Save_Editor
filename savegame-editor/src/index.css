@@ -85,8 +85,8 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 85.7% 97.3%;
     --border: 187 10% 36%;
-    --input: 240 3.7% 15.9%;
-    --ring: 142.4 71.8% 29.2%;
+    --input: 187 10% 36%;
+    --ring: 69, 49%, 87%;
 
     --background-image: url('/assets/pictures/backgrounds/Background.jpg');
   }
