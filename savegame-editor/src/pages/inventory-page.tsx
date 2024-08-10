@@ -387,6 +387,7 @@ export const InventoryPage = ({
                 </DialogHeader>
 
                 <IdComboBox ids={currentIdData.value ?? []} />
+                
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmitChangeValues)}>
                   <FormField
