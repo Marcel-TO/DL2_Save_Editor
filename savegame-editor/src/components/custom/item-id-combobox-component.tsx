@@ -18,15 +18,18 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 const POPOVER_WIDTH = 'w-full';
 
 type ComboboxProps = {
+  currentSelected: string;
+  setCurrentSelected: Function;
   ids: IdData[];
 }
 
-export function IdComboBox({ids}: ComboboxProps) {
+export function IdComboBox({ids, currentSelected, setCurrentSelected}: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
-  const [selected, setSelected] = React.useState<string>('');
+  const [selected, setSelected] = React.useState<string>(currentSelected);
 
   const handleSetActive = React.useCallback((id: string) => {
     setSelected(id);
+    setCurrentSelected(id);
   }, []);
 
   const displayName = selected ? selected : 'Select ID';

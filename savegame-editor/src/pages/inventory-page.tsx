@@ -386,8 +386,8 @@ export const InventoryPage = ({
                   </TooltipProvider> */}
                 </DialogHeader>
 
-                <IdComboBox ids={currentIdData.value ?? []} />
-                
+                <IdComboBox ids={currentIdData.value ?? []} currentSelected={form.getValues("name")} setCurrentSelected={(id: string) =>form.setValue("name", id)}/>
+
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmitChangeValues)}>
                   <FormField

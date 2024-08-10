@@ -17,7 +17,7 @@ import { SearchResponse } from '@/models/models';
 
 interface SearchProps {
   selectedResult?: string;
-  onSelectResult: (id: string) => void;
+  onSelectResult: Function;
   ids: IdData[];
 }
 
@@ -45,6 +45,12 @@ export function Search({ selectedResult, onSelectResult, ids }: SearchProps) {
       />
 
     <CommandList>
+      <CommandItem
+        onSelect={() => setDisplayLimit(displayLimit + 30)}
+        value="Show More"
+      >
+        <span>Show More</span>
+      </CommandItem>
       <SearchResults
         query={searchQuery}
         selectedResult={selectedResult}
@@ -103,7 +109,7 @@ function SearchResults({
         return (
           <CommandItem
             key={id}
-            onSelect={() => onSelectResult(id)}
+            onSelect={(res:string) => onSelectResult(res)}
             value={id}
           >
             <Check
