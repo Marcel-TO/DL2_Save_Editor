@@ -54,6 +54,7 @@ import {
 } from "@/components/ui/form";
 import { toast } from "@/components/ui/use-toast";
 import { IdComboBox } from "@/components/custom/item-id-combobox-component";
+import { Sheet, SheetContent, SheetFooter, SheetHeader } from "@/components/ui/sheet";
 
 type InventoryPageProps = {
   currentSaveFile: SettingState<SaveFile | undefined>;
@@ -115,20 +116,21 @@ export const InventoryPage = ({
     level: z.coerce
       .number()
       .multipleOf(1, { message: "Level must be a whole number" })
-      .max(65535, { message: "Level must be less than 65535" })
-      .positive({ message: "Level must be a positive number" }),
+      .gte(0, { message: "Level must be a positive number" })
+      .max(65535, { message: "Level must be less than 65535" }),
     seed: z.coerce
       .number()
       .multipleOf(1, { message: "Seed must be a whole number" })
-      .max(65535, { message: "Seed must be less than 65535" })
-      .positive({ message: "Seed must be a positive number" }),
+      .gte(0, { message: "Seed must be a positive number" })
+      .max(65535, { message: "Seed must be less than 65535" }),
     amount: z.coerce
       .number()
       .multipleOf(1, { message: "Amount must be a whole number" })
-      .max(4294967295, { message: "Amount must be less than 4294967295" })
-      .positive({ message: "Amount must be a positive number" }),
-    durability: z.coerce
+      .gte(0, { message: "Amount must be a positive number" })
+      .max(4294967295, { message: "Amount must be less than 4294967295" }),
+      durability: z.coerce
       .number()
+      .multipleOf(0.1, { message: "Amount must be a whole number" })
       .max(4294967295, { message: "Durability must be less than 4294967295" }),
   });
 
@@ -146,11 +148,11 @@ export const InventoryPage = ({
   const form = useForm<z.infer<typeof ItemFormSchema>>({
     resolver: zodResolver(ItemFormSchema),
     defaultValues: {
-      name: currentItem?.name,
-      level: currentItem?.chunk_data.level_value,
-      seed: currentItem?.chunk_data.seed_value,
-      amount: currentItem?.chunk_data.amount_value,
-      durability: currentItem?.chunk_data.durability_value,
+      name: currentItem ? currentItem.name : "",
+      level: currentItem ? currentItem.chunk_data.level_value : 0,
+      seed: currentItem ? currentItem.chunk_data.seed_value : 0,
+      amount: currentItem ? currentItem.chunk_data.amount_value : 0,
+      durability: currentItem ? currentItem.chunk_data.durability_value : 0,
     },
   });
 
@@ -267,7 +269,7 @@ export const InventoryPage = ({
                       <TabsList>
                         {item_rows?.map((item_row, index) => (
                           <TabsTrigger
-                            key={item_row.name}
+                            key={index}
                             value={index.toString()}
                             onClick={() => setCurrentItemRow(item_row)}
                           >
@@ -282,7 +284,7 @@ export const InventoryPage = ({
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-7 gap-2 text-sm"
+                              className="h-7 gap-2 text-sm bg-card/50"
                             >
                               {isGalleryView ? (
                                 <GalleryHorizontal className="h-3.5 w-3.5" />
@@ -337,17 +339,19 @@ export const InventoryPage = ({
                         ))}
                       </>
                     ) : (
-                      <Card className="my-4">
-                        {item_rows?.map((item_row, index) => (
-                          <TabsContent key={index} value={index.toString()}>
-                            <DataTable
-                              columns={columns}
-                              data={item_row.inventory_items}
-                              executeFunctionForRow={handleSelectItem}
-                            />
-                          </TabsContent>
-                        ))}
-                      </Card>
+                      <>
+                        <Card className="my-4">
+                          {item_rows?.map((item_row, index) => (
+                            <TabsContent key={index} value={index.toString()}>
+                              <DataTable
+                                columns={columns}
+                                data={item_row.inventory_items}
+                                executeFunctionForRow={handleSelectItem}
+                              />
+                            </TabsContent>
+                          ))}
+                        </Card>
+                      </>
                     )}
                   </Tabs>
                 </>
@@ -370,52 +374,18 @@ export const InventoryPage = ({
               )}
             </div>
 
-            <Dialog open={isSelectingItem} onOpenChange={setIsSelectingItem}>
-              <DialogContent className="w-1/3">
-                <DialogHeader>
-                  <DialogTitle>Edit Item</DialogTitle>
-                  {/* <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="w-4/5 truncate">
-                          {form.getValues("name")}
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>{form.getValues("name")}</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider> */}
-                </DialogHeader>
+            <Sheet open={isSelectingItem} onOpenChange={setIsSelectingItem}>
+              <SheetContent>
+                <SheetHeader>Edit Item</SheetHeader>
 
-                <IdComboBox ids={currentIdData.value ?? []} currentSelected={form.getValues("name")} setCurrentSelected={(id: string) =>form.setValue("name", id)}/>
+                <IdComboBox
+                  ids={currentIdData.value ?? []}
+                  currentSelected={form.getValues("name")}
+                  setCurrentSelected={(id: string) => form.setValue("name", id)}
+                />
 
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmitChangeValues)}>
-                  <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem className="grid grid-cols-8 items-center gap-4">
-                          <FormLabel className="text-right col-span-2">
-                            Name
-                          </FormLabel>
-                          <div className="col-span-6">
-                            <FormControl className="">
-                              <Input
-                                placeholder="name"
-                                {...field}
-                              />
-                            </FormControl>
-                            <div className="px-4">
-                              <FormDescription>
-                                The name of the desired item.
-                              </FormDescription>
-                              <FormMessage />
-                            </div>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-
                     <FormField
                       control={form.control}
                       name="level"
@@ -444,42 +414,13 @@ export const InventoryPage = ({
                         </FormItem>
                       )}
                     />
-
-                    <FormField
-                      control={form.control}
-                      name="durability"
-                      render={({ field }) => (
-                        <FormItem className="grid grid-cols-8 items-center gap-4">
-                          <FormLabel className="text-right col-span-2">
-                            Durability
-                          </FormLabel>
-                          <div className="col-span-6">
-                            <FormControl className="">
-                              <Input
-                                type="number"
-                                placeholder="durability"
-                                min={-1}
-                                {...field}
-                              />
-                            </FormControl>
-                            <div className="px-4">
-                              <FormDescription>
-                                The Durability of the desired item. The maximum
-                                durability is 4294967295.
-                              </FormDescription>
-                              <FormMessage />
-                            </div>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                    <DialogFooter className="mr-8">
-                      <Button type="submit">Save</Button>
-                    </DialogFooter>
                   </form>
                 </Form>
-              </DialogContent>
-            </Dialog>
+                <SheetFooter className="my-10">
+                      <Button onClick={() => form.trigger()}>Save</Button>
+                    </SheetFooter>
+              </SheetContent>
+            </Sheet>
           </main>
         </div>
       </div>

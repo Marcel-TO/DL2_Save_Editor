@@ -23,7 +23,7 @@ type ComboboxProps = {
   ids: IdData[];
 }
 
-export function IdComboBox({ids, currentSelected, setCurrentSelected}: ComboboxProps) {
+export function IdComboBox({currentSelected, setCurrentSelected, ids}: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [selected, setSelected] = React.useState<string>(currentSelected);
 
@@ -44,14 +44,16 @@ export function IdComboBox({ids, currentSelected, setCurrentSelected}: ComboboxP
             role="combobox"
             className={cn('justify-between', POPOVER_WIDTH)}
           >
-            {displayName}
+            <div className="truncate text-ellipsis">
+              {displayName}
+            </div>
 
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
 
         <PopoverContent side="bottom" className={cn('p-0', POPOVER_WIDTH)}>
-          <Search selectedResult={selected} onSelectResult={handleSetActive} ids={ids}/>
+          <Search selectedResult={selected} onSelectResult={handleSetActive} ids={ids} setOpen={setOpen}/>
         </PopoverContent>
       </Popover>
 
