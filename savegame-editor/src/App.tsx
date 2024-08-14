@@ -100,7 +100,7 @@ function App() {
       <Route path={"/info"} element={<InfoPage />}></Route>,
       <Route
         path={"/skills"}
-        element={<SkillsPage skills={currentSaveFile.value?.skills} />}
+        element={<SkillsPage skills={currentSaveFile.value?.skills} currentSaveFile={currentSaveFile} />}
       ></Route>,
       <Route
         path={"/inventory"}

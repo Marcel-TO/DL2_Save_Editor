@@ -21,17 +21,8 @@ import {
 import { CellContext, ColumnDef } from "@tanstack/react-table";
 import { ChevronDown, GalleryHorizontal, List, Split } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChangeEvent, useState } from "react";
+import { useState } from "react";
 import { InventoryItemCard } from "@/components/custom/inventory-item-card";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
   Tooltip,
@@ -41,8 +32,8 @@ import {
 } from "@/components/ui/tooltip";
 import { invoke } from "@tauri-apps/api/tauri";
 import { SettingState } from "@/models/settings-model";
-import { set, useForm } from "react-hook-form";
-import { z, ZodError } from "zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
@@ -121,22 +112,18 @@ export const InventoryPage = ({
     }),
     level: z.coerce
       .number()
-      .multipleOf(1, { message: "Level must be a whole number" })
       .gte(0, { message: "Level must be a positive number" })
       .max(65535, { message: "Level must be less than 65535" }),
     seed: z.coerce
       .number()
-      .multipleOf(1, { message: "Seed must be a whole number" })
       .gte(0, { message: "Seed must be a positive number" })
       .max(65535, { message: "Seed must be less than 65535" }),
     amount: z.coerce
       .number()
-      .multipleOf(1, { message: "Amount must be a whole number" })
       .gte(0, { message: "Amount must be a positive number" })
       .max(4294967295, { message: "Amount must be less than 4294967295" }),
     durability: z.coerce
       .number()
-      .multipleOf(0.1, { message: "Amount must be a whole number" })
       .max(4294967295, { message: "Durability must be less than 4294967295" }),
   });
 
@@ -163,6 +150,13 @@ export const InventoryPage = ({
   });
 
   async function onSubmitChangeValues(data: z.infer<typeof ItemFormSchema>) {
+    // Check whether the validation went through and it is ok to save values.
+    try {
+      ItemFormSchema.parse(data);
+    } catch (error: any) {
+      return;
+    }
+    
     form.setValue("name", data.name);
     form.setValue("level", Number(data.level));
     form.setValue("seed", data.seed);
@@ -183,13 +177,6 @@ export const InventoryPage = ({
       ].chunk_data.durability_value = data.durability;
       setCurrentItemRow(currentItemRow);
       setItemRows(item_rows);
-    }
-
-    // Check whether the validation went through and it is ok to save values.
-    try {
-      ItemFormSchema.parse(data);
-    } catch (error: any) {
-      return;
     }
 
     await submitItemValues(
