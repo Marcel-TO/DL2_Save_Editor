@@ -36,7 +36,7 @@
     "lucide-react": "^0.400.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-hook-form": "^7.52.1",
+    "react-hook-form": "^7.52.2",
     "react-router-dom": "^6.24.1",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
