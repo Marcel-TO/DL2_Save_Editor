@@ -1,8 +1,8 @@
 import { NavbarComponent } from "@/components/custom/custom-navbar-component";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Carousel, CarouselIndicator, CarouselMainContainer, CarouselNext, CarouselPrevious, CarouselThumbsContainer, SliderMainItem } from "@/components/ui/carousel";
+import { KnowledgeCarouselComponent } from "@/components/custom/knowledge-carousel-component";
 
 export const KnowledgeVaultPage = () => {
+  
   return (
     <>
       <div className="flex min-h-screen w-full flex-col">
@@ -12,28 +12,7 @@ export const KnowledgeVaultPage = () => {
             <div className="flex-1">
               <h1 className="text-3xl font-semibold mb-4">Knowledge Vault Page</h1>
 
-              <Carousel>
-                <CarouselNext />
-                <CarouselPrevious />
-                <div className="relative h-full">
-                  <CarouselMainContainer className="h-[80vh]">
-                    {Array.from({ length: 5 }).map((_, index) => (
-                      <SliderMainItem key={index} className="bg-transparent h-full">
-                        <div className="outline outline-1 outline-border size-full flex items-center justify-center rounded-xl bg-background h-full">
-                          Slide {index + 1}
-                        </div>
-                      </SliderMainItem>
-                    ))}
-                  </CarouselMainContainer>
-                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2">
-                    <CarouselThumbsContainer className="gap-x-1">
-                      {Array.from({ length: 5 }).map((_, index) => (
-                        <CarouselIndicator key={index} index={index} />
-                      ))}
-                    </CarouselThumbsContainer>
-                  </div>
-                </div>
-              </Carousel>
+              <KnowledgeCarouselComponent />
             </div>
           </main>
         </div>

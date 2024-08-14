@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 
 import {
   Command,
-  CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList,
@@ -98,7 +97,6 @@ function SearchResults({
     queryFn: () =>
       searchIdsByQuery(
         debouncedSearchQuery,
-        selectedResult ?? "",
         ids,
         displayLimit
       ),
@@ -180,7 +178,6 @@ function SearchResults({
 
 const searchIdsByQuery = async (
   query: string,
-  currentId: string,
   ids: IdData[],
   displayLimit: number
 ): Promise<SearchResponse> => {
