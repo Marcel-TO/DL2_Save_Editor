@@ -16,9 +16,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuCheckboxItem,
+  DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { CellContext, ColumnDef } from "@tanstack/react-table";
-import { GalleryHorizontal, List, Split } from "lucide-react";
+import { ChevronDown, GalleryHorizontal, List, Split } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChangeEvent, useState } from "react";
 import { InventoryItemCard } from "@/components/custom/inventory-item-card";
@@ -54,7 +55,12 @@ import {
 } from "@/components/ui/form";
 import { toast } from "@/components/ui/use-toast";
 import { IdComboBox } from "@/components/custom/item-id-combobox-component";
-import { Sheet, SheetContent, SheetFooter, SheetHeader } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+} from "@/components/ui/sheet";
 
 type InventoryPageProps = {
   currentSaveFile: SettingState<SaveFile | undefined>;
@@ -128,7 +134,7 @@ export const InventoryPage = ({
       .multipleOf(1, { message: "Amount must be a whole number" })
       .gte(0, { message: "Amount must be a positive number" })
       .max(4294967295, { message: "Amount must be less than 4294967295" }),
-      durability: z.coerce
+    durability: z.coerce
       .number()
       .multipleOf(0.1, { message: "Amount must be a whole number" })
       .max(4294967295, { message: "Durability must be less than 4294967295" }),
@@ -375,27 +381,29 @@ export const InventoryPage = ({
             </div>
 
             <Sheet open={isSelectingItem} onOpenChange={setIsSelectingItem}>
-              <SheetContent>
-                <SheetHeader>Edit Item</SheetHeader>
+              <TooltipProvider>
+                <SheetContent>
+                  <SheetHeader className="my-6">Edit Item</SheetHeader>
 
-                <IdComboBox
-                  ids={currentIdData.value ?? []}
-                  currentSelected={form.getValues("name")}
-                  setCurrentSelected={(id: string) => form.setValue("name", id)}
-                />
+                  <IdComboBox
+                    ids={currentIdData.value ?? []}
+                    currentSelected={form.getValues("name")}
+                    setCurrentSelected={(id: string) =>
+                      form.setValue("name", id)
+                    }
+                  />
 
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmitChangeValues)}>
-                    <FormField
-                      control={form.control}
-                      name="level"
-                      render={({ field }) => (
-                        <FormItem className="grid grid-cols-8 items-center gap-4">
-                          <FormLabel className="text-right col-span-2">
-                            Level
-                          </FormLabel>
-                          <div className="col-span-6">
-                            <FormControl className="">
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmitChangeValues)}>
+                      <FormField
+                        control={form.control}
+                        name="level"
+                        render={({ field }) => (
+                          <FormItem className="grid grid-cols-8 grid-rows-2 items-center gap-x-2 my-4">
+                            <FormLabel className="text-right col-span-2">
+                              Level
+                            </FormLabel>
+                            <FormControl className="col-span-6">
                               <Input
                                 type="number"
                                 placeholder="level"
@@ -403,23 +411,201 @@ export const InventoryPage = ({
                                 {...field}
                               />
                             </FormControl>
-                            <div className="px-4">
+                            <div className="col-span-6 col-start-3">
                               <FormDescription>
                                 The level of the desired item. The maximum level
-                                is 9999.
+                                is 65534.
                               </FormDescription>
                               <FormMessage />
                             </div>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  </form>
-                </Form>
-                <SheetFooter className="my-10">
-                      <Button onClick={() => form.trigger()}>Save</Button>
-                    </SheetFooter>
-              </SheetContent>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="seed"
+                        render={({ field }) => (
+                          <FormItem className="grid grid-cols-8 grid-rows-2 items-center gap-x-2 my-4">
+                            <FormLabel className="text-right col-span-2">
+                              Seed
+                            </FormLabel>
+                            <FormControl className="col-span-4">
+                              <Input
+                                type="number"
+                                placeholder="seed"
+                                min={0}
+                                {...field}
+                              />
+                            </FormControl>
+                            <Tooltip>
+                              <TooltipTrigger className="col-span-2">
+                                <Button
+                                  onClick={generateRandomSeed}
+                                  variant="outline"
+                                  className="col-span-2 m-0 p-0 w-full"
+                                  type="button"
+                                >
+                                  <Split className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                Generate a random seed value.
+                              </TooltipContent>
+                            </Tooltip>
+                            <div className="col-span-6 col-start-3">
+                              <FormDescription>
+                                The seed of the desired item. The maximum seed
+                                is 65534.
+                              </FormDescription>
+                              <FormMessage />
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="amount"
+                        render={({ field }) => (
+                          <FormItem className="grid grid-cols-8 grid-rows-2 items-center gap-x-2 my-4">
+                            <FormLabel className="text-right col-span-2">
+                              Amount
+                            </FormLabel>
+                            <FormControl className="col-span-4">
+                              <Input
+                                type="number"
+                                placeholder="amount"
+                                min={0}
+                                {...field}
+                              />
+                            </FormControl>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger className="col-span-2">
+                                <Button
+                                  variant="outline"
+                                  className="col-span-2 w-full m-0 p-0"
+                                  type="button"
+                                >
+                                  <ChevronDown className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuItem
+                                  onSelect={() => form.setValue("amount", 0)}
+                                >
+                                  0
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onSelect={() => form.setValue("amount", 999)}
+                                >
+                                  999
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onSelect={() => form.setValue("amount", 9999)}
+                                >
+                                  9999
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onSelect={() =>
+                                    form.setValue("amount", 999999)
+                                  }
+                                >
+                                  999999
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                            <div className="col-span-6 col-start-3">
+                              <FormDescription>
+                                The maximum amount is 4294967295. But use higher
+                                values than the game allows at your own risk.
+                              </FormDescription>
+                              <FormMessage />
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="durability"
+                        render={({ field }) => (
+                          <FormItem className="grid grid-cols-8 grid-rows-2 items-center gap-x-2 my-4">
+                            <FormLabel className="text-right col-span-2">
+                              Durability
+                            </FormLabel>
+                            <FormControl className="col-span-4">
+                              <Input
+                                type="number"
+                                placeholder="durability"
+                                {...field}
+                              />
+                            </FormControl>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger className="col-span-2">
+                                <Button
+                                  variant="outline"
+                                  className="col-span-2 w-full m-0 p-0"
+                                  type="button"
+                                >
+                                  <ChevronDown className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuItem
+                                  onSelect={() =>
+                                    form.setValue("durability", -1.0)
+                                  }
+                                >
+                                  -1.0
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onSelect={() =>
+                                    form.setValue("durability", 0)
+                                  }
+                                >
+                                  0
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onSelect={() =>
+                                    form.setValue("durability", 9999)
+                                  }
+                                >
+                                  9999
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onSelect={() =>
+                                    form.setValue("durability", 999999)
+                                  }
+                                >
+                                  999999
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                            <div className="col-span-6 col-start-3">
+                              <FormDescription>
+                                The maximum durability is 4294967295. But use
+                                higher values than the game allows at your own
+                                risk.
+                              </FormDescription>
+                              <FormMessage />
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <SheetFooter className="my-6">
+                        <Button
+                          className="w-full"
+                          onClick={() => form.trigger()}
+                        >
+                          Save
+                        </Button>
+                      </SheetFooter>
+                    </form>
+                  </Form>
+                </SheetContent>
+              </TooltipProvider>
             </Sheet>
           </main>
         </div>
