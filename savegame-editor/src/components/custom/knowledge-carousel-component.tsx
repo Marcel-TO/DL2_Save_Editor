@@ -7,74 +7,89 @@ import {
   CarouselThumbsContainer,
   CarouselIndicator,
 } from "../ui/carousel";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+
+const knowledge: [string, string, string][] = [
+  [
+    "Getting Started",
+    "https://marcel-to.notion.site/Getting-Started-with-the-Editor-496ffcc2b46a4f39b6e7ca04ed1b3b32",
+    "/assets/pictures/backgrounds/slider-2.jpg",
+  ],
+  [
+    "Tutorial",
+    "https://marcel-to.notion.site/Tutorial-95ff57c3d2c14314b6e89613f0f14a7a",
+    "/assets/pictures/backgrounds/slider-3.jpg",
+  ],
+  [
+    "Commonly Asked Questions",
+    "https://marcel-to.notion.site/Commonly-asked-Questions-QnA-5c05da103a304c3e99b9bc024c35cf7d",
+    "/assets/pictures/backgrounds/slider-4.jpg",
+  ],
+  [
+    "Prerequisites for Programming",
+    "https://marcel-to.notion.site/Prerequisites-for-Programming-bcd84864e7e4454283bac25d619015e7",
+    "/assets/pictures/backgrounds/slider-5.jpg",
+  ],
+  [
+    "The Editor in Detail: Frontend",
+    "https://marcel-to.notion.site/The-Editor-in-Detail-Frontend-9c72b33073eb43c2acfbf9210ff80c71",
+    "/assets/pictures/backgrounds/slider-2.jpg",
+  ],
+  [
+    "Video Tutorial",
+    "https://youtu.be/BfgnVI4v-Jo?si=onXnwUkU9Oc7HEf",
+    "/assets/pictures/backgrounds/slider-6.jpg",
+  ],
+  [
+    "Feature Release Plan",
+    "https://github.com/users/Marcel-TO/projects/2/views/2",
+    "/assets/pictures/backgrounds/slider-7.jpg",
+  ],
+];
 
 export const KnowledgeCarouselComponent = () => {
-  const knowledge: [string, string, string][] = [
-    [
-      "Getting Started",
-      "https://marcel-to.notion.site/Getting-Started-with-the-Editor-496ffcc2b46a4f39b6e7ca04ed1b3b32",
-      "slider-2.jpg",
-    ],
-    [
-      "Tutorial",
-      "https://marcel-to.notion.site/Tutorial-95ff57c3d2c14314b6e89613f0f14a7a",
-      "slider-3.jpg",
-    ],
-    [
-      "Commonly Asked Questions",
-      "https://marcel-to.notion.site/Commonly-asked-Questions-QnA-5c05da103a304c3e99b9bc024c35cf7d",
-      "slider-4.jpg",
-    ],
-    [
-      "Prerequisites for Programming",
-      "https://marcel-to.notion.site/Prerequisites-for-Programming-bcd84864e7e4454283bac25d619015e7",
-      "slider-5.jpg",
-    ],
-    [
-      "The Editor in Detail: Frontend",
-      "https://marcel-to.notion.site/The-Editor-in-Detail-Frontend-9c72b33073eb43c2acfbf9210ff80c71",
-      "slider-2.jpg",
-    ],
-    [
-      "Video Tutorial",
-      "https://youtu.be/BfgnVI4v-Jo?si=onXnwUkU9Oc7HEf",
-      "slider-6.jpg",
-    ],
-    [
-      "Feature Release Plan",
-      "https://github.com/users/Marcel-TO/projects/2/views/2",
-      "slider-7.jpg",
-    ],
-  ];
+  
 
   return (
+    <TooltipProvider>
+
     <Carousel carouselOptions={{ loop: true }}>
-      <CarouselNext />
-      <CarouselPrevious />
+      <CarouselNext className="scale-150 bg-card/70"/>
+      <CarouselPrevious className="scale-150 bg-card/70"/>
       <div className="relative h-full">
         <CarouselMainContainer className="h-[80vh]">
           {knowledge.map(([title, link, backgroundImage]) => (
-            <SliderMainItem key={title} className="bg-transparent h-full">
-              <a
-                href={link}
-                target="_blank"
-                rel="noreferrer"
-                // className={`outline outline-1 outline-border size-full flex items-center justify-center rounded-xl bg-[url('/assets/pictures/backgrounds/${backgroundImage}')] h-full`}
-                className={`outline outline-1 outline-border size-full flex items-center justify-center rounded-xl bg-[url('/assets/pictures/backgrounds/slider-2.jpg')] h-full`}
-              >
-                {title}
-              </a>
+            <SliderMainItem key={title} className="relative size-full flex items-center justify-center rounded-xl bg-transparent h-full overflow-hidden">
+              <Tooltip>
+                <TooltipTrigger className="absolute transition-all hover:scale-110 hover:shadow-2xl hover:shadow-primary">
+                <a
+                  href={link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={"px-6 py-4 rounded bg-card/70 text-7xl border border-primary border-1 font-drip"}
+                >
+                  {title}
+                </a>
+                </TooltipTrigger>
+                <TooltipContent>{title}</TooltipContent>
+              </Tooltip>
+
+              <img
+                className="w-full h-full aspect-video"
+                src={backgroundImage}
+              />
             </SliderMainItem>
           ))}
         </CarouselMainContainer>
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2">
           <CarouselThumbsContainer className="gap-x-1">
             {Array.from({ length: knowledge.length }).map((_, index) => (
-              <CarouselIndicator key={index} index={index} className="h-[2vh]"/>
+              <CarouselIndicator key={index} index={index} className="h-[3vh] w-[4vh]"/>
             ))}
           </CarouselThumbsContainer>
         </div>
       </div>
     </Carousel>
+    </TooltipProvider>
   );
 };

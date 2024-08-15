@@ -322,7 +322,7 @@ const CarouselIndicator = forwardRef<
       size="icon"
       className={cn(
         "h-1 w-6 rounded-full",
-        "data-[active='false']:bg-primary-foreground data-[active='true']:bg-primary",
+        "data-[active='false']:bg-primary-foreground data-[active='false']:border-primary data-[active='true']:bg-primary data-[active='true']:border-primary-foreground",
         className
       )}
       data-active={isSlideActive}
