@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import { MainPage } from "./pages/main-page";
 import { InfoPage } from "./pages/info-page";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { IdData, SaveFile } from "./models/save-models";
 import { SettingsPage } from "./pages/settings-page";
 import { AppSettings, SettingState } from "./models/settings-model";
@@ -22,9 +22,6 @@ import { PlayerPage } from "./pages/player-page";
 import { KnowledgeVaultPage } from "./pages/knowledge-vault";
 import { DebugPage } from "./pages/debug-page";
 import { SponsorPage } from "./pages/sponsor-page";
-import { invoke } from "@tauri-apps/api/tauri";
-import { ToastAction } from "./components/ui/toast";
-import { toast } from "./components/ui/use-toast";
 
 function App() {
   // Declare all app settings

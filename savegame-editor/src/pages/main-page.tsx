@@ -296,7 +296,7 @@ export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps
   }
 
   const openSecondWindow = async () =>  {
-    let newSave = await invoke("open_second_window").catch((err) => {
+    await invoke("open_second_window").catch((err) => {
       toast({
         title: "Uh oh! Something went wrong.",
         description:

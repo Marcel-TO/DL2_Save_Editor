@@ -1,6 +1,5 @@
 import { NavbarComponent } from "@/components/custom/custom-navbar-component";
 import { SponsorAvatarComponent } from "@/components/custom/sponsor-avatar-component";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardHeader,

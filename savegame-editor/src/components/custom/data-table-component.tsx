@@ -29,7 +29,7 @@ export function DataTable<TData, TValue>({
   executeFunctionForRow
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [displayedData, setDisplayedData] = useState<TData[]>(data);
+  const [_, setDisplayedData] = useState<TData[]>(data);
 
   const table = useReactTable({
     data,
