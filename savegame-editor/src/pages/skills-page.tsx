@@ -134,31 +134,6 @@ export const SkillsPage = ({ skills, currentSaveFile }: SkillsPageProps) => {
                       <TabsTrigger value="base" onClick={() => setCurrentTab(0)}>Base Skills</TabsTrigger>
                       <TabsTrigger value="legend" onClick={() => setCurrentTab(1)}>Legend Skills</TabsTrigger>
                     </TabsList>
-
-                    <div className="ml-auto flex items-center gap-2">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 gap-1 text-sm"
-                          >
-                            <SortAsc className="h-3.5 w-3.5" />
-                            <span className="sr-only sm:not-sr-only">Sort</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuCheckboxItem checked>
-                            save order
-                          </DropdownMenuCheckboxItem>
-                          <DropdownMenuCheckboxItem>
-                            alphabetical
-                          </DropdownMenuCheckboxItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
                   </div>
                   <TabsContent value="base">
                     <Card className="my-4">
