@@ -233,6 +233,16 @@ async fn open_second_window(app_handle: AppHandle) {
       .title("Hex View").build().unwrap();
 }
 
+#[tauri::command(rename_all = "snake_case")]
+async fn open_knowledge_window(app_handle: AppHandle, url: &str, name: &str) {
+    let local_window = tauri::WindowBuilder::new(
+        &app_handle,
+        "HEX",
+        tauri::WindowUrl::App(url.into())
+      )
+      .title(name).build().unwrap();
+}
+
 fn main() {
     dotenv().ok();
     // Comment tauri builder if debugging.
@@ -252,7 +262,8 @@ fn main() {
             change_items_durability_1_negative,
             change_items_amount_max,
             change_items_amount_1,
-            open_second_window
+            open_second_window,
+            open_knowledge_window
             ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
