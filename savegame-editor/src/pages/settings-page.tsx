@@ -18,41 +18,39 @@ import {
   HoverCardTrigger,
   HoverCardContent,
 } from "@/components/ui/hover-card";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ThemeModeToggle } from "@/components/custom/theme-button";
 import { AppSettings } from "@/models/settings-model";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
-import { getTheme } from "@/components/ui/theme-provider";
+import { Store } from "tauri-plugin-store-api";
 
 type SettingsProps = {
   appSettings: AppSettings;
+  settingsManager: Store | undefined;
 };
 
 const CrcFormSchema = z.object({
   crcCheckbox: z.boolean().default(false),
 });
 
-export const SettingsPage = ({ appSettings }: SettingsProps) => {
+export const SettingsPage = ({ appSettings, settingsManager }: SettingsProps) => {
   const [gameFolderPath, setGameFolderPath] = useState<string>(
     appSettings.gameFolderPath.value
   );
   const [isSaving, setIsSaving] = useState(false);
-  const [currentTheme, setCurrentTheme] = useState<string>("");
 
-  useEffect(() => {
-    setCurrentTheme(getTheme());
-  }, []);
-
-  const saveCrcDataToLocalStorage = (crc: boolean, path: string) => {
-    if (appSettings.crc.storageKey) {
-      localStorage.setItem(appSettings.crc.storageKey, crc.toString());
+  const saveCrcDataToLocalStorage = async (crc: boolean, path: string) => {
+    if (appSettings.crc.storageKey && settingsManager) {
+      await settingsManager.set(appSettings.crc.storageKey, { value: crc });
     }
 
-    if (appSettings.gameFolderPath.storageKey) {
-      localStorage.setItem(appSettings.gameFolderPath.storageKey, path);
+    if (appSettings.gameFolderPath.storageKey && settingsManager) {
+      await settingsManager.set(appSettings.gameFolderPath.storageKey, {
+        value: path,
+      });
     }
   };
 
@@ -123,7 +121,7 @@ export const SettingsPage = ({ appSettings }: SettingsProps) => {
                         htmlFor="theme-toggle"
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
-                        Selected Theme: {currentTheme.toUpperCase()}
+                        Selected Theme: {appSettings.theme.value.toUpperCase()}
                       </label>
                     </div>
                   </CardContent>
