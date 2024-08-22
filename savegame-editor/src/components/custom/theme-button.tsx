@@ -48,7 +48,7 @@ export function ThemeModeToggle() {
           <DropdownMenuItem
             onClick={() => {
               setTheme("dl2");
-              navigate("/");
+              navigate("/main");
             }}
             className={`${theme === "dl2" ? "bg-muted" : "bg-transparent"} p-2`}
           >
@@ -57,7 +57,7 @@ export function ThemeModeToggle() {
           <DropdownMenuItem
             onClick={() => {
               setTheme("spooked");
-              navigate("/");
+              navigate("/main");
             }}
             className={`${
               theme === "spooked" ? "bg-muted" : "bg-transparent"
@@ -68,7 +68,7 @@ export function ThemeModeToggle() {
           <DropdownMenuItem
             onClick={() => {
               setTheme("skyfall");
-              navigate("/");
+              navigate("/main");
             }}
             className={`${
               theme === "skyfall" ? "bg-muted" : "bg-transparent"
@@ -79,7 +79,7 @@ export function ThemeModeToggle() {
           <DropdownMenuItem
             onClick={() => {
               setTheme("hope");
-              navigate("/");
+              navigate("/main");
             }}
             className={`${
               theme === "hope" ? "bg-muted" : "bg-transparent"
@@ -94,7 +94,7 @@ export function ThemeModeToggle() {
           <DropdownMenuItem
             onClick={() => {
               setTheme("light");
-              navigate("/");
+              navigate("/main");
             }}
             className={`${
               theme === "light" ? "bg-muted/70" : "bg-transparent"
@@ -105,7 +105,7 @@ export function ThemeModeToggle() {
           <DropdownMenuItem
             onClick={() => {
               setTheme("dark");
-              navigate("/");
+              navigate("/main");
             }}
             className={`${
               theme === "dark" ? "bg-muted" : "bg-transparent"
@@ -116,7 +116,7 @@ export function ThemeModeToggle() {
           <DropdownMenuItem
             onClick={() => {
               setTheme("system");
-              navigate("/");
+              navigate("/main");
             }}
             className={`${
               theme === "system" ? "bg-muted" : "bg-transparent"
