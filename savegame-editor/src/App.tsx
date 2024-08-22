@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import { MainPage } from "./pages/main-page";
 import { InfoPage } from "./pages/info-page";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IdData, SaveFile } from "./models/save-models";
 import { SettingsPage } from "./pages/settings-page";
 import { AppSettings, SettingState } from "./models/settings-model";
@@ -22,47 +22,23 @@ import { PlayerPage } from "./pages/player-page";
 import { KnowledgeVaultPage } from "./pages/knowledge-vault";
 import { DebugPage } from "./pages/debug-page";
 import { SponsorPage } from "./pages/sponsor-page";
+import { WelcomePage } from "./pages/welcome-page";
+import { Store } from "tauri-plugin-store-api";
+import { initializeAppSettings, initializeStore } from "./models/settings-manager";
 
 function App() {
-  // Declare all app settings
-  const [crcValue, setCrcValue] = useState<boolean>(
-    JSON.parse(localStorage.getItem("crc-check-settings") ?? "false") ===
-      true || false
-  );
-  const [gameFolderPath, setGameFolderPath] = useState<string>(
-    (localStorage.getItem("game-folder-settings") as unknown as string) || ""
-  );
-  const [isDebugging, setIsDebugging] = useState<boolean>(
-    JSON.parse(localStorage.getItem("debug-settings") ?? "false") === true ||
-      false
-  );
-  const [hasAutomaticBackup, setHasAutomaticBackup] = useState<boolean>(
-    JSON.parse(localStorage.getItem("backup-settings") ?? "false") === true ||
-      false
-  );
+  // Declare app settings manager
+  const appSettings: AppSettings = initializeAppSettings()
+  const [settingsManager, setSettingsManager] = useState<Store>();
 
-  const appSettings: AppSettings = {
-    crc: {
-      value: crcValue,
-      setValue: setCrcValue,
-      storageKey: "crc-check-settings",
-    },
-    gameFolderPath: {
-      value: gameFolderPath,
-      setValue: setGameFolderPath,
-      storageKey: "game-folder-settings",
-    },
-    isDebugging: {
-      value: isDebugging,
-      setValue: setIsDebugging,
-      storageKey: "debug-settings",
-    },
-    hasAutomaticBackup: {
-      value: hasAutomaticBackup,
-      setValue: setHasAutomaticBackup,
-      storageKey: "backup-settings",
-    },
-  };
+  useEffect(() => {
+    const initialize = async () => {
+      const store = await initializeStore(appSettings);
+      setSettingsManager(store);
+    }
+
+    initialize();
+  }, []);
 
   // Declare savefile state
   const [currentSaveFileValue, setCurrentSaveFile] = useState<SaveFile>();
@@ -82,6 +58,10 @@ function App() {
     createRoutesFromElements([
       <Route
         path={"/"}
+        element={<WelcomePage appSettings={appSettings} />}
+      ></Route>,
+      <Route
+        path={"/main"}
         element={
           <MainPage
             appSettings={appSettings}
@@ -92,7 +72,7 @@ function App() {
       ></Route>,
       <Route
         path={"/settings"}
-        element={<SettingsPage appSettings={appSettings} />}
+        element={<SettingsPage appSettings={appSettings} settingsManager={settingsManager}/>}
       ></Route>,
       <Route path={"/info"} element={<InfoPage />}></Route>,
       <Route
@@ -133,7 +113,7 @@ function App() {
   );
 
   return (
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="dl2" storageKey="vite-ui-theme" appSettings={appSettings} settingsManager={settingsManager}>
       <div className="bg-muted/40 background-image-container">
         <RouterProvider router={router}></RouterProvider>
       </div>

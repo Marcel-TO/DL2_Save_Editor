@@ -1,4 +1,6 @@
+import { AppSettings } from "@/models/settings-model"
 import { createContext, useContext, useEffect, useState } from "react"
+import { Store } from "tauri-plugin-store-api"
 
 export type Theme = "dark" | "light" | "system" | "dl2" | "spooked" | "skyfall" | "hope"
 
@@ -6,6 +8,8 @@ type ThemeProviderProps = {
   children: React.ReactNode
   defaultTheme?: Theme
   storageKey?: string
+  appSettings: AppSettings
+  settingsManager: Store | undefined
 }
 
 type ThemeProviderState = {
@@ -24,10 +28,12 @@ export function ThemeProvider({
   children,
   defaultTheme = "dl2",
   storageKey = "vite-ui-theme",
+  appSettings,
+  settingsManager,
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+    () => appSettings.theme.value || defaultTheme
   )
 
   useEffect(() => {
@@ -51,7 +57,10 @@ export function ThemeProvider({
   const value = {
     theme,
     setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
+      if (settingsManager) {
+        settingsManager.set(storageKey, { value: theme })
+      }
+      appSettings.theme.setValue(theme)
       setTheme(theme)
     },
   }
@@ -63,8 +72,8 @@ export function ThemeProvider({
   )
 }
 
-export const getTheme = () => {
-  return localStorage.getItem("vite-ui-theme") as Theme
+export const getTheme = (appSettings: AppSettings) => {
+  return appSettings.theme.value
 }
 
 export const useTheme = () => {
