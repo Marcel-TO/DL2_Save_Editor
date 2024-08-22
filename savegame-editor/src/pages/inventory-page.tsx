@@ -175,8 +175,6 @@ export const InventoryPage = ({
       currentItemRow.inventory_items[
         currentItemIndex
       ].chunk_data.durability_value = data.durability;
-      setCurrentItemRow(currentItemRow);
-      setItemRows(item_rows);
     }
 
     await submitItemValues(
@@ -187,6 +185,9 @@ export const InventoryPage = ({
       data.durability,
       currentSaveFile.value
     );
+
+    setCurrentItemRow(currentItemRow);
+    setItemRows(item_rows);
     setIsSelectingItem(false);
   }
 

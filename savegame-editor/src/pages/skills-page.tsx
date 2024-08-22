@@ -93,6 +93,7 @@ export const SkillsPage = ({ skills, currentSaveFile }: SkillsPageProps) => {
     form.setValue("value", Number(data.value));
 
     await submitSkillValue(Number(data.value));
+    setCurrentTab(currentTab);
     setIsSelectingItem(false);
   }
 
