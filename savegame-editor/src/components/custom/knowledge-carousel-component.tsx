@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/tauri";
 import {
   Carousel,
   CarouselNext,
@@ -8,6 +9,10 @@ import {
   CarouselIndicator,
 } from "../ui/carousel";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { ToastAction } from "@radix-ui/react-toast";
+import { toast } from "../ui/use-toast";
+import { Button } from "../ui/button";
+import { ToastProvider } from "../ui/toast";
 
 const knowledge: [string, string, string][] = [
   [
@@ -48,7 +53,26 @@ const knowledge: [string, string, string][] = [
 ];
 
 export const KnowledgeCarouselComponent = () => {
-  
+  const handleSelectKnowledge = async (title: string, link: string) => {
+    await invoke("open_knowledge_window", {
+      url: link,
+      name: title
+    }).catch((err) => {
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description:
+          err ?? "An error occured while trying to open a knowledge link.",
+        action: (
+          <ToastAction
+            altText="Try again"
+          >
+            Try again
+          </ToastAction>
+        ),
+      });
+      return;
+    });
+  }
 
   return (
     <TooltipProvider>
@@ -61,15 +85,14 @@ export const KnowledgeCarouselComponent = () => {
           {knowledge.map(([title, link, backgroundImage]) => (
             <SliderMainItem key={title} className="relative size-full flex items-center justify-center rounded-xl bg-transparent h-full overflow-hidden">
               <Tooltip>
+                {/* <TooltipTrigger className="absolute transition-all hover:scale-110 hover:shadow-2xl hover:shadow-primary"> */}
                 <TooltipTrigger className="absolute transition-all hover:scale-110 hover:shadow-2xl hover:shadow-primary">
-                <a
-                  href={link}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={"px-6 py-4 rounded bg-card/70 text-7xl border border-primary border-1 font-drip"}
+                <Button
+                  onClick={() => handleSelectKnowledge(title, link)}
+                  className={"roundex-xl bg-card/70 text-7xl text-card/70 font-drip hover:bg-primary hover:text-primary-foreground"}
                 >
                   {title}
-                </a>
+                </Button>
                 </TooltipTrigger>
                 <TooltipContent>{title}</TooltipContent>
               </Tooltip>
@@ -80,6 +103,7 @@ export const KnowledgeCarouselComponent = () => {
               />
             </SliderMainItem>
           ))}
+          <ToastProvider/>
         </CarouselMainContainer>
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2">
           <CarouselThumbsContainer className="gap-x-1">

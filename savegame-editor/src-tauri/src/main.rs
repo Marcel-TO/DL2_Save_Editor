@@ -224,23 +224,20 @@ async fn remove_item(
 }
 
 #[tauri::command(rename_all = "snake_case")]
-async fn open_second_window(app_handle: AppHandle) {
+async fn open_knowledge_window(app_handle: AppHandle, url: &str, name: &str) -> Result<bool, String> {
     let local_window = tauri::WindowBuilder::new(
         &app_handle,
-        "HEX",
-        tauri::WindowUrl::App("index.html".into())
-      )
-      .title("Hex View").build().unwrap();
-}
-
-#[tauri::command(rename_all = "snake_case")]
-async fn open_knowledge_window(app_handle: AppHandle, url: &str, name: &str) {
-    let local_window = tauri::WindowBuilder::new(
-        &app_handle,
-        "HEX",
+        name.replace(" ", "_").to_uppercase().as_str(),
         tauri::WindowUrl::App(url.into())
       )
-      .title(name).build().unwrap();
+      .title(name)
+      .maximized(true)
+      .build();
+      
+    match local_window {
+        Ok(_) => Ok(true),
+        Err(_) => Err(format!("Error while opening window with url: {}.", url))
+    }
 }
 
 fn main() {
@@ -262,7 +259,6 @@ fn main() {
             change_items_durability_1_negative,
             change_items_amount_max,
             change_items_amount_1,
-            open_second_window,
             open_knowledge_window
             ])
         .run(tauri::generate_context!())
