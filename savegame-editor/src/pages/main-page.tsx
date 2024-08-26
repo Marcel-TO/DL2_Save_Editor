@@ -12,7 +12,9 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -46,9 +48,16 @@ import { writeBinaryFile } from "@tauri-apps/api/fs";
 import { open, save } from "@tauri-apps/api/dialog";
 import { AppSettings, SettingState } from "@/models/settings-model";
 import { useToast } from "@/components/ui/use-toast";
-import { ToastAction } from "@/components/ui/toast";
+import { ToastAction, ToastProvider } from "@/components/ui/toast";
 import { Toaster } from "@/components/ui/toaster";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+} from "@/components/ui/dialog";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { TypographyH1 } from "@/components/ui/typography";
 
@@ -58,7 +67,11 @@ type MainPageProps = {
   idData: SettingState<IdData[] | undefined>;
 };
 
-export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps) {
+export function MainPage({
+  currentSaveFile,
+  appSettings,
+  idData,
+}: MainPageProps) {
   // States for the Card Details
   const [latestEditorVersion, setLatestEditorVersion] = useState<string>("");
   const [amountOfDownloads, setAmountOfDownloads] = useState<number | null>(
@@ -118,9 +131,9 @@ export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps
     const getUserName = () => {
       const element = document.documentElement; // Target the root element
       if (element) {
-        return getComputedStyle(element).getPropertyValue('--user-name');
+        return getComputedStyle(element).getPropertyValue("--user-name");
       }
-      return '';
+      return "";
     };
 
     fetchReleaseInfo();
@@ -178,11 +191,11 @@ export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps
       }
 
       loadSave(filepath);
-      setIsDrawerOpen(false);
     });
   }
 
   const loadSave = async (filepath: string) => {
+    // setIsDrawerOpen(true);
     let newSave = await invoke<SaveFile>("load_save", {
       file_path: filepath,
       is_debugging: appSettings.isDebugging.value,
@@ -190,8 +203,7 @@ export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps
     }).catch((err) => {
       toast({
         title: "Uh oh! Something went wrong.",
-        description:
-          err ?? "An error occured while loading the save file.",
+        description: err,
         action: (
           <ToastAction
             altText="Try again"
@@ -206,6 +218,8 @@ export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps
 
     if (newSave) {
       currentSaveFile.setValue(newSave);
+      console.log(newSave);
+      setIsDrawerOpen(false);
     }
   };
 
@@ -222,11 +236,18 @@ export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps
 
     if (filepath != null && !Array.isArray(filepath)) {
       loadSave(filepath);
-      setIsDrawerOpen(false);
     }
   }
 
-  async function saveCurrentSaveFile() {
+  function handleSavingCurrentSaveFile() {
+    if (currentSaveFile.value?.is_compressed == true) {
+      saveCurrentSaveFileCompressed();
+    } else {
+      saveCurrentSaveFileDecompressed();
+    }
+  }
+
+  async function saveCurrentSaveFileDecompressed() {
     let filePath = await save({
       defaultPath: "/save_main_0",
       filters: [
@@ -249,6 +270,45 @@ export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps
           return;
         }
       );
+    }
+  }
+
+  async function saveCurrentSaveFileCompressed() {
+    let filePath = await save({
+      defaultPath: "/save_main_0",
+      filters: [
+        {
+          name: "SAV File",
+          extensions: ["sav"],
+        },
+      ],
+    });
+
+    if (filePath != null && currentSaveFile.value != undefined) {
+      // Save data to file
+      let compressed = await invoke<Uint8Array>('export_for_pc', {data: currentSaveFile.value.file_content}).catch(
+        (err) => {
+          toast({
+            title: "Uh oh! Something went wrong. :/",
+            description:
+              "The Editor stumbled accross the following error: " + err,
+          });
+          return;
+        }
+      );
+
+      if (compressed) {
+        await writeBinaryFile(filePath, compressed).catch(
+          (err) => {
+            toast({
+              title: "Uh oh! Something went wrong. :/",
+              description:
+                "The Editor stumbled accross the following error: " + err,
+            });
+            return;
+          }
+        );
+      }
     }
   }
 
@@ -295,12 +355,11 @@ export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps
     }
   }
 
-  const openSecondWindow = async () =>  {
+  const openSecondWindow = async () => {
     await invoke("open_second_window").catch((err) => {
       toast({
         title: "Uh oh! Something went wrong.",
-        description:
-          err ?? "An error occured while loading the save file.",
+        description: err ?? "An error occured while loading the save file.",
         action: (
           <ToastAction
             altText="Try again"
@@ -312,7 +371,7 @@ export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps
       });
       return;
     });
-  }
+  };
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -333,7 +392,11 @@ export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps
                             size="icon"
                             variant="outline"
                             className="h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
-                            onClick={() => navigator.clipboard.writeText(currentSaveFile.value?.path ?? "")}
+                            onClick={() =>
+                              navigator.clipboard.writeText(
+                                currentSaveFile.value?.path ?? ""
+                              )
+                            }
                           >
                             <Copy className="h-3 w-3" />
                             <span className="sr-only">Copy</span>
@@ -344,7 +407,23 @@ export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps
                     </TooltipProvider>
                   </CardTitle>
                   <CardDescription>
-                    Save Version: {currentSaveFile.value?.save_version}
+                    {currentSaveFile.value ? (
+                      <>
+                        <div className="flex flex-col">
+                          <div>
+                            Save Version: {currentSaveFile.value?.save_version}
+                          </div>
+                          <div>
+                            Is Compressed:{" "}
+                            {currentSaveFile.value?.is_compressed == true
+                              ? "Yes"
+                              : "No"}
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <></>
+                    )}
                   </CardDescription>
                 </div>
                 <div className="ml-auto flex items-center gap-1">
@@ -353,7 +432,7 @@ export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps
                     variant="outline"
                     className="h-8 gap-1"
                     disabled={currentSaveFile.value ? false : true}
-                    onClick={() => saveCurrentSaveFile()}
+                    onClick={() => handleSavingCurrentSaveFile()}
                   >
                     <Save className="h-3.5 w-3.5" />
                     <span className="lg:sr-only xl:not-sr-only xl:whitespace-nowrap">
@@ -373,32 +452,59 @@ export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <Link to={"/debug"}>
-                        <DropdownMenuItem>Debug</DropdownMenuItem>
-                      </Link>
-                      <DropdownMenuItem onClick={() => openSecondWindow()}>Hex View</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => saveBackupSaveFile()}>
-                        Backup
-                      </DropdownMenuItem>
+                      <DropdownMenuGroup>
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <Link to={"/debug"}>
+                          <DropdownMenuItem>Debug</DropdownMenuItem>
+                        </Link>
+                        <DropdownMenuItem onClick={() => openSecondWindow()}>
+                          Hex View
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuGroup>
+                        <DropdownMenuLabel>Export As</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => saveCurrentSaveFileCompressed()}>
+                          Compressed
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => saveCurrentSaveFileDecompressed()}>
+                          Decompressed
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => saveBackupSaveFile()}>
+                          Backup
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
                       <DropdownMenuSeparator />
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button variant="destructive" className="w-full">Reset</Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>Are you sure that you want to reset?</DialogHeader>
-                            <DialogDescription>
-                            When resetting, the current save will be deselcted. This means that all unsaved changes
-                            to the save will be lost. If this is not your intention, please save before continuing. 
-                            </DialogDescription>
-                            <DialogFooter>
-                              <DialogClose asChild>
-                                <Button onClick={() => currentSaveFile.setValue(undefined)} variant="destructive">Reset</Button>
-                              </DialogClose>
-                            </DialogFooter>
-                          </DialogContent>
+                          <Button variant="destructive" className="w-full">
+                            Reset
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            Are you sure that you want to reset?
+                          </DialogHeader>
+                          <DialogDescription>
+                            When resetting, the current save will be deselcted.
+                            This means that all unsaved changes to the save will
+                            be lost. If this is not your intention, please save
+                            before continuing.
+                          </DialogDescription>
+                          <DialogFooter>
+                            <DialogClose asChild>
+                              <Button
+                                onClick={() =>
+                                  currentSaveFile.setValue(undefined)
+                                }
+                                variant="destructive"
+                              >
+                                Reset
+                              </Button>
+                            </DialogClose>
+                          </DialogFooter>
+                        </DialogContent>
                       </Dialog>
-
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -520,7 +626,10 @@ export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps
             </Card>
           </div>
           <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
-            <TypographyH1 text={`Welcome ${userName}`} className="text-primary mt-4 text-7xl"/>
+            <TypographyH1
+              text={`Welcome ${userName}`}
+              className="text-primary mt-4 text-7xl"
+            />
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
               <Card className="sm:col-span-2" x-chunk="dashboard-05-chunk-0">
                 <CardHeader className="pb-3">
@@ -533,7 +642,7 @@ export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps
                 <CardFooter>
                   <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
                     <DrawerTrigger asChild>
-                      <Button 
+                      <Button
                         variant="outline"
                         className="border-primary text-primary"
                         onClick={() => listenDragDrop()}
@@ -563,6 +672,7 @@ export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps
                           </div>
                         </div>
                         <Toaster />
+                        <ToastProvider />
                         <DrawerFooter>
                           <Button onClick={selectCurrentSaveFile}>
                             Select
@@ -649,7 +759,7 @@ export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps
                   <CardHeader className="pb-2">
                     <CardDescription className="flex flex-row gap-2">
                       Select to visit
-                      <ExternalLink className="w-4"/>
+                      <ExternalLink className="w-4" />
                     </CardDescription>
                     <CardTitle className="text-4xl">Github</CardTitle>
                   </CardHeader>
@@ -664,9 +774,12 @@ export function MainPage({ currentSaveFile, appSettings, idData }: MainPageProps
                   </CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Button 
+                  <Button
                     variant="outline"
-                    className="border-primary text-primary">Learn more</Button>
+                    className="border-primary text-primary"
+                  >
+                    Learn more
+                  </Button>
                 </CardFooter>
               </Card>
             </div>
