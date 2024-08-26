@@ -64,7 +64,8 @@ pub fn load_save_file(
     file_content: Vec<u8>,
     ids: Vec<IdData>,
     logger: &mut ConsoleLogger,
-    is_debugging: bool
+    is_debugging: bool,
+    is_compressed: bool
 ) -> Result<SaveFile> {   
     // Gets the indices of the skill data.
     let skill_start_index: usize = get_index_from_sequence(&file_content, &0, &START_SKILLS, true);
@@ -136,7 +137,8 @@ pub fn load_save_file(
         skills.unwrap().clone(),
         unlockable_items,
         items_result?,
-        logger.log_histroy.clone()
+        logger.log_histroy.clone(),
+        is_compressed
     ))
 }
 
@@ -156,7 +158,8 @@ pub fn load_save_file_pc(
     compressed: Vec<u8>,
     ids: Vec<IdData>,
     logger: &mut ConsoleLogger,
-    is_debugging: bool
+    is_debugging: bool,
+    is_compressed: bool
 ) -> Result<SaveFile> {
     let mut gz = GzDecoder::new(&compressed[..]);
     let mut file_content = Vec::new();
@@ -164,7 +167,7 @@ pub fn load_save_file_pc(
         return Err(format!("{} -> Make sure that the file you want to decompress is actually compressed.", error.to_string()).into());
     }
 
-    load_save_file(file_path, file_content, ids, logger, is_debugging)
+    load_save_file(file_path, file_content, ids, logger, is_debugging, is_compressed)
 }
 
 /// Represents a method for exporting the save for PC (compressing).
@@ -230,7 +233,8 @@ pub fn edit_skill(
         save_file.skills,
         save_file.unlockable_items,
         save_file.items,
-        save_file.log_history.clone()
+        save_file.log_history.clone(),
+        save_file.is_compressed
     );
 
     // Changes the current skill to the new one.

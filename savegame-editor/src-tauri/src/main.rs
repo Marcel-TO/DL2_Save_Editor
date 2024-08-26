@@ -53,12 +53,21 @@ fn load_save(app_handle: AppHandle, file_path: &str, is_debugging: bool, has_aut
     
     let file_content: Vec<u8> = get_contents_from_file(&file_path).unwrap();
     
+    // Checks if the file is compressed.
+    if file_content[0] == 31 && file_content[1] == 139 {
+        let save_file = load_save_pc(app_handle, file_path, is_debugging, has_automatic_backup);
+        match save_file {
+            Ok(save) => return Ok(save),
+            Err(err) => return Err(err)
+        }
+    }
+    
     // Creates a backup file if the settings are set to true.
     if has_automatic_backup {
         create_backup_from_file(&file_path, &file_content);
     }
     
-    let save_file = load_save_file(&file_path, file_content, ids.unwrap(), &mut logger, is_debugging);
+    let save_file = load_save_file(&file_path, file_content, ids.unwrap(), &mut logger, is_debugging, false);
 
     match save_file {
         Ok(save) => return Ok(save),
@@ -67,7 +76,7 @@ fn load_save(app_handle: AppHandle, file_path: &str, is_debugging: bool, has_aut
 }
 
 #[tauri::command(rename_all = "snake_case")]
-async fn load_save_pc(app_handle: AppHandle, file_path: &str, is_debugging: bool, has_automatic_backup: bool) -> Result<SaveFile, String> {
+fn load_save_pc(app_handle: AppHandle, file_path: &str, is_debugging: bool, has_automatic_backup: bool) -> Result<SaveFile, String> {
     // Initializes the logger.
     let mut logger: ConsoleLogger = ConsoleLogger::new();
     // Initializes resource path where IDs are stored.
@@ -83,7 +92,7 @@ async fn load_save_pc(app_handle: AppHandle, file_path: &str, is_debugging: bool
         create_backup_from_file(&file_path, &file_content);
     }
 
-    let save_file = load_save_file_pc(&file_path, file_content, ids, &mut logger, is_debugging);
+    let save_file = load_save_file_pc(&file_path, file_content, ids, &mut logger, is_debugging, true);
 
     match save_file {
         Ok(save) => return Ok(save),
@@ -92,7 +101,7 @@ async fn load_save_pc(app_handle: AppHandle, file_path: &str, is_debugging: bool
 }
 
 #[tauri::command(rename_all = "snake_case")]
-async fn export_for_pc(data: Vec<u8>) -> Result<Vec<u8>, String> {
+async fn compress_save(data: Vec<u8>) -> Result<Vec<u8>, String> {
     let compressed: Vec<u8> = export_save_for_pc(&data);
 
     Ok(compressed)
@@ -251,7 +260,7 @@ fn main() {
             update_id_folder,
             load_save,
             load_save_pc,
-            export_for_pc,
+            compress_save,
             handle_edit_skill,
             handle_edit_item_chunk,
             remove_item,

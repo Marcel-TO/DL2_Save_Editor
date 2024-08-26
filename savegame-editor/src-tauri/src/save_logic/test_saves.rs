@@ -29,7 +29,7 @@ mod tests {
                         // Check if the file has the desired extension
                         if file_name.to_string_lossy().ends_with(".sav") {
                             let file_content: Vec<u8> = get_contents_from_file(path.to_str().unwrap()).unwrap();
-                            let save_result = load_save_file(path.to_str().unwrap(), file_content, ids.clone(), &mut logger, false);        
+                            let save_result = load_save_file(path.to_str().unwrap(), file_content, ids.clone(), &mut logger, false, false);        
                             let save_file = save_result.unwrap();
                             
                             assert!(
