@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { InventoryItem } from "@/models/save-models";
 import { Separator } from "../ui/separator";
+import { HelpCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 type InventoryItemCardProps = {
   item: InventoryItem;
@@ -11,15 +13,29 @@ type InventoryItemCardProps = {
 
 export const InventoryItemCard = ({ item, itemIndex, executeAction }: InventoryItemCardProps) => {
   return (
-    <Card className="overflow-hidden transform transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg w-full h-full"
+    <Card className="overflow-visible transform transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg w-full h-full"
       onClick={() => executeAction && executeAction(item, itemIndex)}
     >
       <CardHeader className="flex flex-row items-start bg-muted/50">
+        <div className="relative w-full">
         <CardTitle className="w-full group flex items-center gap-2 text-lg">
           <div className="w full truncate">
             {item.name}
           </div>
         </CardTitle>
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger className="absolute top-0 right-0 w-6 h-6 text-muted-foreground cursor-pointer">
+                <HelpCircle className="" />
+            </TooltipTrigger>
+              <TooltipContent className="z-100">
+                <div>Chunk Index: {item.chunk_data.index}</div>
+                <div>Index: {item.index}</div>
+              </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        </div>
       </CardHeader>
       <CardContent className="text-sm">
         <div className="font-semibold mb-2">Values</div>
