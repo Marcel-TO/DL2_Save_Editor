@@ -255,3 +255,4 @@ Shrapnel_Trap_Upgrade8
 Event_Halloween_PumpkinGrenade
 Throwable_Small_FreezeExplosive
 Event_WinterEvent_ExplodingBauble
+Parachute_Gridiron
