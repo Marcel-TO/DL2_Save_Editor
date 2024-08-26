@@ -66,5 +66,6 @@ export interface SaveFile {
     unlockable_items: UnlockableItem[],
     items: InventoryItemRow[],
     log_history: string[],
+    is_compressed: boolean,
     save_version: string
 }
