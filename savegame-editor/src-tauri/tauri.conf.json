@@ -39,7 +39,8 @@
     },
     "bundle": {
       "resources": [
-        "./IDs/*"
+        "./IDs/*",
+        "./CRC_Bypass/*"
       ],
       "active": true,
       "targets": "all",

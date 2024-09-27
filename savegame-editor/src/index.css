@@ -113,7 +113,7 @@
     --ring: 346.8 77.2% 49.8%;
 
     --background-image: url('/assets/pictures/backgrounds/spooked.jpg');
-    --user-name: Easily Spooked;
+    /* --user-name: Easily Spooked; */
   }
 
   .skyfall {
