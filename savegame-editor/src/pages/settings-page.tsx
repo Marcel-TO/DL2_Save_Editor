@@ -29,6 +29,7 @@ import { Store } from "tauri-plugin-store-api";
 import { invoke } from "@tauri-apps/api/tauri";
 import { toast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { Toaster } from "@/components/ui/toaster";
 
 type SettingsProps = {
   appSettings: AppSettings;
@@ -67,11 +68,23 @@ export const SettingsPage = ({ appSettings, settingsManager }: SettingsProps) =>
   async function onSubmitCrcCheck(data: z.infer<typeof CrcFormSchema>) {
     setIsSaving(true);
     saveCrcDataToLocalStorage(data.crcCheckbox, gameFolderPath);
+    
+    // Disable saving for 1 second to prevent spamming the button
     setTimeout(() => {
       setIsSaving(false);
     }, 1000);
 
-    let test = await invoke("add_crc_bypass_files", {
+    if (!data.crcCheckbox) {
+      toast({
+        title: "Uh oh! Something went wrong!",
+        description:
+          "You will need to activate the CRC checkbox to allow the Editor to deploy the .dll file to the game folder. Please try again.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
+      return;
+    }
+
+    await invoke("add_crc_bypass_files", {
       file_path: gameFolderPath,
     }).catch((err) => {
       toast({
@@ -83,8 +96,6 @@ export const SettingsPage = ({ appSettings, settingsManager }: SettingsProps) =>
       });
       return;
     });
-
-    console.log(test);
   }
 
   return (
@@ -248,6 +259,8 @@ export const SettingsPage = ({ appSettings, settingsManager }: SettingsProps) =>
                 </form>
               </Form>
             </div>
+
+            <Toaster />
           </main>
         </div>
       </div>

@@ -54,7 +54,7 @@ export const SponsorPage = () => {
                 <div className="flex w-full justify-center align-center">
                     <Link
                     to={"https://github.com/sponsors/Marcel-TO"} target="_blank"
-                    className="flex h-20 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground border"
+                    className="flex h-20 items-center justify-center rounded-lg text-primary bg-card transition-colors hover:text-foreground border"
                     >
                     <Heart className="hover:text-pink-500 hover:fill-pink-500" size="80%" />
                     <span className="text-2xl text-center mr-8">Click Heart to Sponsor the Editor</span>
