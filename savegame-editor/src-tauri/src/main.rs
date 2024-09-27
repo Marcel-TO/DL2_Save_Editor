@@ -7,6 +7,7 @@ mod logger;
 use std::error::Error;
 
 use dotenv::dotenv;
+use save_logic::bypass_crc::get_files_and_copy_to_destination;
 use save_logic::file_analyser::{change_items_amount, change_items_durability, create_backup_from_file, edit_inventory_item_chunk, edit_skill, export_save_for_pc, get_contents_from_file, load_save_file, load_save_file_pc, remove_inventory_item};
 use save_logic::struct_data::{SaveFile, InventoryChunk, IdData};
 use save_logic::id_fetcher::{fetch_ids, update_ids};
@@ -249,6 +250,23 @@ async fn open_knowledge_window(app_handle: AppHandle, url: &str, name: &str) -> 
     }
 }
 
+#[tauri::command(rename_all = "snake_case")]
+async fn add_crc_bypass_files(app_handle: AppHandle, file_path: &str) -> Result<bool, String> {
+    println!("Adding CRC bypass files.");
+    println!("{}", file_path);
+    
+    // Initializes resource path where IDs are stored.
+    let resource_path = app_handle.path_resolver().resolve_resource("./CRC_Bypass/").unwrap();
+
+    match get_files_and_copy_to_destination(&resource_path.display().to_string(), file_path) {
+        Ok(_) => Ok(true),
+        Err(err) => {
+            println!("Error: {}", err);
+            Err(err.to_string())
+        }
+    }
+}
+
 fn main() {
     dotenv().ok();
     // Comment tauri builder if debugging.
@@ -269,7 +287,8 @@ fn main() {
             change_items_durability_1_negative,
             change_items_amount_max,
             change_items_amount_1,
-            open_knowledge_window
+            open_knowledge_window,
+            add_crc_bypass_files
             ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

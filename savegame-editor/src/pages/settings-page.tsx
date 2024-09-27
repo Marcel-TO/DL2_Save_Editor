@@ -26,6 +26,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Store } from "tauri-plugin-store-api";
+import { invoke } from "@tauri-apps/api/tauri";
+import { toast } from "@/components/ui/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 type SettingsProps = {
   appSettings: AppSettings;
@@ -61,12 +64,27 @@ export const SettingsPage = ({ appSettings, settingsManager }: SettingsProps) =>
     },
   });
 
-  function onSubmitCrcCheck(data: z.infer<typeof CrcFormSchema>) {
+  async function onSubmitCrcCheck(data: z.infer<typeof CrcFormSchema>) {
     setIsSaving(true);
     saveCrcDataToLocalStorage(data.crcCheckbox, gameFolderPath);
     setTimeout(() => {
       setIsSaving(false);
     }, 1000);
+
+    let test = await invoke("add_crc_bypass_files", {
+      file_path: gameFolderPath,
+    }).catch((err) => {
+      toast({
+        title: "Uh oh! Something went wrong!",
+        description:
+          err ??
+          "An error occured while trying to add the CRC bypass files to the game folder. Please make sure the path is correct and try again.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
+      return;
+    });
+
+    console.log(test);
   }
 
   return (
