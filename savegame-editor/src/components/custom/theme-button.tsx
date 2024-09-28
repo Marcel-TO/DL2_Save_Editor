@@ -1,4 +1,4 @@
-import { Biohazard, Droplet, Ghost, Moon, Sparkle, Sun } from "lucide-react";
+import { Biohazard, Droplet, Ghost, Moon, PawPrint, Sparkle, Sun } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +38,9 @@ export function ThemeModeToggle() {
           )}
           {theme === "hope" && (
             <Sparkle className="h-[1.2rem] w-[1.2rem] transition-all" />
+          )}
+          {theme === "beast" && (
+            <PawPrint className="h-[1.2rem] w-[1.2rem] transition-all" />
           )}
           <span className="sr-only">Toggle theme</span>
         </Button>
@@ -86,6 +89,17 @@ export function ThemeModeToggle() {
             } p-2`}
           >
             Hope
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => {
+              setTheme("beast");
+              navigate("/main");
+            }}
+            className={`${
+              theme === "beast" ? "bg-muted" : "bg-transparent"
+            } p-2`}
+          >
+            Beast
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <Separator />

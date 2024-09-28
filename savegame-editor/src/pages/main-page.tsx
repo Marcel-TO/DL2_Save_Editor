@@ -286,7 +286,7 @@ export function MainPage({
 
     if (filePath != null && currentSaveFile.value != undefined) {
       // Save data to file
-      let compressed = await invoke<Uint8Array>('export_for_pc', {data: currentSaveFile.value.file_content}).catch(
+      let compressed = await invoke<Uint8Array>('compress_save', {data: currentSaveFile.value.file_content}).catch(
         (err) => {
           toast({
             title: "Uh oh! Something went wrong. :/",
@@ -644,7 +644,7 @@ export function MainPage({
                     <DrawerTrigger asChild>
                       <Button
                         variant="outline"
-                        className="border-primary text-primary"
+                        className="border-primary text-primary transform transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
                         onClick={() => listenDragDrop()}
                       >
                         Load Save
@@ -774,12 +774,14 @@ export function MainPage({
                   </CardDescription>
                 </CardHeader>
                 <CardFooter>
+                  <Link to={"/knowledge-vault"} className="transform transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
                   <Button
                     variant="outline"
                     className="border-primary text-primary"
                   >
                     Learn more
                   </Button>
+                  </Link>
                 </CardFooter>
               </Card>
             </div>
