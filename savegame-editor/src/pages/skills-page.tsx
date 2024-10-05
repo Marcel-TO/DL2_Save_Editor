@@ -27,26 +27,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { invoke } from "@tauri-apps/api/tauri";
 import { SettingState } from "@/models/settings-model";
+import { SkillsDataTableComponent } from "@/components/custom/skills-data-table-component";
 
 type SkillsPageProps = {
   skills?: Skills;
   currentSaveFile: SettingState<SaveFile | undefined>;
 };
-
-export const columns: ColumnDef<SkillItem>[] = [
-  {
-    accessorKey: "name",
-    header: "Name",
-  },
-  {
-    accessorKey: "points_value",
-    header: "Value",
-  },
-  {
-    accessorKey: "points_data",
-    header: "Value (HEX)",
-  },
-];
 
 export const SkillsPage = ({ skills, currentSaveFile }: SkillsPageProps) => {
   const [isSelectingItem, setIsSelectingItem] = useState(false);
@@ -99,16 +85,16 @@ export const SkillsPage = ({ skills, currentSaveFile }: SkillsPageProps) => {
 
   async function submitSkillValue(skillValue: number) {
     invoke<string>("handle_edit_skill", {
-        current_skill: JSON.stringify(currentSkill),
-        current_skill_index: currentSkillIndex,
-        is_base_skill: currentTab === 0,
-        new_value: skillValue,
-        save_file: JSON.stringify(currentSaveFile.value)
+      current_skill: JSON.stringify(currentSkill),
+      current_skill_index: currentSkillIndex,
+      is_base_skill: currentTab === 0,
+      new_value: skillValue,
+      save_file: JSON.stringify(currentSaveFile.value),
     }).then((new_save) => {
-        let convertedSave: SaveFile = JSON.parse(new_save);
-        currentSaveFile.setValue(convertedSave);
+      let convertedSave: SaveFile = JSON.parse(new_save);
+      currentSaveFile.setValue(convertedSave);
     });
-}
+  }
 
   return (
     <>
@@ -120,30 +106,34 @@ export const SkillsPage = ({ skills, currentSaveFile }: SkillsPageProps) => {
               <h1 className="text-3xl font-semibold mb-4">Skills Page</h1>
 
               {skills ? (
-                <Tabs defaultValue="base">
+                <Tabs>
                   <div className="flex items-center">
                     <TabsList>
-                      <TabsTrigger value="base" onClick={() => setCurrentTab(0)}>Base Skills</TabsTrigger>
-                      <TabsTrigger value="legend" onClick={() => setCurrentTab(1)}>Legend Skills</TabsTrigger>
+                      <TabsTrigger
+                        value="base"
+                        onClick={() => setCurrentTab(0)}
+                      >
+                        Base Skills
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="legend"
+                        onClick={() => setCurrentTab(1)}
+                      >
+                        Legend Skills
+                      </TabsTrigger>
                     </TabsList>
                   </div>
                   <TabsContent value="base">
-                    <Card className="my-4">
-                      <DataTable
-                        columns={columns}
-                        data={skills ? skills.base_skills : []}
-                        executeFunctionForRow={handleSelectItem}
-                      />
-                    </Card>
+                    <SkillsDataTableComponent
+                      skill_section="Base Skills"
+                      data={skills.base_skills}
+                    />
                   </TabsContent>
                   <TabsContent value="legend">
-                    <Card className="my-4">
-                      <DataTable
-                        columns={columns}
-                        data={skills ? skills.legend_skills : []}
-                        executeFunctionForRow={handleSelectItem}
-                      />
-                    </Card>
+                    <SkillsDataTableComponent
+                      skill_section="Legend Skills"
+                      data={skills.legend_skills}
+                    />
                   </TabsContent>
                 </Tabs>
               ) : (
@@ -168,46 +158,42 @@ export const SkillsPage = ({ skills, currentSaveFile }: SkillsPageProps) => {
             <Sheet open={isSelectingItem} onOpenChange={setIsSelectingItem}>
               <SheetContent>
                 <SheetHeader>Edit Skill</SheetHeader>
-                
-                
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmitChangeValues)}>
-                       <FormField
-                        control={form.control}
-                        name="value"
-                        render={({ field }) => (
-                          <FormItem className="grid grid-cols-8 grid-rows-2 items-center gap-x-2 my-4">
-                            <FormLabel className="text-right col-span-2">
-                              Value
-                            </FormLabel>
-                            <FormControl className="col-span-6">
-                              <Input
-                                type="number"
-                                placeholder="value"
-                                {...field}
-                              />
-                            </FormControl>
-                            <div className="col-span-6 col-start-3">
-                              <FormDescription>
-                                The value of the desired item. The maximum value
-                                is 65534.
-                              </FormDescription>
-                              <FormMessage />
-                            </div>
-                          </FormItem>
-                        )}
-                      /> 
 
-                      <SheetFooter className="my-6">
-                        <Button
-                          className="w-full"
-                          onClick={() => form.trigger()}
-                        >
-                          Save
-                        </Button>
-                      </SheetFooter>
-                    </form>
-                  </Form>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmitChangeValues)}>
+                    <FormField
+                      control={form.control}
+                      name="value"
+                      render={({ field }) => (
+                        <FormItem className="grid grid-cols-8 grid-rows-2 items-center gap-x-2 my-4">
+                          <FormLabel className="text-right col-span-2">
+                            Value
+                          </FormLabel>
+                          <FormControl className="col-span-6">
+                            <Input
+                              type="number"
+                              placeholder="value"
+                              {...field}
+                            />
+                          </FormControl>
+                          <div className="col-span-6 col-start-3">
+                            <FormDescription>
+                              The value of the desired item. The maximum value
+                              is 65534.
+                            </FormDescription>
+                            <FormMessage />
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    <SheetFooter className="my-6">
+                      <Button className="w-full" onClick={() => form.trigger()}>
+                        Save
+                      </Button>
+                    </SheetFooter>
+                  </form>
+                </Form>
               </SheetContent>
             </Sheet>
           </main>

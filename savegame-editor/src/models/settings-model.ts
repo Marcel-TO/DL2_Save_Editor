@@ -7,10 +7,13 @@ export type SettingState<T> = {
     storageKey?: string;
 };
 
+export type DefaultItemLayout = "list" | "grid";
+
 export type AppSettings = {
     theme: SettingState<Theme>;
     crc: SettingState<boolean>;
     gameFolderPath: SettingState<string>;
     isDebugging: SettingState<boolean>;
     hasAutomaticBackup: SettingState<boolean>;
+    defaultItemLayout: SettingState<DefaultItemLayout>;
 };

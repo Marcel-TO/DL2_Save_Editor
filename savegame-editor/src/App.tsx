@@ -85,6 +85,7 @@ function App() {
           <InventoryPage
             currentSaveFile={currentSaveFile}
             currentIdData={idData}
+            appSettings={appSettings}
           />
         }
       ></Route>,

@@ -1,5 +1,5 @@
 import { Store } from "tauri-plugin-store-api";
-import { AppSettings } from "./settings-model";
+import { AppSettings, DefaultItemLayout } from "./settings-model";
 import { useState } from "react";
 import { Theme } from "@/components/ui/theme-provider";
 
@@ -66,6 +66,18 @@ export const initializeStore = async (
     );
   }
 
+  let storedDefaultItemLayout = await store.get<{ value: DefaultItemLayout }>(
+    appSettings.defaultItemLayout.storageKey ?? defaultStorageKey
+  );
+  if (storedDefaultItemLayout) {
+    appSettings.defaultItemLayout.setValue(storedDefaultItemLayout.value);
+  } else {
+    await store.set(
+      appSettings.defaultItemLayout.storageKey ?? defaultStorageKey,
+      { value: appSettings.defaultItemLayout.value }
+    );
+  }
+
   await store.save();
   return store;
 };
@@ -75,7 +87,8 @@ export const initializeAppSettings = (): AppSettings => {
   const [crcValue, setCrcValue] = useState<boolean>(false);
   const [gameFolderPath, setGameFolderPath] = useState<string>("");
   const [isDebugging, setIsDebugging] = useState<boolean>(false);
-  const [hasAutomaticBackup, setHasAutomaticBackup] = useState<boolean>(false);
+  const [hasAutomaticBackup, setHasAutomaticBackup] = useState<boolean>(true);
+  const [defaultItemLayout, setDefaultItemLayout] = useState<DefaultItemLayout>("list");
 
   return {
     theme: {
@@ -102,6 +115,11 @@ export const initializeAppSettings = (): AppSettings => {
       value: hasAutomaticBackup,
       setValue: setHasAutomaticBackup,
       storageKey: "backup-settings",
+    },
+    defaultItemLayout: {
+      value: defaultItemLayout,
+      setValue: setDefaultItemLayout,
+      storageKey: "default-item-layout-settings",
     },
   };
 };

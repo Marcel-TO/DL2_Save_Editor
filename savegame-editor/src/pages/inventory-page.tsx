@@ -1,12 +1,10 @@
 import { NavbarComponent } from "@/components/custom/custom-navbar-component";
-import { DataTable } from "@/components/custom/data-table-component";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   IdData,
   InventoryItem,
   InventoryItemRow,
-  Mod,
   SaveFile,
 } from "@/models/save-models";
 import {
@@ -18,10 +16,9 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { CellContext, ColumnDef } from "@tanstack/react-table";
 import { ChevronDown, GalleryHorizontal, List, Split } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { InventoryItemCard } from "@/components/custom/inventory-item-card";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,7 +28,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { invoke } from "@tauri-apps/api/tauri";
-import { SettingState } from "@/models/settings-model";
+import {
+  AppSettings,
+  DefaultItemLayout,
+  SettingState,
+} from "@/models/settings-model";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -52,57 +53,34 @@ import {
   SheetFooter,
   SheetHeader,
 } from "@/components/ui/sheet";
+import { InventoryDataTableComponent } from "@/components/custom/inventory-data-table-component";
 
 type InventoryPageProps = {
   currentSaveFile: SettingState<SaveFile | undefined>;
   currentIdData: SettingState<IdData[] | undefined>;
+  appSettings: AppSettings;
 };
-
-export const columns: ColumnDef<InventoryItem>[] = [
-  {
-    accessorKey: "name",
-    header: "Name",
-  },
-  {
-    accessorKey: "chunk_data.level_value",
-    header: "Level",
-  },
-  {
-    accessorKey: "chunk_data.seed_value",
-    header: "Seed",
-  },
-  {
-    accessorKey: "chunk_data.amount_value",
-    header: "Amount",
-  },
-  {
-    accessorKey: "chunk_data.durability_value",
-    header: "Durability",
-  },
-  {
-    accessorKey: "mod_data",
-    header: "Mods",
-    cell: ({ getValue }: CellContext<InventoryItem, any>) => {
-      const modData = getValue() as Mod[];
-      return modData.length;
-    },
-  },
-];
 
 export const InventoryPage = ({
   currentSaveFile,
   currentIdData,
+  appSettings,
 }: InventoryPageProps) => {
-  const [isGalleryView, setIsGalleryView] = useState<boolean>(true);
+  const [itemView, setItemView] = useState<DefaultItemLayout>(
+    appSettings.defaultItemLayout.value
+  );
   const [isSelectingItem, setIsSelectingItem] = useState<boolean>(false);
   const [currentItem, setCurrentItem] = useState<InventoryItem>();
+  const [currentItemData, setCurrentItemData] = useState<InventoryItem[]>();
   const [currentItemRow, setCurrentItemRow] = useState<InventoryItemRow>();
   const [item_rows, setItemRows] = useState<InventoryItemRow[]>(
     currentSaveFile.value?.items ?? []
   );
-
   // initialize the current item values
   const [currentItemIndex, setCurrentItemIndex] = useState<number>(0);
+  const [currentTableDataFunction, setcurrentTableDataFunction] = useState<
+    Dispatch<SetStateAction<InventoryItem[]>>
+  >(() => {});
 
   // initialize the current item values and their requriements
   const ItemFormSchema = z.object({
@@ -127,10 +105,15 @@ export const InventoryPage = ({
       .max(4294967295, { message: "Durability must be less than 4294967295" }),
   });
 
-  const handleSelectItem = (item: InventoryItem, index: number) => {
+  const handleSelectItem = (
+    item: InventoryItem,
+    index: number,
+    tableDataFunction: Dispatch<SetStateAction<InventoryItem[]>>
+  ) => {
     setCurrentItem(item);
     setIsSelectingItem(true);
     setCurrentItemIndex(index);
+    setcurrentTableDataFunction(tableDataFunction);
     form.setValue("name", item.name);
     form.setValue("level", item.chunk_data.level_value);
     form.setValue("seed", item.chunk_data.seed_value);
@@ -156,7 +139,7 @@ export const InventoryPage = ({
     } catch (error: any) {
       return;
     }
-    
+
     form.setValue("name", data.name);
     form.setValue("level", Number(data.level));
     form.setValue("seed", data.seed);
@@ -222,6 +205,9 @@ export const InventoryPage = ({
             ) {
               item_rows[i] = currentItemRow;
               setItemRows(item_rows);
+              setCurrentItemData(currentItemRow.inventory_items);
+              currentTableDataFunction?.(currentItemRow.inventory_items);
+              console.log("Updated Data");
               saveFile.items = item_rows;
               currentSaveFile.setValue(saveFile);
               return;
@@ -258,14 +244,17 @@ export const InventoryPage = ({
               <h1 className="text-3xl font-semibold mb-4">Inventory Page</h1>
               {currentSaveFile.value ? (
                 <>
-                  <Tabs defaultValue={item_rows ? "0" : ""}>
+                  <Tabs>
                     <div className="flex items-center">
                       <TabsList>
                         {item_rows?.map((item_row, index) => (
                           <TabsTrigger
                             key={index}
                             value={index.toString()}
-                            onClick={() => setCurrentItemRow(item_row)}
+                            onClick={() => {
+                              setCurrentItemRow(item_row);
+                              setCurrentItemData(item_row.inventory_items);
+                            }}
                           >
                             {item_row.name}
                           </TabsTrigger>
@@ -280,7 +269,7 @@ export const InventoryPage = ({
                               size="sm"
                               className="h-7 gap-2 text-sm bg-card/50"
                             >
-                              {isGalleryView ? (
+                              {itemView === "grid" ? (
                                 <GalleryHorizontal className="h-3.5 w-3.5" />
                               ) : (
                                 <List className="h-3.5 w-3.5" />
@@ -294,16 +283,16 @@ export const InventoryPage = ({
                             <DropdownMenuLabel>View Items as</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuCheckboxItem
-                              checked={isGalleryView}
-                              onClick={() => setIsGalleryView(true)}
+                              checked={itemView === "grid"}
+                              onClick={() => setItemView("grid")}
                               className="h-7 gap-1 text-sm"
                             >
                               <GalleryHorizontal className="h-3.5 w-3.5" />
                               Gallery
                             </DropdownMenuCheckboxItem>
                             <DropdownMenuCheckboxItem
-                              checked={!isGalleryView}
-                              onClick={() => setIsGalleryView(false)}
+                              checked={itemView === "list"}
+                              onClick={() => setItemView("list")}
                               className="h-7 gap-1 text-sm"
                             >
                               <List className="h-3.5 w-3.5" />
@@ -313,7 +302,7 @@ export const InventoryPage = ({
                         </DropdownMenu>
                       </div>
                     </div>
-                    {isGalleryView ? (
+                    {itemView === "grid" ? (
                       <>
                         {item_rows?.map((item_row, index) => (
                           <TabsContent key={index} value={index.toString()}>
@@ -334,17 +323,15 @@ export const InventoryPage = ({
                       </>
                     ) : (
                       <>
-                        <Card className="my-4">
-                          {item_rows?.map((item_row, index) => (
-                            <TabsContent key={index} value={index.toString()}>
-                              <DataTable
-                                columns={columns}
-                                data={item_row.inventory_items}
-                                executeFunctionForRow={handleSelectItem}
-                              />
-                            </TabsContent>
-                          ))}
-                        </Card>
+                        {item_rows?.map((item_row, index) => (
+                          <TabsContent key={index} value={index.toString()}>
+                            <InventoryDataTableComponent
+                              item_section={item_row.name}
+                              item_data={currentItemData ?? []}
+                              executeFunctionForRow={handleSelectItem}
+                            />
+                          </TabsContent>
+                        ))}
                       </>
                     )}
                   </Tabs>
