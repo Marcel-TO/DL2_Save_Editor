@@ -1,8 +1,10 @@
 import { NavbarComponent } from "@/components/custom/custom-navbar-component";
 import { DataTable } from "@/components/custom/data-table-component";
 import { UnlockableItem } from "@/models/save-models";
-import { ColumnDef } from "@tanstack/react-table";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ColumnDef } from "@tanstack/react-table";
+import { ChevronsUpDown } from "lucide-react";
 
 type UnlockablesPageProps = {
   unlockables?: UnlockableItem[];
@@ -11,11 +13,35 @@ type UnlockablesPageProps = {
 export const columns: ColumnDef<UnlockableItem>[] = [
   {
     accessorKey: "name",
-    header: "Name",
+    accessorFn: (row) => row.name,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Name
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div>{row.getValue("name")}</div>,
   },
   {
-    accessorKey: "index",
-    header: "Index",
+    accessorKey: "offset",
+    accessorFn: (row) => row.index,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Offset
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div>{row.getValue("offset")}</div>,
   },
 ];
 
@@ -30,12 +56,7 @@ export const UnlockablesPage = ({ unlockables }: UnlockablesPageProps) => {
               <h1 className="text-3xl font-semibold mb-4">Unlockables Page</h1>
 
               {unlockables ? (
-                <Card className="my-4">
-                  <DataTable
-                    columns={columns}
-                    data={unlockables ? unlockables : []}
-                  />
-                </Card>
+                <DataTable columns={columns} data={unlockables} />
               ) : (
                 <>
                   <div className="flex align-center justify-center w-full h-full">

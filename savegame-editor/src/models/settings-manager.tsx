@@ -88,7 +88,8 @@ export const initializeAppSettings = (): AppSettings => {
   const [gameFolderPath, setGameFolderPath] = useState<string>("");
   const [isDebugging, setIsDebugging] = useState<boolean>(false);
   const [hasAutomaticBackup, setHasAutomaticBackup] = useState<boolean>(true);
-  const [defaultItemLayout, setDefaultItemLayout] = useState<DefaultItemLayout>("list");
+  const [defaultItemLayout, setDefaultItemLayout] =
+    useState<DefaultItemLayout>("list");
 
   return {
     theme: {

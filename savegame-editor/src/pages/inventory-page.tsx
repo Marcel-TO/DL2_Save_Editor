@@ -5,6 +5,7 @@ import {
   IdData,
   InventoryItem,
   InventoryItemRow,
+  Mod,
   SaveFile,
 } from "@/models/save-models";
 import {
@@ -16,9 +17,15 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, GalleryHorizontal, List, Split } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronsUpDown,
+  GalleryHorizontal,
+  List,
+  Split,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 import { InventoryItemCard } from "@/components/custom/inventory-item-card";
 import { Input } from "@/components/ui/input";
 import {
@@ -53,13 +60,94 @@ import {
   SheetFooter,
   SheetHeader,
 } from "@/components/ui/sheet";
-import { InventoryDataTableComponent } from "@/components/custom/inventory-data-table-component";
+import { ColumnDef, CellContext } from "@tanstack/react-table";
+import { DataTable } from "@/components/custom/data-table-component";
 
 type InventoryPageProps = {
   currentSaveFile: SettingState<SaveFile | undefined>;
   currentIdData: SettingState<IdData[] | undefined>;
   appSettings: AppSettings;
 };
+
+export const columns: ColumnDef<InventoryItem>[] = [
+  {
+    accessorKey: "name",
+    accessorFn: (row) => row.name,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Name
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div>{row.getValue("name")}</div>,
+  },
+  {
+    accessorKey: "level",
+    accessorFn: (row) => row.chunk_data.level_value,
+    header: "Level",
+  },
+  {
+    accessorKey: "seed",
+    accessorFn: (row) => row.chunk_data.seed_value,
+    header: "Seed",
+  },
+  {
+    accessorKey: "amount",
+    accessorFn: (row) => row.chunk_data.amount_value,
+    header: "Amount",
+  },
+  {
+    accessorKey: "durability",
+    accessorFn: (row) => row.chunk_data.durability_value,
+    header: "Durability",
+  },
+  {
+    accessorKey: "mods",
+    accessorFn: (row) => row.mod_data,
+    header: "Mods",
+    cell: ({ getValue }: CellContext<InventoryItem, any>) => {
+      const modData = getValue() as Mod[];
+      return modData.length;
+    },
+  },
+  {
+    accessorKey: "offset",
+    accessorFn: (row) => row.index,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Offset
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div>{row.getValue("offset")}</div>,
+  },
+  {
+    accessorKey: "chunk_offset",
+    accessorFn: (row) => row.chunk_data.index,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Chunk Offset
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div>{row.getValue("chunk_offset")}</div>,
+  },
+];
 
 export const InventoryPage = ({
   currentSaveFile,
@@ -78,9 +166,6 @@ export const InventoryPage = ({
   );
   // initialize the current item values
   const [currentItemIndex, setCurrentItemIndex] = useState<number>(0);
-  const [currentTableDataFunction, setcurrentTableDataFunction] = useState<
-    Dispatch<SetStateAction<InventoryItem[]>>
-  >(() => {});
 
   // initialize the current item values and their requriements
   const ItemFormSchema = z.object({
@@ -105,15 +190,10 @@ export const InventoryPage = ({
       .max(4294967295, { message: "Durability must be less than 4294967295" }),
   });
 
-  const handleSelectItem = (
-    item: InventoryItem,
-    index: number,
-    tableDataFunction: Dispatch<SetStateAction<InventoryItem[]>>
-  ) => {
+  const handleSelectItem = (item: InventoryItem, index: number) => {
     setCurrentItem(item);
     setIsSelectingItem(true);
     setCurrentItemIndex(index);
-    setcurrentTableDataFunction(tableDataFunction);
     form.setValue("name", item.name);
     form.setValue("level", item.chunk_data.level_value);
     form.setValue("seed", item.chunk_data.seed_value);
@@ -205,8 +285,10 @@ export const InventoryPage = ({
             ) {
               item_rows[i] = currentItemRow;
               setItemRows(item_rows);
-              setCurrentItemData(currentItemRow.inventory_items);
-              currentTableDataFunction?.(currentItemRow.inventory_items);
+              setCurrentItemData(undefined);
+              setTimeout(() => {
+                setCurrentItemData(currentItemRow.inventory_items);
+              }, 1);
               console.log("Updated Data");
               saveFile.items = item_rows;
               currentSaveFile.setValue(saveFile);
@@ -325,9 +407,10 @@ export const InventoryPage = ({
                       <>
                         {item_rows?.map((item_row, index) => (
                           <TabsContent key={index} value={index.toString()}>
-                            <InventoryDataTableComponent
-                              item_section={item_row.name}
-                              item_data={currentItemData ?? []}
+                            <DataTable
+                              title={item_row.name}
+                              columns={columns}
+                              data={currentItemData ?? []}
                               executeFunctionForRow={handleSelectItem}
                             />
                           </TabsContent>

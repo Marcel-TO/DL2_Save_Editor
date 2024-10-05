@@ -27,18 +27,66 @@ import {
 import { Input } from "@/components/ui/input";
 import { invoke } from "@tauri-apps/api/tauri";
 import { SettingState } from "@/models/settings-model";
-import { SkillsDataTableComponent } from "@/components/custom/skills-data-table-component";
+import { ChevronsUpDown } from "lucide-react";
 
 type SkillsPageProps = {
   skills?: Skills;
   currentSaveFile: SettingState<SaveFile | undefined>;
 };
 
+export const columns: ColumnDef<SkillItem>[] = [
+  {
+    accessorKey: "name",
+    accessorFn: (row) => row.name,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Name
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div>{row.getValue("name")}</div>,
+  },
+  {
+    accessorKey: "value",
+    accessorFn: (row) => row.points_value,
+    header: "Value",
+  },
+  {
+    accessorKey: "hex",
+    accessorFn: (row) => row.points_data,
+    header: "Value (HEX)",
+  },
+  {
+    accessorKey: "offset",
+    accessorFn: (row) => row.index,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Offset
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div>{row.getValue("offset")}</div>,
+  },
+];
+
 export const SkillsPage = ({ skills, currentSaveFile }: SkillsPageProps) => {
   const [isSelectingItem, setIsSelectingItem] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
   const [currentSkill, setCurrentSkill] = useState<SkillItem>();
   const [currentSkillIndex, setCurrentSkillIndex] = useState(0);
+  const [currentItemData, setCurrentItemData] = useState<
+    SkillItem[] | undefined
+  >(skills?.base_skills);
 
   // initialize the current item values and their requriements
   const ItemFormSchema = z.object({
@@ -93,6 +141,14 @@ export const SkillsPage = ({ skills, currentSaveFile }: SkillsPageProps) => {
     }).then((new_save) => {
       let convertedSave: SaveFile = JSON.parse(new_save);
       currentSaveFile.setValue(convertedSave);
+      setCurrentItemData(undefined);
+      setTimeout(() => {
+        setCurrentItemData(
+          currentTab === 0
+            ? convertedSave.skills.base_skills
+            : convertedSave.skills.legend_skills
+        );
+      }, 1);
     });
   }
 
@@ -111,28 +167,38 @@ export const SkillsPage = ({ skills, currentSaveFile }: SkillsPageProps) => {
                     <TabsList>
                       <TabsTrigger
                         value="base"
-                        onClick={() => setCurrentTab(0)}
+                        onClick={() => {
+                          setCurrentTab(0);
+                          setCurrentItemData(skills.base_skills);
+                        }}
                       >
                         Base Skills
                       </TabsTrigger>
                       <TabsTrigger
                         value="legend"
-                        onClick={() => setCurrentTab(1)}
+                        onClick={() => {
+                          setCurrentTab(1);
+                          setCurrentItemData(skills.legend_skills);
+                        }}
                       >
                         Legend Skills
                       </TabsTrigger>
                     </TabsList>
                   </div>
                   <TabsContent value="base">
-                    <SkillsDataTableComponent
-                      skill_section="Base Skills"
-                      data={skills.base_skills}
+                    <DataTable
+                      title="Base Skills"
+                      columns={columns}
+                      data={currentItemData || []}
+                      executeFunctionForRow={handleSelectItem}
                     />
                   </TabsContent>
                   <TabsContent value="legend">
-                    <SkillsDataTableComponent
-                      skill_section="Legend Skills"
-                      data={skills.legend_skills}
+                    <DataTable
+                      title="Legend Skills"
+                      columns={columns}
+                      data={currentItemData || []}
+                      executeFunctionForRow={handleSelectItem}
                     />
                   </TabsContent>
                 </Tabs>
