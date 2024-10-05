@@ -100,7 +100,7 @@ function App() {
       <Route path={"/backpack"} element={<BackpackPage />}></Route>,
       <Route path={"/campaign"} element={<CampaignPage />}></Route>,
       <Route path={"/player"} element={<PlayerPage />}></Route>,
-      <Route path={"/ids"} element={<IDsPage />}></Route>,
+      <Route path={"/ids"} element={<IDsPage ids={idData.value}/>}></Route>,
       <Route
         path={"/knowledge-vault"}
         element={<KnowledgeVaultPage />}

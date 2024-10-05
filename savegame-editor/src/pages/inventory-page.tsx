@@ -409,6 +409,7 @@ export const InventoryPage = ({
                           <TabsContent key={index} value={index.toString()}>
                             <DataTable
                               title={item_row.name}
+                              counter_description="Items"
                               columns={columns}
                               data={currentItemData ?? []}
                               executeFunctionForRow={handleSelectItem}
@@ -499,7 +500,7 @@ export const InventoryPage = ({
                             <Tooltip>
                               <TooltipTrigger className="col-span-2">
                                 <Button
-                                  onClick={generateRandomSeed}
+                                  onClick={() => generateRandomSeed()}
                                   variant="outline"
                                   className="col-span-2 m-0 p-0 w-full"
                                   type="button"

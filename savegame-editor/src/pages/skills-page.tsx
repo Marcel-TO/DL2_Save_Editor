@@ -132,23 +132,32 @@ export const SkillsPage = ({ skills, currentSaveFile }: SkillsPageProps) => {
   }
 
   async function submitSkillValue(skillValue: number) {
-    invoke<string>("handle_edit_skill", {
-      current_skill: JSON.stringify(currentSkill),
-      current_skill_index: currentSkillIndex,
-      is_base_skill: currentTab === 0,
+    console.log("Submitting skill value: ", currentSkill);
+    invoke<Uint8Array>("handle_edit_skill", {
+      current_item_size: currentSkill?.size,
+      current_skill_index: currentSkill?.index,
       new_value: skillValue,
-      save_file: JSON.stringify(currentSaveFile.value),
-    }).then((new_save) => {
-      let convertedSave: SaveFile = JSON.parse(new_save);
-      currentSaveFile.setValue(convertedSave);
-      setCurrentItemData(undefined);
-      setTimeout(() => {
-        setCurrentItemData(
-          currentTab === 0
-            ? convertedSave.skills.base_skills
-            : convertedSave.skills.legend_skills
-        );
-      }, 1);
+      save_file_content: currentSaveFile.value?.file_content,
+    }).then((new_save_content) => {
+      console.log("New save content: ", new_save_content);
+      let newSaveFile = currentSaveFile.value;
+      if (newSaveFile != undefined) {
+        newSaveFile.file_content = new_save_content;
+        if (currentTab === 0) {
+          newSaveFile.skills.base_skills[currentSkillIndex].points_value = skillValue;
+        } else {
+          newSaveFile.skills.legend_skills[currentSkillIndex].points_value = skillValue;
+        }
+        currentSaveFile.setValue(newSaveFile);
+        setCurrentItemData(undefined);
+        setTimeout(() => {
+          setCurrentItemData(
+            currentTab === 0
+              ? newSaveFile.skills.base_skills
+              : newSaveFile.skills.legend_skills
+          );
+        }, 1);
+      }
     });
   }
 
@@ -188,6 +197,7 @@ export const SkillsPage = ({ skills, currentSaveFile }: SkillsPageProps) => {
                   <TabsContent value="base">
                     <DataTable
                       title="Base Skills"
+                      counter_description="Skills"
                       columns={columns}
                       data={currentItemData || []}
                       executeFunctionForRow={handleSelectItem}
@@ -196,6 +206,7 @@ export const SkillsPage = ({ skills, currentSaveFile }: SkillsPageProps) => {
                   <TabsContent value="legend">
                     <DataTable
                       title="Legend Skills"
+                      counter_description="Skills"
                       columns={columns}
                       data={currentItemData || []}
                       executeFunctionForRow={handleSelectItem}

@@ -33,6 +33,7 @@ import { Input } from "../ui/input";
 
 interface DataTableProps<TData, TValue> {
   title?: string;
+  counter_description?: string;
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   executeFunctionForRow?: Function;
@@ -40,6 +41,7 @@ interface DataTableProps<TData, TValue> {
 
 export function DataTable<TData, TValue>({
   title,
+  counter_description,
   columns,
   data,
   executeFunctionForRow,
@@ -172,7 +174,9 @@ export function DataTable<TData, TValue>({
           </div>
           <div className="flex items-center justify-end space-x-2 py-4">
             <div className="flex-1 text-sm text-muted-foreground">
-              {table.getFilteredRowModel().rows.length} skills.
+              {counter_description ?? "Showing"}{" "}
+              {table.getPaginationRowModel().rows.length} of{" "}
+              {table.getCoreRowModel().rows.length} rows.{" "}
             </div>
             <div className="space-x-2">
               <Button
