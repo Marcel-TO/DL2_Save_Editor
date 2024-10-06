@@ -78,6 +78,7 @@ export const SponsorPage = () => {
                       initials: "ES",
                       name: "Easily Spooked",
                       tier: "Ultimate Sponsor of Doom",
+                      themeName: "spooked",
                     }}
                   />
                 </CardContent>

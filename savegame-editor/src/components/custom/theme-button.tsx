@@ -1,4 +1,4 @@
-import { Biohazard, Droplet, Ghost, Moon, PawPrint, Sparkle, Sun } from "lucide-react";
+import { Biohazard, Droplet, Ghost, Moon, Paintbrush2Icon, PawPrint, Sparkle, Sun } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -30,17 +30,21 @@ export function ThemeModeToggle() {
           {theme === "dl2" && (
             <Biohazard className="h-[1.2rem] w-[1.2rem] transition-all" />
           )}
-          {theme === "spooked" && (
-            <Ghost className="h-[1.2rem] w-[1.2rem] transition-all" />
-          )}
           {theme === "skyfall" && (
             <Droplet className="h-[1.2rem] w-[1.2rem] transition-all" />
           )}
           {theme === "hope" && (
             <Sparkle className="h-[1.2rem] w-[1.2rem] transition-all" />
           )}
-          {theme === "beast" && (
+          {/* Easter Egg Themes */}
+          {theme === "mchawk" && (
             <PawPrint className="h-[1.2rem] w-[1.2rem] transition-all" />
+          )}
+          {theme === "spooked" && (
+            <Ghost className="h-[1.2rem] w-[1.2rem] transition-all" />
+          )}
+          {theme === "batang" && (
+            <Paintbrush2Icon className="h-[1.2rem] w-[1.2rem] transition-all" />
           )}
           <span className="sr-only">Toggle theme</span>
         </Button>
@@ -56,17 +60,6 @@ export function ThemeModeToggle() {
             className={`${theme === "dl2" ? "bg-muted" : "bg-transparent"} p-2`}
           >
             DL2
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => {
-              setTheme("spooked");
-              navigate("/main");
-            }}
-            className={`${
-              theme === "spooked" ? "bg-muted" : "bg-transparent"
-            } p-2`}
-          >
-            Spooked
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => {
@@ -89,17 +82,6 @@ export function ThemeModeToggle() {
             } p-2`}
           >
             Hope
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => {
-              setTheme("beast");
-              navigate("/main");
-            }}
-            className={`${
-              theme === "beast" ? "bg-muted" : "bg-transparent"
-            } p-2`}
-          >
-            Beast
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <Separator />

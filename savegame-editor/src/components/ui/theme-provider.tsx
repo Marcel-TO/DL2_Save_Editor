@@ -2,7 +2,7 @@ import { AppSettings } from "@/models/settings-model"
 import { createContext, useContext, useEffect, useState } from "react"
 import { Store } from "tauri-plugin-store-api"
 
-export type Theme = "dark" | "light" | "system" | "dl2" | "spooked" | "skyfall" | "hope" | "beast"
+export type Theme = "dark" | "light" | "system" | "dl2" | "spooked" | "skyfall" | "hope" | "mchawk" | "batang"
 
 type ThemeProviderProps = {
   children: React.ReactNode
@@ -39,7 +39,7 @@ export function ThemeProvider({
   useEffect(() => {
     const root = window.document.documentElement
 
-    root.classList.remove("light", "dark", "dl2", "spooked", "skyfall", "hope", "beast")
+    root.classList.remove("light", "dark", "dl2", "spooked", "skyfall", "hope", "mchawk", "batang")
 
     if (theme === "system") {
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")

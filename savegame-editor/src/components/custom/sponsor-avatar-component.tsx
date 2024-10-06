@@ -1,4 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Theme, useTheme } from "@/components/ui/theme-provider";
+import { useNavigate } from "react-router-dom";
 
 export interface SponsorAvatarProps {
     avatar: string;
@@ -6,13 +8,25 @@ export interface SponsorAvatarProps {
     name: string;
     tier: string;
     background?: string;
+    themeName?: Theme;
 };
 
 export const SponsorAvatarComponent = ({sponsor}: {sponsor: SponsorAvatarProps}) => {
+  const { setTheme } = useTheme();
+  const navigate = useNavigate();
+  
   return (
     <>
       <div className="flex items-center gap-4 border rounded-md my-5 p-5">
-        <Avatar className={`hidden h-9 w-9 sm:flex ${sponsor.background}`}>
+        <Avatar 
+          className={`hidden h-9 w-9 sm:flex ${sponsor.themeName ? 'cursor-pointer' : ''} ${sponsor.background}`}
+          onClick={() => {
+            if (sponsor.themeName !== undefined) {
+              setTheme(sponsor.themeName);
+              navigate("/main");
+            }
+          }}
+        >
           <AvatarImage src={sponsor.avatar} alt="Avatar" />
           <AvatarFallback>{sponsor.initials}</AvatarFallback>
         </Avatar>

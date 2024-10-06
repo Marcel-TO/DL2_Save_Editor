@@ -83,6 +83,7 @@ export const InfoPage = () => {
                       name: "Marcel McHawk",
                       role: "Owner, Creator & Main-Developer",
                       github: "https://github.com/Marcel-TO",
+                      themeName: "mchawk"
                     }}
                   />
 
@@ -105,6 +106,7 @@ export const InfoPage = () => {
                         name: "Batang",
                         role: "Head of Testing & Contributor",
                         github: "https://github.com/B-a-t-a-n-g",
+                        themeName: "batang",
                       }}
                     />
                     <ContributorAvatarComponent
