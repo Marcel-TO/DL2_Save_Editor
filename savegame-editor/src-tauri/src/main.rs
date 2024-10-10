@@ -298,7 +298,7 @@ fn main() {
     dotenv().ok();
     // Comment tauri builder if debugging.
     tauri::Builder::default()
-        .plugin(tauri_plugin_log::Builder::default().build())
+        // .plugin(tauri_plugin_log::Builder::default().build())
         .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             get_ids,

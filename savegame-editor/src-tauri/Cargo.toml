@@ -17,7 +17,7 @@ tauri = { version = "1.7.2", features = [ "path-all", "fs-all", "shell-open", "d
 serde = { version = "1.0.209", features = ["derive"] }
 serde_json = "1.0.127"
 log = "0.4.22"
-tauri-plugin-log = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "dev" }
+# tauri-plugin-log = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 tauri-plugin-store = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 regex = "1.11.0"
 dotenv = "0.15.0"
