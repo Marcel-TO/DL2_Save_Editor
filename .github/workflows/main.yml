@@ -58,7 +58,9 @@ jobs:
         run: npm install
         working-directory: './savegame-editor'
 
-      - uses: tauri-apps/tauri-action@v0
+      - name: build
+        id: build
+        uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -68,3 +70,10 @@ jobs:
           releaseDraft: false
           prerelease: true
           args: ${{ matrix.settings.args }}
+      
+      - name: attest
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ${{ github.repository }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
