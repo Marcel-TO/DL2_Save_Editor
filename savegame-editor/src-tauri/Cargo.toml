@@ -21,7 +21,7 @@ log = "0.4.22"
 tauri-plugin-store = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 regex = "1.11.1"
 dotenv = "0.15.0"
-flate2 = "1.0.33"
+flate2 = "1.0.35"
 term = "1.0.0"
 term_size = "0.3.2"
 
