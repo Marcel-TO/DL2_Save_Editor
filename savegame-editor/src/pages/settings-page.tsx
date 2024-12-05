@@ -99,16 +99,22 @@ export const SettingsPage = ({
       setIsSavingCRC(false);
     }, 1000);
 
-    if (!data.crcCheckbox) {
+
+    // Check if the user wants to bypass the CRC check and does not enter a path
+    if (data.crcCheckbox && gameFolderPath == "") {
       toast({
         title: "Uh oh! Something went wrong!",
         description:
-          "You will need to activate the CRC checkbox to allow the Editor to deploy the .dll file to the game folder. Please try again.",
+          "And where do you expect me to deploy the .dll file? Please provide a valid path to the game folder and try again.",
         action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
       return;
     }
 
+    // If the checkbox is not checked, we don't need to add the files
+    if (!data.crcCheckbox) {
+      return;
+    }
     await invoke("add_crc_bypass_files", {
       file_path: gameFolderPath,
     }).catch((err) => {
