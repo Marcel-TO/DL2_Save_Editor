@@ -1,6 +1,6 @@
 import { AppSettings } from "@/models/settings-model"
 import { createContext, useContext, useEffect, useState } from "react"
-import { Store } from "tauri-plugin-store-api"
+import { Store } from "@tauri-apps/plugin-store"
 
 export type Theme = "dark" | "light" | "system" | "dl2" | "spooked" | "skyfall" | "hope" | "mchawk" | "batang"
 

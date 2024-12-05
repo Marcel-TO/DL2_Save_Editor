@@ -1,6 +1,6 @@
-use term;
 use std::io;
 use std::io::prelude::*;
+use term;
 use term_size;
 
 pub struct ConsoleLogger {
@@ -9,7 +9,7 @@ pub struct ConsoleLogger {
 
 pub trait LoggerFunctions {
     fn log_message(&mut self, message: &str, attributes: Vec<term::Attr>);
-    fn log_message_no_linebreak(&mut self, message: &str,attributes: Vec<term::Attr>);
+    fn log_message_no_linebreak(&mut self, message: &str, attributes: Vec<term::Attr>);
     fn log_error(&mut self, message: &str);
     fn log_break(&mut self);
     fn wait_for_input(&self);
@@ -33,7 +33,7 @@ impl LoggerFunctions for ConsoleLogger {
     fn log_error(&mut self, message: &str) {
         let mut terminal = term::stdout().unwrap();
         terminal.fg(term::color::BRIGHT_RED).unwrap();
-        let error_msg  = format!("Error: {}", message);
+        let error_msg = format!("Error: {}", message);
         println!("{:?}", error_msg);
         self.log_histroy.push(error_msg);
 
@@ -65,7 +65,7 @@ impl LoggerFunctions for ConsoleLogger {
         let mut stdout = io::stdout();
         stdout.write(b"[devtool]>>>").unwrap();
         stdout.flush().unwrap();
-    
+
         let mut input = String::new();
         io::stdin().read_line(&mut input).unwrap();
         input.trim().to_string()
@@ -73,7 +73,7 @@ impl LoggerFunctions for ConsoleLogger {
 
     fn log_title_page(&self) {
         println!(
-        "
+            "
          _____                                                              _____ 
         ( ___ )                                                            ( ___ )
          |   |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|   | 
@@ -100,12 +100,14 @@ impl LoggerFunctions for ConsoleLogger {
          |___|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|___| 
         (_____)                                                            (_____)
         "
-        );     
+        );
     }
 }
 
 impl ConsoleLogger {
     pub fn new() -> Self {
-        ConsoleLogger { log_histroy: Vec::new() }
+        ConsoleLogger {
+            log_histroy: Vec::new(),
+        }
     }
 }

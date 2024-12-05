@@ -43,9 +43,9 @@ import {
   DrawerClose,
 } from "@/components/ui/drawer";
 import { listen } from "@tauri-apps/api/event";
-import { invoke } from "@tauri-apps/api/tauri";
-import { writeBinaryFile } from "@tauri-apps/api/fs";
-import { open, save } from "@tauri-apps/api/dialog";
+import { invoke } from "@tauri-apps/api/core";
+import { writeFile } from "@tauri-apps/plugin-fs";
+import { open, save } from "@tauri-apps/plugin-dialog";
 import { AppSettings, SettingState } from "@/models/settings-model";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction, ToastProvider } from "@/components/ui/toast";
@@ -260,7 +260,7 @@ export function MainPage({
 
     if (filePath != null && currentSaveFile.value != undefined) {
       // Save data to file
-      await writeBinaryFile(filePath, currentSaveFile.value.file_content).catch(
+      await writeFile(filePath, currentSaveFile.value.file_content).catch(
         (err) => {
           toast({
             title: "Uh oh! Something went wrong. :/",
@@ -298,7 +298,7 @@ export function MainPage({
       );
 
       if (compressed) {
-        await writeBinaryFile(filePath, compressed).catch(
+        await writeFile(filePath, compressed).catch(
           (err) => {
             toast({
               title: "Uh oh! Something went wrong. :/",
@@ -325,7 +325,7 @@ export function MainPage({
 
     if (filePath != null && currentSaveFile.value != undefined) {
       // Save data to file
-      await writeBinaryFile(filePath, currentSaveFile.value.file_content).catch(
+      await writeFile(filePath, currentSaveFile.value.file_content).catch(
         (err) => {
           toast({
             title: "Uh oh! Something went wrong. :/",

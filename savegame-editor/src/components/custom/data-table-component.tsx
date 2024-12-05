@@ -175,8 +175,27 @@ export function DataTable<TData, TValue>({
           <div className="flex items-center justify-end space-x-2 py-4">
             <div className="flex-1 text-sm text-muted-foreground">
               {counter_description ?? "Showing"}{" "}
-              {table.getPaginationRowModel().rows.length} of{" "}
-              {table.getCoreRowModel().rows.length} rows.{" "}
+              {table.getCanNextPage() ? (
+                <>
+                  {table.getState().pagination.pageIndex *
+                    table.getPaginationRowModel().rows.length}{" "}
+                  {" - "}
+                  {(table.getState().pagination.pageIndex + 1) *
+                    table.getPaginationRowModel().rows.length}{" "}
+                  {"of "}
+                </>
+              ) : (
+                <>
+                  {table.getState().pagination.pageIndex *
+                    table.getState().pagination.pageSize}{" "}
+                  {" - "}
+                  {table.getState().pagination.pageIndex *
+                    table.getState().pagination.pageSize +
+                    table.getPaginationRowModel().rows.length}{" "}
+                  {"of "}
+                </>
+              )}
+              {table.getCoreRowModel().rows.length}
             </div>
             <div className="space-x-2">
               <Button

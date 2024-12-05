@@ -1,12 +1,12 @@
-use std::{fs, error::Error, path::Path};
-use std::io;
 use crate::save_logic::struct_data::IdData;
+use std::io;
+use std::{error::Error, fs, path::Path};
 
 // Define global result definition for easier readability.
-type Result<T> = std::result::Result<T,Box<dyn Error>>;
+type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
-/// Represents a method for fetching all ID datas. 
-/// 
+/// Represents a method for fetching all ID datas.
+///
 /// ### Returns `Vec<IdData>`
 /// A list of all fetched id sections.
 pub fn fetch_ids(id_path: &String) -> Result<Vec<IdData>> {

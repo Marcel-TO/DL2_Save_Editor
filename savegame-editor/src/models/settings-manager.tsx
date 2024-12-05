@@ -1,4 +1,4 @@
-import { Store } from "tauri-plugin-store-api";
+import { load, Store } from "@tauri-apps/plugin-store";
 import { AppSettings, DefaultItemLayout } from "./settings-model";
 import { useState } from "react";
 import { Theme } from "@/components/ui/theme-provider";
@@ -6,7 +6,7 @@ import { Theme } from "@/components/ui/theme-provider";
 export const initializeStore = async (
   appSettings: AppSettings
 ): Promise<Store> => {
-  let store = new Store(".settings.dat");
+  let store = await load("settings.json", { autoSave: false });
   let defaultStorageKey = "default-settings";
 
   let storedTheme = await store.get<{ value: Theme }>(

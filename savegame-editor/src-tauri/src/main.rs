@@ -5,7 +5,6 @@ mod logger;
 mod save_logic;
 
 use std::error::Error;
-use std::thread::current;
 
 use crate::logger::ConsoleLogger;
 use dotenv::dotenv;
@@ -17,14 +16,15 @@ use save_logic::file_analyser::{
 };
 use save_logic::id_fetcher::{fetch_ids, update_ids};
 use save_logic::struct_data::{IdData, InventoryChunk, SaveFile};
-use tauri::AppHandle;
+use tauri::path::BaseDirectory;
+use tauri::{AppHandle, Manager};
 
 #[tauri::command(rename_all = "snake_case")]
 async fn get_ids(app_handle: AppHandle) -> Result<Vec<IdData>, String> {
     // Initializes resource path where IDs are stored.
     let resource_path = app_handle
-        .path_resolver()
-        .resolve_resource("./IDs/")
+        .path()
+        .resolve("./IDs/", BaseDirectory::Resource)
         .unwrap();
 
     match fetch_ids(&resource_path.display().to_string()) {
@@ -40,8 +40,8 @@ async fn get_ids(app_handle: AppHandle) -> Result<Vec<IdData>, String> {
 fn update_id_folder(app_handle: AppHandle, file_path: &str) {
     // Initializes resource path where IDs are stored.
     let resource_path = app_handle
-        .path_resolver()
-        .resolve_resource("./IDs/")
+        .path()
+        .resolve("./IDs/", BaseDirectory::Resource)
         .unwrap();
 
     match update_ids(file_path, &resource_path.display().to_string()) {
@@ -61,8 +61,8 @@ fn load_save(
     let mut logger: ConsoleLogger = ConsoleLogger::new();
     // Initializes resource path where IDs are stored.
     let resource_path: std::path::PathBuf = app_handle
-        .path_resolver()
-        .resolve_resource("./IDs/")
+        .path()
+        .resolve("./IDs/", BaseDirectory::Resource)
         .unwrap();
 
     // Initializes IDs
@@ -110,8 +110,8 @@ fn load_save_pc(
     let mut logger: ConsoleLogger = ConsoleLogger::new();
     // Initializes resource path where IDs are stored.
     let resource_path = app_handle
-        .path_resolver()
-        .resolve_resource("./IDs/")
+        .path()
+        .resolve("./IDs/", BaseDirectory::Resource)
         .unwrap();
 
     // Initializes IDs
@@ -159,7 +159,7 @@ async fn handle_edit_skill(
         new_value,
         save_file_content,
     );
-    
+
     Ok(new_save_file_content)
 }
 
@@ -259,10 +259,10 @@ async fn open_knowledge_window(
     url: &str,
     name: &str,
 ) -> Result<bool, String> {
-    let local_window = tauri::WindowBuilder::new(
+    let local_window = tauri::WebviewWindowBuilder::new(
         &app_handle,
         name.replace(" ", "_").to_uppercase().as_str(),
-        tauri::WindowUrl::App(url.into()),
+        tauri::WebviewUrl::App(url.into()),
     )
     .title(name)
     .maximized(true)
@@ -281,8 +281,8 @@ async fn add_crc_bypass_files(app_handle: AppHandle, file_path: &str) -> Result<
 
     // Initializes resource path where IDs are stored.
     let resource_path = app_handle
-        .path_resolver()
-        .resolve_resource("./CRC_Bypass/")
+        .path()
+        .resolve("./CRC_Bypass/", BaseDirectory::Resource)
         .unwrap();
 
     match get_files_and_copy_to_destination(&resource_path.display().to_string(), file_path) {
@@ -298,7 +298,10 @@ fn main() {
     dotenv().ok();
     // Comment tauri builder if debugging.
     tauri::Builder::default()
-        // .plugin(tauri_plugin_log::Builder::default().build())
+        .plugin(tauri_plugin_store::Builder::new().build())
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             get_ids,

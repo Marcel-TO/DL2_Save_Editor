@@ -1,6 +1,6 @@
 use std::mem;
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use crate::save_logic::file_analyser::format_bytes_to_string;
 
@@ -8,7 +8,7 @@ use crate::save_logic::file_analyser::format_bytes_to_string;
 pub enum ItemTypeEnum {
     Craftplan,
     ToolSkin,
-    Collectable
+    Collectable,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -19,13 +19,9 @@ pub struct IdData {
 
 impl IdData {
     pub fn new(filename: String, ids: Vec<String>) -> Self {
-        IdData {
-            filename,
-            ids,
-        }
+        IdData { filename, ids }
     }
 }
-
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InventoryChunk {
@@ -64,7 +60,11 @@ impl InventoryChunk {
             level_value: u16::from_le_bytes(level.clone().try_into().unwrap()),
             seed_value: u16::from_le_bytes(seed.clone().try_into().unwrap()),
             amount_value: u32::from_le_bytes(amount.clone().try_into().unwrap()),
-            durability_value: format!("{:.1}", unsafe { mem::transmute::<u32, f32>(u32::from_le_bytes(durability.clone().try_into().unwrap())) }),
+            durability_value: format!("{:.1}", unsafe {
+                mem::transmute::<u32, f32>(u32::from_le_bytes(
+                    durability.clone().try_into().unwrap(),
+                ))
+            }),
             counter_stats_value: u32::from_le_bytes(counter_stats.clone().try_into().unwrap()),
         }
     }
@@ -79,11 +79,7 @@ pub struct Mod {
 }
 
 impl Mod {
-    pub fn new(
-        name: String, 
-        index: usize,
-        data_content: Vec<u8>,
-    ) -> Self {
+    pub fn new(name: String, index: usize, data_content: Vec<u8>) -> Self {
         Mod {
             name,
             index,
@@ -110,7 +106,7 @@ impl InventoryItem {
         size: usize,
         sgd_data: Vec<u8>,
         chunk_data: InventoryChunk,
-        mod_data: Vec<Mod>
+        mod_data: Vec<Mod>,
     ) -> Self {
         InventoryItem {
             name,
@@ -130,10 +126,7 @@ pub struct InventoryItemRow {
 }
 
 impl InventoryItemRow {
-    pub fn new(
-        name: String,
-        inventory_items: Vec<InventoryItem>,
-    ) -> Self {
+    pub fn new(name: String, inventory_items: Vec<InventoryItem>) -> Self {
         InventoryItemRow {
             name,
             inventory_items,
@@ -177,10 +170,7 @@ pub struct Skills {
 }
 
 impl Skills {
-    pub fn new(
-        base_skills: Vec<SkillItem>,
-        legend_skills: Vec<SkillItem>,
-    ) -> Self {
+    pub fn new(base_skills: Vec<SkillItem>, legend_skills: Vec<SkillItem>) -> Self {
         Skills {
             base_skills,
             legend_skills,
@@ -197,12 +187,7 @@ pub struct UnlockableItem {
 }
 
 impl UnlockableItem {
-    pub fn new(
-        name: String,
-        index: usize,
-        size: usize,
-        sgd_data: Vec<u8>,
-    ) -> Self {
+    pub fn new(name: String, index: usize, size: usize, sgd_data: Vec<u8>) -> Self {
         UnlockableItem {
             name,
             index,
@@ -242,7 +227,7 @@ impl SaveFile {
             unlockable_items,
             skills,
             log_history,
-            is_compressed
+            is_compressed,
         }
     }
 }

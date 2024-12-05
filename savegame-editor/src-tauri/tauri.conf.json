@@ -2,60 +2,31 @@
   "build": {
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build",
-    "devPath": "http://localhost:1420",
-    "distDir": "../dist",
-    "withGlobalTauri": false
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420"
   },
-  "package": {
-    "productName": "Dying Light 2 Save Editor",
-    "version": "1.0.8"
+  "bundle": {
+    "resources": [
+      "./IDs/*",
+      "./CRC_Bypass/*"
+    ],
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
   },
-  "tauri": {
-    "allowlist": {
-      "dialog": {
-        "all": true,
-        "ask": true,
-        "confirm": true,
-        "message": true,
-        "open": true,
-        "save": true
-      },
-      "all": false,
-      "shell": {
-        "all": false,
-        "open": true
-      },
-      "fs": {
-        "all": true,
-        "scope": [
-          "$RESOURCE/*",
-          "$APPCONFIG", 
-          "$APPCONFIG/*"
-        ]
-      },
-      "path": {
-        "all": true
-       }
-    },
-    "bundle": {
-      "resources": [
-        "./IDs/*",
-        "./CRC_Bypass/*"
-      ],
-      "active": true,
-      "targets": "all",
-      "identifier": "com.dyinglight.save.editor",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ]
-    },
-    "security": {
-      "csp": null
-    },
+  "productName": "Dying Light 2 Save Editor",
+  "mainBinaryName": "Dying Light 2 Save Editor",
+  "version": "1.0.8",
+  "identifier": "com.dyinglight.save.editor",
+  "plugins": {},
+  "app": {
+    "withGlobalTauri": false,
     "windows": [
       {
         "fullscreen": false,
@@ -63,8 +34,12 @@
         "maximized": true,
         "title": "Dying Light 2 Save Editor",
         "width": 1080,
-        "height": 800
+        "height": 800,
+        "useHttpsScheme": true
       }
-    ]
+    ],
+    "security": {
+      "csp": null
+    }
   }
 }
