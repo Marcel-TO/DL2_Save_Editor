@@ -34,7 +34,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import {
   AppSettings,
   DefaultItemLayout,
@@ -73,6 +73,7 @@ export const columns: ColumnDef<InventoryItem>[] = [
   {
     accessorKey: "name",
     accessorFn: (row) => row.name,
+    enableHiding: false,
     header: ({ column }) => {
       return (
         <Button
@@ -113,6 +114,23 @@ export const columns: ColumnDef<InventoryItem>[] = [
     cell: ({ getValue }: CellContext<InventoryItem, any>) => {
       const modData = getValue() as Mod[];
       return modData.length;
+    },
+  },
+  {
+    accessorKey: "mod-details",
+    accessorFn: (row) => row.mod_data,
+    header: "Mod Details",
+    cell: ({ getValue }: CellContext<InventoryItem, any>) => {
+      const modData = getValue() as Mod[];
+      return (
+        <div className="flex gap-2 flex-col">
+          {modData.map((mod, index) => (
+            <div key={index}>
+              <span>{mod.name}</span>
+            </div>
+          ))}
+        </div>
+      )
     },
   },
   {

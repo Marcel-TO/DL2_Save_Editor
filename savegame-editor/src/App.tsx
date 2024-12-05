@@ -23,7 +23,7 @@ import { KnowledgeVaultPage } from "./pages/knowledge-vault";
 import { DebugPage } from "./pages/debug-page";
 import { SponsorPage } from "./pages/sponsor-page";
 import { WelcomePage } from "./pages/welcome-page";
-import { Store } from "tauri-plugin-store-api";
+import { Store } from "@tauri-apps/plugin-store";
 import { initializeAppSettings, initializeStore } from "./models/settings-manager";
 
 function App() {
