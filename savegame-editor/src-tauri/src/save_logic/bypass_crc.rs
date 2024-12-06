@@ -1,7 +1,6 @@
 use crate::save_logic::file_analyser::get_contents_from_file;
-use crate::save_logic::struct_data::IdData;
 use std::io::Write;
-use std::{error::Error, fs, path::Path};
+use std::{error::Error, fs};
 
 // Define global result definition for easier readability.
 type Result<T> = std::result::Result<T, Box<dyn Error>>;

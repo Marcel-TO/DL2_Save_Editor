@@ -194,6 +194,28 @@ export function MainPage({
     });
   }
 
+  const testOutpost = async () => {
+    const result = await invoke("get_outpost_saves").catch((err) => {
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description: err,
+        action: (
+          <ToastAction
+            altText="Try again"
+            onClick={() => setIsDrawerOpen(true)}
+          >
+            Try again
+          </ToastAction>
+        ),
+      });
+      return;
+    });
+
+    if (result) {
+      console.log(result);
+    }
+  }
+
   const loadSave = async (filepath: string) => {
     // setIsDrawerOpen(true);
     let newSave = await invoke<SaveFile>("load_save", {
@@ -684,6 +706,7 @@ export function MainPage({
                       </div>
                     </DrawerContent>
                   </Drawer>
+                      <Button onClick={() => testOutpost()}>Test</Button>
                 </CardFooter>
               </Card>
               <Card x-chunk="dashboard-05-chunk-1">

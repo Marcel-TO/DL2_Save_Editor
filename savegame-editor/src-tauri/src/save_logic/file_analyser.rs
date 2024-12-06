@@ -776,8 +776,8 @@ fn get_all_items(
         let mut current_item_id: String = String::new();
         let mut current_item_index: usize = 0;
         let mut chunk_counter: usize = chunks.len() - 1;
-        let mut current_inv_chunk: InventoryChunk = chunks[chunk_counter].clone();
-        let mut match_bytes: &[u8] = current_item_id.as_bytes();
+        let mut _current_inv_chunk: InventoryChunk = chunks[chunk_counter].clone();
+        let mut _match_bytes: &[u8] = current_item_id.as_bytes();
         let mut mods: Vec<Mod> = Vec::new();
 
         // iterate through each found match and validate the position of the match.
@@ -816,9 +816,9 @@ fn get_all_items(
 
                 // Set the current item initialization.
                 current_item_id = current_item_ids[i].trim_end_matches("SGDs").to_string();
-                match_bytes = current_item_ids[i].as_bytes();
+                _match_bytes = current_item_ids[i].as_bytes();
                 current_item_index = current_item_indices[i];
-                current_inv_chunk = chunks[chunk_counter].clone();
+                _current_inv_chunk = chunks[chunk_counter].clone();
 
                 // The chunk counter is decreased to get the correct chunk for the item, since the chunk is mirrored to the ids.
                 if chunk_counter > 0 {
@@ -830,9 +830,9 @@ fn get_all_items(
                     inner_item_list.push(InventoryItem::new(
                         current_item_id.replace("\x00", "").replace("\x01", ""),
                         current_item_index,
-                        match_bytes.len(),
-                        match_bytes.to_vec(),
-                        current_inv_chunk.clone(),
+                        _match_bytes.len(),
+                        _match_bytes.to_vec(),
+                        _current_inv_chunk.clone(),
                         mods.clone(),
                     ));
 

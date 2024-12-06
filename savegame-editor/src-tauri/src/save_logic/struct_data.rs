@@ -231,3 +231,33 @@ impl SaveFile {
         }
     }
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct OutpostSave {
+    pub name: String,
+    pub owner: String,
+    pub description: String,
+    pub features: Vec<String>,
+    pub version: String,
+    pub save_file: SaveFile,
+}
+
+impl OutpostSave {
+    pub fn new(
+        name: String,
+        owner: String,
+        description: String,
+        features: Vec<String>,
+        version: String,
+        save_file: SaveFile,
+    ) -> Self {
+        OutpostSave {
+            name,
+            owner,
+            description,
+            features,
+            version,
+            save_file,
+        }
+    }
+}

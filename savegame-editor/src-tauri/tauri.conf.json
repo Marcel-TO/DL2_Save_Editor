@@ -8,7 +8,8 @@
   "bundle": {
     "resources": [
       "./IDs/*",
-      "./CRC_Bypass/*"
+      "./CRC_Bypass/*",
+      "./Hawks_Outpost/**/*"
     ],
     "active": true,
     "targets": "all",

@@ -1,13 +1,13 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod logger;
 mod save_logic;
+mod logger;
 
 use std::error::Error;
 
-use crate::logger::ConsoleLogger;
 use dotenv::dotenv;
+use logger::ConsoleLogger;
 use save_logic::bypass_crc::get_files_and_copy_to_destination;
 use save_logic::file_analyser::{
     change_items_amount, change_items_durability, create_backup_from_file,
@@ -15,7 +15,8 @@ use save_logic::file_analyser::{
     load_save_file, load_save_file_pc, remove_inventory_item,
 };
 use save_logic::id_fetcher::{fetch_ids, update_ids};
-use save_logic::struct_data::{IdData, InventoryChunk, SaveFile};
+use save_logic::struct_data::{IdData, InventoryChunk, OutpostSave, SaveFile};
+use save_logic::save_outpost::fetch_outpost_saves;
 use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Manager};
 
@@ -294,6 +295,23 @@ async fn add_crc_bypass_files(app_handle: AppHandle, file_path: &str) -> Result<
     }
 }
 
+#[tauri::command(rename_all = "snake_case")]
+async fn get_outpost_saves(app_handle: AppHandle) -> Result<Vec<OutpostSave>, String> {
+    // Initializes resource path where IDs are stored.
+    let resource_path = app_handle
+        .path()
+        .resolve("./Hawks_Outpost/", BaseDirectory::Resource)
+        .unwrap();
+
+    match fetch_outpost_saves(app_handle, &resource_path.display().to_string()) {
+        Ok(result) => Ok(result),
+        Err(err) => {
+            println!("Error: {}", err);
+            Err(err.to_string())
+        }
+    }
+}
+
 fn main() {
     dotenv().ok();
     // Comment tauri builder if debugging.
@@ -318,26 +336,9 @@ fn main() {
             change_items_amount_max,
             change_items_amount_1,
             open_knowledge_window,
-            add_crc_bypass_files
+            add_crc_bypass_files,
+            get_outpost_saves
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-
-    // // Uncomment the following line to if .env file should be selected.
-    // // let file_path = std::env::var("FILE_PATH").expect("FILE_PATH must be set.");
-    // let file_path = "C:\\Users\\MarcelTurobin-Ort\\Downloads\\save_main_0 (2).sav";
-    // // Initializes the logger.
-    // let mut logger: ConsoleLogger = ConsoleLogger::new();
-    // // Initializes resource path where IDs are stored.
-    // // let resource_path = std::env::var("IDS_PATH").expect("IDS_PATH must be set.");
-    // let resource_path = "C:\\Users\\MarcelTurobin-Ort\\Github\\_Privat\\DL2_Save_Editor\\savegame-editor\\src-tauri\\IDs".to_string();
-
-    // // Initializes IDs
-    // let ids = fetch_ids(&resource_path).unwrap();
-
-    // let file_content: Vec<u8> = get_contents_from_file(&file_path).unwrap();
-    // create_backup_from_file(&file_path, &file_content);
-    // let save_file = load_save_file(&file_path, file_content, ids, &mut logger, true, false).unwrap();
-
-    // // println!("{:?}", save_file.file_string)
 }
