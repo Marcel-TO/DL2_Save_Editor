@@ -151,3 +151,7 @@ Inhibitor_Container
 Inhibitor_Container_Bundle2
 Inhibitor_Container_Bundle3
 Inhibitor_Syringe
+RopeHook_Snowman
+RopeHook_Snowman_CableSkin
+RopeHook_Krampus
+RopeHook_Krampus_CableSkin
