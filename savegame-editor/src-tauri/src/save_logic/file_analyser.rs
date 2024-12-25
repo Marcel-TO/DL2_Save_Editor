@@ -57,6 +57,8 @@ pub fn load_save_file(
     is_debugging: bool,
     is_compressed: bool,
 ) -> Result<SaveFile> {
+    // Get the game version.
+    let game_version: String = get_game_version(&file_content);
     // Gets the indices of the skill data.
     let skill_start_index: usize = get_index_from_sequence(&file_content, &0, &START_SKILLS, true);
     let skill_end_index: usize =
@@ -155,6 +157,7 @@ pub fn load_save_file(
         items_result?,
         logger.log_histroy.clone(),
         is_compressed,
+        game_version,
     ))
 }
 
@@ -1188,6 +1191,30 @@ fn find_first_sgd_index(content: &[u8], start_index: usize) -> Result<usize> {
     }
 
     return Err("No SGDs found.".into());
+}
+
+/// Represents a method for finding the current game version of the save.
+///
+/// ### Parameter
+/// - `content`: The byte data of the current save file.
+///
+/// ### Returns `String`
+/// The game version of the current save.
+fn get_game_version(content: &[u8]) -> String {
+    // Convert the byte data to string to check regex patterns.
+    let string_data: String = String::from_utf8_lossy(content).to_string();
+    // The Regex pattern to match base skills.
+    let pattern: &str = r"EVersion::Patch[A-Za-z0-9_]+";
+    // Defines the regex instance.
+    let re: Regex = Regex::new(pattern).unwrap();
+    match re.find(&string_data) {
+        Some(mat) => {
+            return mat.as_str().to_string();
+        }
+        None => {
+            return "Unknown".to_string();
+        }
+    }
 }
 
 /// Represents a method for finding all sgd matches inside the range.

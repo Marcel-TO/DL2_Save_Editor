@@ -67,5 +67,14 @@ export interface SaveFile {
     items: InventoryItemRow[],
     log_history: string[],
     is_compressed: boolean,
-    save_version: string
+    game_version: string
+}
+
+export interface OutpostSave {
+    name: string,
+    owner: string,
+    description: string,
+    features: string[],
+    version: string,
+    save_files: SaveFile[]
 }

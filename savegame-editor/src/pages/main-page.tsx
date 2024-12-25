@@ -433,7 +433,7 @@ export function MainPage({
                       <>
                         <div className="flex flex-col">
                           <div>
-                            Save Version: {currentSaveFile.value?.save_version}
+                            Save Version: {currentSaveFile.value?.game_version}
                           </div>
                           <div>
                             Is Compressed:{" "}

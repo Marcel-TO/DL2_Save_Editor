@@ -207,6 +207,7 @@ pub struct SaveFile {
     pub items: Vec<InventoryItemRow>,
     pub log_history: Vec<String>,
     pub is_compressed: bool,
+    pub game_version: String,
 }
 
 impl SaveFile {
@@ -218,6 +219,7 @@ impl SaveFile {
         items: Vec<InventoryItemRow>,
         log_history: Vec<String>,
         is_compressed: bool,
+        game_version: String,
     ) -> Self {
         SaveFile {
             path,
@@ -228,6 +230,7 @@ impl SaveFile {
             skills,
             log_history,
             is_compressed,
+            game_version,
         }
     }
 }
