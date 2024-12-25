@@ -42,7 +42,7 @@ import {
   DrawerFooter,
   DrawerClose,
 } from "@/components/ui/drawer";
-import { listen } from "@tauri-apps/api/event";
+import { listen, TauriEvent } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { writeFile } from "@tauri-apps/plugin-fs";
 import { open, save } from "@tauri-apps/plugin-dialog";
@@ -142,8 +142,9 @@ export function MainPage({
   }, []);
 
   async function listenDragDrop() {
-    listen<string>("tauri://file-drop", async (event) => {
-      let filepath = event.payload[0];
+    console.log("Listening for file drop...");
+    listen<{ paths: string[] }>(TauriEvent.DRAG_DROP, async (event) => {
+      let filepath = event.payload.paths[0];
 
       if (filepath == null) {
         toast({
@@ -159,7 +160,7 @@ export function MainPage({
           ),
         });
         return;
-      } else if (event.payload.length > 1) {
+      } else if (event.payload.paths.length > 1) {
         toast({
           title: "Uh oh! Something went wrong.",
           description: "Please only drop one file at a time.",
