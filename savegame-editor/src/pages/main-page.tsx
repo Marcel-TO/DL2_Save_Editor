@@ -60,6 +60,7 @@ import {
 } from "@/components/ui/dialog";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { TypographyH1 } from "@/components/ui/typography";
+import { HelixLoader } from "@/components/custom/helix-loader/helix-loader-component";
 
 type MainPageProps = {
   appSettings: AppSettings;
@@ -72,6 +73,8 @@ export function MainPage({
   appSettings,
   idData,
 }: MainPageProps) {
+  // State for the current loading state.
+  const [isLoading, setIsLoading] = useState(false);
   // States for the Card Details
   const [latestEditorVersion, setLatestEditorVersion] = useState<string>("");
   const [amountOfDownloads, setAmountOfDownloads] = useState<number | null>(
@@ -215,10 +218,11 @@ export function MainPage({
     if (result) {
       console.log(result);
     }
-  }
+  };
 
   const loadSave = async (filepath: string) => {
-    // setIsDrawerOpen(true);
+      setIsLoading(true);
+      setIsDrawerOpen(false);
     let newSave = await invoke<SaveFile>("load_save", {
       file_path: filepath,
       is_debugging: appSettings.isDebugging.value,
@@ -242,7 +246,7 @@ export function MainPage({
     if (newSave) {
       currentSaveFile.setValue(newSave);
       console.log(newSave);
-      setIsDrawerOpen(false);
+      setIsLoading(false);
     }
   };
 
@@ -309,28 +313,26 @@ export function MainPage({
 
     if (filePath != null && currentSaveFile.value != undefined) {
       // Save data to file
-      let compressed = await invoke<Uint8Array>('compress_save', {data: currentSaveFile.value.file_content}).catch(
-        (err) => {
+      let compressed = await invoke<Uint8Array>("compress_save", {
+        data: currentSaveFile.value.file_content,
+      }).catch((err) => {
+        toast({
+          title: "Uh oh! Something went wrong. :/",
+          description:
+            "The Editor stumbled accross the following error: " + err,
+        });
+        return;
+      });
+
+      if (compressed) {
+        await writeFile(filePath, compressed).catch((err) => {
           toast({
             title: "Uh oh! Something went wrong. :/",
             description:
               "The Editor stumbled accross the following error: " + err,
           });
           return;
-        }
-      );
-
-      if (compressed) {
-        await writeFile(filePath, compressed).catch(
-          (err) => {
-            toast({
-              title: "Uh oh! Something went wrong. :/",
-              description:
-                "The Editor stumbled accross the following error: " + err,
-            });
-            return;
-          }
-        );
+        });
       }
     }
   }
@@ -487,10 +489,14 @@ export function MainPage({
                       <DropdownMenuSeparator />
                       <DropdownMenuGroup>
                         <DropdownMenuLabel>Export As</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => saveCurrentSaveFileCompressed()}>
+                        <DropdownMenuItem
+                          onClick={() => saveCurrentSaveFileCompressed()}
+                        >
                           Compressed
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => saveCurrentSaveFileDecompressed()}>
+                        <DropdownMenuItem
+                          onClick={() => saveCurrentSaveFileDecompressed()}
+                        >
                           Decompressed
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => saveBackupSaveFile()}>
@@ -707,7 +713,7 @@ export function MainPage({
                       </div>
                     </DrawerContent>
                   </Drawer>
-                      <Button onClick={() => testOutpost()}>Test</Button>
+                  <Button onClick={() => testOutpost()}>Test</Button>
                 </CardFooter>
               </Card>
               <Card x-chunk="dashboard-05-chunk-1">
@@ -798,13 +804,16 @@ export function MainPage({
                   </CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Link to={"/knowledge-vault"} className="transform transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
-                  <Button
-                    variant="outline"
-                    className="border-primary text-primary"
+                  <Link
+                    to={"/knowledge-vault"}
+                    className="transform transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
                   >
-                    Learn more
-                  </Button>
+                    <Button
+                      variant="outline"
+                      className="border-primary text-primary"
+                    >
+                      Learn more
+                    </Button>
                   </Link>
                 </CardFooter>
               </Card>
@@ -812,6 +821,15 @@ export function MainPage({
           </div>
         </main>
       </div>
+
+      {/* Loading Animation */}
+      {isLoading && (
+        <>
+          <section className="absolute w-full h-full grid place-content-center bg-background/50">
+            <HelixLoader></HelixLoader>
+          </section>
+        </>
+      )}
     </div>
   );
 }
