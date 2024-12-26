@@ -76,5 +76,5 @@ export interface OutpostSave {
     description: string,
     features: string[],
     version: string,
-    save_files: SaveFile[]
+    save_file: SaveFile
 }

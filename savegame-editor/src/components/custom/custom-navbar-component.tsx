@@ -17,6 +17,7 @@ import {
   Swords,
   User,
   Heart,
+  StarIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
@@ -81,7 +82,12 @@ const infoPages: [string, JSX.Element, string, boolean][] = [
     "/knowledge-vault",
     false,
   ],
-  // ['Caz Outpost', <StoreRoundedIcon/>, '/outpost', false],
+  [
+    "Hawks Outpost",
+    <StarIcon className="h-5 w-5 transition-all group-hover:scale-110 hover:fill-primary" />,
+    "/hawks-outpost",
+    false,
+  ],
 ];
 
 export const NavbarComponent = () => {
@@ -90,62 +96,62 @@ export const NavbarComponent = () => {
       <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 h-full flex-col border-r bg-background sm:flex overflow-y-auto">
         <TooltipProvider>
           <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
-          <Link
-        to={"/main"}
-        className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
-      >
-        <Home className="h-4 w-4 transition-all group-hover:scale-110" />
-        <span className="sr-only">Home</span>
-      </Link>
-      <Separator />
-      {infoPages.map(([text, icon, link, isDisabled]) => (
-        <Tooltip>
-          <TooltipTrigger asChild>
             <Link
-              to={link}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-              aria-disabled={isDisabled}
+              to={"/main"}
+              className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
             >
-              {icon}
-              <span className="sr-only">{text}</span>
+              <Home className="h-4 w-4 transition-all group-hover:scale-110" />
+              <span className="sr-only">Home</span>
             </Link>
-          </TooltipTrigger>
-          <TooltipContent side="right">{text}</TooltipContent>
-        </Tooltip>
-      ))}
-      <Separator />
-      {editPages.map(([text, icon, link, isDisabled]) => (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link
-              to={link}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-              aria-disabled={isDisabled}
-            >
-              {icon}
-              <span className="sr-only">{text}</span>
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent side="right">{text}</TooltipContent>
-        </Tooltip>
-      ))}
-      <Separator />
-      {otherPages.map(([text, icon, link, isDisabled]) => (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link
-              to={link}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-              aria-disabled={isDisabled}
-            >
-              {icon}
-              <span className="sr-only">{text}</span>
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent side="right">{text}</TooltipContent>
-        </Tooltip>
-      ))}
-      <Separator />
+            <Separator />
+            {infoPages.map(([text, icon, link, isDisabled]) => (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    to={link}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                    aria-disabled={isDisabled}
+                  >
+                    {icon}
+                    <span className="sr-only">{text}</span>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right">{text}</TooltipContent>
+              </Tooltip>
+            ))}
+            <Separator />
+            {editPages.map(([text, icon, link, isDisabled]) => (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    to={link}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                    aria-disabled={isDisabled}
+                  >
+                    {icon}
+                    <span className="sr-only">{text}</span>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right">{text}</TooltipContent>
+              </Tooltip>
+            ))}
+            <Separator />
+            {otherPages.map(([text, icon, link, isDisabled]) => (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    to={link}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                    aria-disabled={isDisabled}
+                  >
+                    {icon}
+                    <span className="sr-only">{text}</span>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right">{text}</TooltipContent>
+              </Tooltip>
+            ))}
+            <Separator />
           </nav>
           <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
             <Tooltip>

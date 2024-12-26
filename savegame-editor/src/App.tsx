@@ -9,7 +9,7 @@ import {
 import { MainPage } from "./pages/main-page";
 import { InfoPage } from "./pages/info-page";
 import { useEffect, useState } from "react";
-import { IdData, SaveFile } from "./models/save-models";
+import { IdData, OutpostSave, SaveFile } from "./models/save-models";
 import { SettingsPage } from "./pages/settings-page";
 import { AppSettings, SettingState } from "./models/settings-model";
 import { SkillsPage } from "./pages/skills-page";
@@ -25,6 +25,7 @@ import { SponsorPage } from "./pages/sponsor-page";
 import { WelcomePage } from "./pages/welcome-page";
 import { Store } from "@tauri-apps/plugin-store";
 import { initializeAppSettings, initializeStore } from "./models/settings-manager";
+import { HawksOutpostPage } from "./pages/outpost-page";
 
 function App() {
   // Declare app settings manager
@@ -52,6 +53,13 @@ function App() {
   const idData: SettingState<IdData[] | undefined> = {
     value: idDataValue,
     setValue: setIdData,
+  };
+
+  // Declare outpost saves state
+  const [outpostSavesValue, setOutpostSaves] = useState<OutpostSave[]>();
+  const outpostSaves: SettingState<OutpostSave[] | undefined> = {
+    value: outpostSavesValue,
+    setValue: setOutpostSaves,
   };
 
   const router = createBrowserRouter(
@@ -110,6 +118,15 @@ function App() {
         element={<DebugPage log_history={currentSaveFile.value?.log_history} />}
       ></Route>,
       <Route path={"/sponsor"} element={<SponsorPage />}></Route>,
+      <Route
+        path={"/hawks-outpost"}
+        element={
+          <HawksOutpostPage
+            currentSaveFile={currentSaveFile}
+            outpostSaves={outpostSaves}
+          />
+        }
+      ></Route>
     ])
   );
 

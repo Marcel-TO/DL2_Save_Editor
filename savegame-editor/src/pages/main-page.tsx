@@ -145,7 +145,6 @@ export function MainPage({
   }, []);
 
   async function listenDragDrop() {
-    console.log("Listening for file drop...");
     listen<{ paths: string[] }>(TauriEvent.DRAG_DROP, async (event) => {
       let filepath = event.payload.paths[0];
 
@@ -198,27 +197,6 @@ export function MainPage({
     });
   }
 
-  const testOutpost = async () => {
-    const result = await invoke("get_outpost_saves").catch((err) => {
-      toast({
-        title: "Uh oh! Something went wrong.",
-        description: err,
-        action: (
-          <ToastAction
-            altText="Try again"
-            onClick={() => setIsDrawerOpen(true)}
-          >
-            Try again
-          </ToastAction>
-        ),
-      });
-      return;
-    });
-
-    if (result) {
-      console.log(result);
-    }
-  };
 
   const loadSave = async (filepath: string) => {
       setIsLoading(true);
@@ -713,7 +691,6 @@ export function MainPage({
                       </div>
                     </DrawerContent>
                   </Drawer>
-                  <Button onClick={() => testOutpost()}>Test</Button>
                 </CardFooter>
               </Card>
               <Card x-chunk="dashboard-05-chunk-1">
@@ -825,7 +802,7 @@ export function MainPage({
       {/* Loading Animation */}
       {isLoading && (
         <>
-          <section className="absolute w-full h-full grid place-content-center bg-background/50">
+          <section className="fixed w-full h-full grid place-content-center bg-background/50">
             <HelixLoader></HelixLoader>
           </section>
         </>
