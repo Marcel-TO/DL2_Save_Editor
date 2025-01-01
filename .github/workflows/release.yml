@@ -72,7 +72,7 @@ jobs:
           args: ${{ matrix.settings.args }}
       
       - name: attest
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v2
         with:
           subject-name: ${{ github.repository }}
           subject-digest: ${{ steps.build.outputs.digest }}
