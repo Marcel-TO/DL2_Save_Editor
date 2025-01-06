@@ -21,7 +21,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { NavbarComponent } from "@/components/custom/custom-navbar-component";
-import { IdData, SaveFile } from "@/models/save-models";
+import { IdData, PatchedItems, SaveFile } from "@/models/save-models";
 import {
   Tooltip,
   TooltipContent,
@@ -66,12 +66,14 @@ type MainPageProps = {
   appSettings: AppSettings;
   currentSaveFile: SettingState<SaveFile | undefined>;
   idData: SettingState<IdData[] | undefined>;
+  patchedItems: SettingState<PatchedItems | undefined>;
 };
 
 export function MainPage({
   currentSaveFile,
   appSettings,
   idData,
+  patchedItems,
 }: MainPageProps) {
   // State for the current loading state.
   const [isLoading, setIsLoading] = useState(false);
@@ -142,6 +144,7 @@ export function MainPage({
     fetchReleaseInfo();
     setUserName(getUserName());
     handleSetIdData();
+    handleSetPatchedItems();
   }, []);
 
   async function listenDragDrop() {
@@ -197,10 +200,9 @@ export function MainPage({
     });
   }
 
-
   const loadSave = async (filepath: string) => {
-      setIsLoading(true);
-      setIsDrawerOpen(false);
+    setIsLoading(true);
+    setIsDrawerOpen(false);
     let newSave = await invoke<SaveFile>("load_save", {
       file_path: filepath,
       is_debugging: appSettings.isDebugging.value,
@@ -355,6 +357,26 @@ export function MainPage({
 
     if (ids) {
       idData.setValue(ids);
+    }
+  }
+
+  async function handleSetPatchedItems() {
+    let patched_items = await invoke<PatchedItems>(
+      "get_patched_items",
+      {}
+    ).catch((err) => {
+      toast({
+        title: "Uh oh! Something went wrong!",
+        description:
+          err ??
+          "An error occured while trying to load the Patched Items. Please make sure the Patched_items folder exists in the editor's directory.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
+      return;
+    });
+
+    if (patched_items) {
+      patchedItems.setValue(patched_items);
     }
   }
 

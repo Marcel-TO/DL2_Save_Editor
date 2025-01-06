@@ -3,6 +3,11 @@ export interface IdData {
     ids: string[]
 }
 
+export interface PatchedItems {
+    not_dropable: string[],
+    not_shareable: string[]
+}
+
 export interface InventoryChunk {
     level: Uint8Array,
     seed: Uint8Array,

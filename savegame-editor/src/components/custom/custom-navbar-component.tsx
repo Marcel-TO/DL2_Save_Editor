@@ -18,6 +18,7 @@ import {
   User,
   Heart,
   StarIcon,
+  ShieldAlertIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
@@ -66,6 +67,12 @@ const otherPages: [string, JSX.Element, string, boolean][] = [
     "IDs",
     <Fingerprint className="h-5 w-5 transition-all group-hover:scale-110" />,
     "/ids",
+    false,
+  ],
+  [
+    "Patched Items",
+    <ShieldAlertIcon className="h-5 w-5 transition-all group-hover:scale-110" />,
+    "/patched-items",
     false,
   ],
 ];

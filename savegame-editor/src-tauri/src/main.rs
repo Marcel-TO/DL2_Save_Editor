@@ -1,8 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod save_logic;
 mod logger;
+mod save_logic;
 
 use std::error::Error;
 
@@ -15,8 +15,9 @@ use save_logic::file_analyser::{
     load_save_file, load_save_file_pc, remove_inventory_item,
 };
 use save_logic::id_fetcher::{fetch_ids, update_ids};
-use save_logic::struct_data::{IdData, InventoryChunk, OutpostSave, SaveFile};
+use save_logic::patched_items_fetcher::fetch_patched_ids;
 use save_logic::save_outpost::fetch_outpost_saves;
+use save_logic::struct_data::{IdData, InventoryChunk, OutpostSave, PatchedItems, SaveFile};
 use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Manager};
 
@@ -34,6 +35,20 @@ async fn get_ids(app_handle: AppHandle) -> Result<Vec<IdData>, String> {
             let empty_vectory: Vec<IdData> = Vec::new();
             Ok(empty_vectory)
         }
+    }
+}
+
+#[tauri::command(rename_all = "snake_case")]
+async fn get_patched_items(app_handle: AppHandle) -> Result<PatchedItems, String> {
+    // Initializes resource path where IDs are stored.
+    let resource_path = app_handle
+        .path()
+        .resolve("./Patched_Items/", BaseDirectory::Resource)
+        .unwrap();
+
+    match fetch_patched_ids(&resource_path.display().to_string()) {
+        Ok(patched_items) => Ok(patched_items),
+        Err(_) => Err("Could not find the patched files.".into()),
     }
 }
 
@@ -337,7 +352,8 @@ fn main() {
             change_items_amount_1,
             open_knowledge_window,
             add_crc_bypass_files,
-            get_outpost_saves
+            get_outpost_saves,
+            get_patched_items
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

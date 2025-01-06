@@ -9,7 +9,8 @@
     "resources": [
       "./IDs/*",
       "./CRC_Bypass/*",
-      "./Hawks_Outpost/**/*"
+      "./Hawks_Outpost/**/*",
+      "./Patched_Items/*"
     ],
     "active": true,
     "targets": "all",

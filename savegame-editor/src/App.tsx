@@ -9,7 +9,12 @@ import {
 import { MainPage } from "./pages/main-page";
 import { InfoPage } from "./pages/info-page";
 import { useEffect, useState } from "react";
-import { IdData, OutpostSave, SaveFile } from "./models/save-models";
+import {
+  IdData,
+  OutpostSave,
+  PatchedItems,
+  SaveFile,
+} from "./models/save-models";
 import { SettingsPage } from "./pages/settings-page";
 import { AppSettings, SettingState } from "./models/settings-model";
 import { SkillsPage } from "./pages/skills-page";
@@ -24,19 +29,23 @@ import { DebugPage } from "./pages/debug-page";
 import { SponsorPage } from "./pages/sponsor-page";
 import { WelcomePage } from "./pages/welcome-page";
 import { Store } from "@tauri-apps/plugin-store";
-import { initializeAppSettings, initializeStore } from "./models/settings-manager";
+import {
+  initializeAppSettings,
+  initializeStore,
+} from "./models/settings-manager";
 import { HawksOutpostPage } from "./pages/outpost-page";
+import { PatchedItemsPage } from "./pages/patched-items-page";
 
 function App() {
   // Declare app settings manager
-  const appSettings: AppSettings = initializeAppSettings()
+  const appSettings: AppSettings = initializeAppSettings();
   const [settingsManager, setSettingsManager] = useState<Store>();
 
   useEffect(() => {
     const initialize = async () => {
       const store = await initializeStore(appSettings);
       setSettingsManager(store);
-    }
+    };
 
     initialize();
   }, []);
@@ -62,6 +71,13 @@ function App() {
     setValue: setOutpostSaves,
   };
 
+  // Declare Patched Items state
+  const [patchedItemsValue, setPatchedItems] = useState<PatchedItems>();
+  const patchedItems: SettingState<PatchedItems | undefined> = {
+    value: patchedItemsValue,
+    setValue: setPatchedItems,
+  };
+
   const router = createBrowserRouter(
     createRoutesFromElements([
       <Route
@@ -75,17 +91,28 @@ function App() {
             appSettings={appSettings}
             currentSaveFile={currentSaveFile}
             idData={idData}
+            patchedItems={patchedItems}
           />
         }
       ></Route>,
       <Route
         path={"/settings"}
-        element={<SettingsPage appSettings={appSettings} settingsManager={settingsManager}/>}
+        element={
+          <SettingsPage
+            appSettings={appSettings}
+            settingsManager={settingsManager}
+          />
+        }
       ></Route>,
       <Route path={"/info"} element={<InfoPage />}></Route>,
       <Route
         path={"/skills"}
-        element={<SkillsPage skills={currentSaveFile.value?.skills} currentSaveFile={currentSaveFile} />}
+        element={
+          <SkillsPage
+            skills={currentSaveFile.value?.skills}
+            currentSaveFile={currentSaveFile}
+          />
+        }
       ></Route>,
       <Route
         path={"/inventory"}
@@ -108,7 +135,7 @@ function App() {
       <Route path={"/backpack"} element={<BackpackPage />}></Route>,
       <Route path={"/campaign"} element={<CampaignPage />}></Route>,
       <Route path={"/player"} element={<PlayerPage />}></Route>,
-      <Route path={"/ids"} element={<IDsPage ids={idData.value}/>}></Route>,
+      <Route path={"/ids"} element={<IDsPage ids={idData.value} />}></Route>,
       <Route
         path={"/knowledge-vault"}
         element={<KnowledgeVaultPage />}
@@ -126,12 +153,21 @@ function App() {
             outpostSaves={outpostSaves}
           />
         }
-      ></Route>
+      ></Route>,
+      <Route
+        path={"/patched-items"}
+        element={<PatchedItemsPage patchedItems={patchedItems.value} />}
+      ></Route>,
     ])
   );
 
   return (
-    <ThemeProvider defaultTheme="dl2" storageKey="vite-ui-theme" appSettings={appSettings} settingsManager={settingsManager}>
+    <ThemeProvider
+      defaultTheme="dl2"
+      storageKey="vite-ui-theme"
+      appSettings={appSettings}
+      settingsManager={settingsManager}
+    >
       <div className="bg-muted/40 background-image-container">
         <RouterProvider router={router}></RouterProvider>
       </div>

@@ -62,6 +62,14 @@ import {
 } from "@/components/ui/sheet";
 import { ColumnDef, CellContext } from "@tanstack/react-table";
 import { DataTable } from "@/components/custom/data-table-component";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogHeader,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 type InventoryPageProps = {
   currentSaveFile: SettingState<SaveFile | undefined>;
@@ -130,7 +138,7 @@ export const columns: ColumnDef<InventoryItem>[] = [
             </div>
           ))}
         </div>
-      )
+      );
     },
   },
   {
@@ -175,6 +183,7 @@ export const InventoryPage = ({
   const [itemView, setItemView] = useState<DefaultItemLayout>(
     appSettings.defaultItemLayout.value
   );
+  const [isStartDialogOpen, setIsStartDialogOpen] = useState<boolean>(true);
   const [isSelectingItem, setIsSelectingItem] = useState<boolean>(false);
   const [currentItem, setCurrentItem] = useState<InventoryItem>();
   const [currentItemData, setCurrentItemData] = useState<InventoryItem[]>();
@@ -334,6 +343,10 @@ export const InventoryPage = ({
     form.setValue("seed", randomValue);
   };
 
+  const handleContinueWithInventory = () => {
+    setIsStartDialogOpen(false);
+  };
+
   return (
     <>
       <div className="flex min-h-screen w-full flex-col">
@@ -342,6 +355,36 @@ export const InventoryPage = ({
           <main className="grid flex-1 items-start gap-4 p-4">
             <div>
               <h1 className="text-3xl font-semibold mb-4">Inventory Page</h1>
+              <Dialog open={isStartDialogOpen}>
+                <DialogContent className="bg-card/70">
+                  <DialogHeader>
+                    <DialogTitle>
+                      Attention! This is a work in progress.
+                    </DialogTitle>
+                  </DialogHeader>
+                  <DialogDescription>
+                    Due to changes inside the save file structure, the inventory
+                    <strong>
+                      <u> experimental </u>
+                    </strong>
+                    state. Please make sure to backup your save file before
+                    making any changes. It may occur that the editor does not
+                    show any items or that the items are not displayed correctly
+                    with the correct stats.
+                    <br />
+                    <br />
+                    I am currently working on a new matching algorithm to fix the issue caused by techlands changes. Please be patient and wait for the next update.
+                  </DialogDescription>
+                  <DialogFooter>
+                    <Button
+                      onClick={handleContinueWithInventory}
+                      variant="outline"
+                    >
+                      Continue with experimental inventory editor
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
               {currentSaveFile.value ? (
                 <>
                   <Tabs>

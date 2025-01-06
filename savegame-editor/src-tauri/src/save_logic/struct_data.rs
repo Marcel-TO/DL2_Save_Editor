@@ -24,6 +24,21 @@ impl IdData {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PatchedItems {
+    pub not_dropable: Vec<String>,
+    pub not_shareable: Vec<String>,
+}
+
+impl PatchedItems {
+    pub fn new(not_dropable: Vec<String>, not_shareable: Vec<String>) -> Self {
+        PatchedItems {
+            not_dropable,
+            not_shareable,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct InventoryChunk {
     pub level: Vec<u8>,
     pub seed: Vec<u8>,
