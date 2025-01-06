@@ -6,15 +6,22 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+    prefix: "chore"
+      include_scope: true
 
   # Maintain dependencies for Rust / Backend
   - package-ecosystem: "cargo"
     directory: "/savegame-editor/src-tauri" # Location of package manifests
     schedule:
       interval: "monthly"
+    prefix: "chore"
+      include_scope: true
 
   # Maintain dependencies for npm
   - package-ecosystem: "npm"
     directory: "/savegame-editor"
     schedule:
       interval: "monthly"
+    commit_message:
+      prefix: "chore"
+      include_scope: true

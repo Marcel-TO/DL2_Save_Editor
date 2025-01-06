@@ -70,10 +70,3 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.settings.args }}
-
-      - name: attest
-        uses: actions/attest-build-provenance@v1
-        with:
-          subject-name: ${{ github.repository }}
-          subject-digest: ${{ steps.build.outputs.digest }}
-          push-to-registry: true
