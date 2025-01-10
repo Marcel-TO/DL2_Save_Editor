@@ -1,5 +1,9 @@
 import { load, Store } from "@tauri-apps/plugin-store";
-import { AppSettings, DefaultItemLayout } from "./settings-model";
+import {
+  AppSettings,
+  DefaultHeaderFont,
+  DefaultItemLayout,
+} from "./settings-model";
 import { useState } from "react";
 import { Theme } from "@/components/ui/theme-provider";
 
@@ -78,6 +82,18 @@ export const initializeStore = async (
     );
   }
 
+  let storedHeaderFont = await store.get<{ value: DefaultHeaderFont }>(
+    appSettings.defaultHeaderFont.storageKey ?? defaultStorageKey
+  );
+  if (storedHeaderFont) {
+    appSettings.defaultHeaderFont.setValue(storedHeaderFont.value);
+  } else {
+    await store.set(
+      appSettings.defaultHeaderFont.storageKey ?? defaultStorageKey,
+      { value: appSettings.defaultHeaderFont.value }
+    );
+  }
+
   await store.save();
   return store;
 };
@@ -90,6 +106,8 @@ export const initializeAppSettings = (): AppSettings => {
   const [hasAutomaticBackup, setHasAutomaticBackup] = useState<boolean>(true);
   const [defaultItemLayout, setDefaultItemLayout] =
     useState<DefaultItemLayout>("list");
+  const [defaultHeaderFont, setDefaultHeaderFont] =
+    useState<DefaultHeaderFont>("drip");
 
   return {
     theme: {
@@ -121,6 +139,11 @@ export const initializeAppSettings = (): AppSettings => {
       value: defaultItemLayout,
       setValue: setDefaultItemLayout,
       storageKey: "default-item-layout-settings",
+    },
+    defaultHeaderFont: {
+      value: defaultHeaderFont,
+      setValue: setDefaultHeaderFont,
+      storageKey: "default-header-font-settings",
     },
   };
 };
