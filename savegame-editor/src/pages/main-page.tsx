@@ -482,7 +482,7 @@ export function MainPage({
                         <Link to={"/debug"}>
                           <DropdownMenuItem>Debug</DropdownMenuItem>
                         </Link>
-                        <DropdownMenuItem onClick={() => openSecondWindow()}>
+                        <DropdownMenuItem onClick={() => openSecondWindow()} disabled>
                           Hex View
                         </DropdownMenuItem>
                       </DropdownMenuGroup>

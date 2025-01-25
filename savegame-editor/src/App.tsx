@@ -7,7 +7,6 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import { MainPage } from "./pages/main-page";
-import { InfoPage } from "./pages/info-page";
 import { useEffect, useState } from "react";
 import {
   IdData,
@@ -104,7 +103,6 @@ function App() {
           />
         }
       ></Route>,
-      <Route path={"/info"} element={<InfoPage />}></Route>,
       <Route
         path={"/skills"}
         element={
