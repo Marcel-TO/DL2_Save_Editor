@@ -1,6 +1,6 @@
 [package]
 name = "savegame-editor"
-version = "1.0.6"
+version = "1.0.8"
 description = "A Dying Light 2 Save Editor. Allows to edit inventory and skills."
 authors = ["Marcel-TO", "zCaazual"]
 license = "MIT License"
@@ -10,18 +10,22 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.5.2", features = [] }
+tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "1.6.8", features = [ "path-all", "fs-all", "shell-open", "dialog-all"] }
-serde = { version = "1.0.203", features = ["derive"] }
-serde_json = "1.0"
-log = "0.4.21"
-tauri-plugin-log = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "dev" }
-regex = "1.10.5"
+tauri = { version = "2.2.0", features = [] }
+tauri-plugin-store = "2.2.0"
+tauri-plugin-dialog = "2.2.0"
+tauri-plugin-shell = "2.2.0"
+tauri-plugin-fs = "2.2.0"
+
+serde = { version = "1.0.214", features = ["derive"] }
+serde_json = "1.0.134"
+log = "0.4.22"
+regex = "1.11.1"
 dotenv = "0.15.0"
-flate2 = "1.0.30"
-term = "0.7.0"
+flate2 = "1.0.33"
+term = "1.0.0"
 term_size = "0.3.2"
 
 [features]

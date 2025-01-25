@@ -1,16 +1,6 @@
-body {
-  margin: 0;
-}
-
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafb);
-}
-
-.page-container {
-  margin-top: 70px;
-  background-color: transparent;
+.background-image-container {
+    background-image: var(--background-image);
+    background-position: center;
+    background-size: cover;
+    background-attachment: fixed;
 }

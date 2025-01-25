@@ -1,0 +1,13 @@
+{
+    "name": "Batang's Endgame",
+    "owner": "Batang",
+    "description": "A max modded save with all weapons and upgrades unlocked.",
+    "features": [
+        "all new weapons",
+        "modded stats",
+        "modded weapons",
+        "all upgrades unlocked",
+        "1-hit kills"
+    ],
+    "version": "Patch18_v112S"
+}

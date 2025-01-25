@@ -1,78 +1,175 @@
 import "./App.css";
-import { useState } from "react";
-import { Route, RouterProvider, createBrowserRouter, createRoutesFromElements } from "react-router-dom";
-import { SettingsManager } from 'tauri-settings';
-import { SettingsSchema } from "./models/settings-schema";
-
-import { MainPage } from "./pages/main/main-page";
-import { SkillPage } from "./pages/skills/skill-page";
-import { ExperiencePage } from "./pages/experience/experience-page";
-import { InventoryPage } from "./pages/inventory/inventory-page";
-import { BackpackPage } from "./pages/backpack/backpack-page";
-import { CampaignPage } from "./pages/campaign/campaign-page";
-import { PlayerPage } from "./pages/player/player-page";
-import { IDsPage } from "./pages/ids/ids-page";
-import { InfoPage } from "./pages/info/info-page";
-import { Background } from "./components/background/background";
-import { IdData, SaveFile } from "./models/save-models";
-import { UnlockablePage } from "./pages/unlockable/unlockable-page";
-import { CazOutpostPage } from "./pages/caz-outpost/caz-outpost";
-import { CazCollectionPage } from "./pages/caz-collection/caz-collection";
-import { KnowledgeVaultPage } from "./pages/knowledge-vault/knowledge-vault";
-import { SettingsPage } from "./pages/settings/settings-page";
-import { DebugPage } from "./pages/debug/debug-page";
-import { StartPage } from "./pages/start/start-page";
-import { SponsorPage } from "./pages/sponsor/sponsor-page";
+import { ThemeProvider } from "@/components/ui/theme-provider";
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Route,
+  RouterProvider,
+} from "react-router-dom";
+import { MainPage } from "./pages/main-page";
+import { useEffect, useState } from "react";
+import {
+  IdData,
+  OutpostSave,
+  PatchedItems,
+  SaveFile,
+} from "./models/save-models";
+import { SettingsPage } from "./pages/settings-page";
+import { AppSettings, SettingState } from "./models/settings-model";
+import { SkillsPage } from "./pages/skills-page";
+import { InventoryPage } from "./pages/inventory-page";
+import { UnlockablesPage } from "./pages/unlockables-page";
+import { BackpackPage } from "./pages/backpack-page";
+import { CampaignPage } from "./pages/campaign-page";
+import { IDsPage } from "./pages/ids-page";
+import { PlayerPage } from "./pages/player-page";
+import { KnowledgeVaultPage } from "./pages/knowledge-vault";
+import { DebugPage } from "./pages/debug-page";
+import { SponsorPage } from "./pages/sponsor-page";
+import { WelcomePage } from "./pages/welcome-page";
+import { Store } from "@tauri-apps/plugin-store";
+import {
+  initializeAppSettings,
+  initializeStore,
+} from "./models/settings-manager";
+import { HawksOutpostPage } from "./pages/outpost-page";
+import { PatchedItemsPage } from "./pages/patched-items-page";
 
 function App() {
-  const [idDatas, setCurrentIdDatas] = useState<IdData[]>([])
-  const [currentSaveFile, setCurrentSaveFile] = useState<SaveFile>();
-  const [settingsManager, setSettingsManager] = useState<SettingsManager<SettingsSchema>>(new SettingsManager<SettingsSchema>(
-    { // defaults
-        theme: 'light',
-        startFullscreen: true,
-        debugMode: false,
-        isNewToEditor: true,
-        automaticBackup: true,
-    },
-    { // options
-        fileName: 'customization-settings'
-    }
-  ));
+  // Declare app settings manager
+  const appSettings: AppSettings = initializeAppSettings();
+  const [settingsManager, setSettingsManager] = useState<Store>();
 
-  // checks whether the settings file exists and created it if not
-  // loads the settings if it exists
-  settingsManager.initialize();
+  useEffect(() => {
+    const initialize = async () => {
+      const store = await initializeStore(appSettings);
+      setSettingsManager(store);
+    };
+
+    initialize();
+  }, []);
+
+  // Declare savefile state
+  const [currentSaveFileValue, setCurrentSaveFile] = useState<SaveFile>();
+  const currentSaveFile: SettingState<SaveFile | undefined> = {
+    value: currentSaveFileValue,
+    setValue: setCurrentSaveFile,
+  };
+
+  // Declare IDs state
+  const [idDataValue, setIdData] = useState<IdData[]>();
+  const idData: SettingState<IdData[] | undefined> = {
+    value: idDataValue,
+    setValue: setIdData,
+  };
+
+  // Declare outpost saves state
+  const [outpostSavesValue, setOutpostSaves] = useState<OutpostSave[]>();
+  const outpostSaves: SettingState<OutpostSave[] | undefined> = {
+    value: outpostSavesValue,
+    setValue: setOutpostSaves,
+  };
+
+  // Declare Patched Items state
+  const [patchedItemsValue, setPatchedItems] = useState<PatchedItems>();
+  const patchedItems: SettingState<PatchedItems | undefined> = {
+    value: patchedItemsValue,
+    setValue: setPatchedItems,
+  };
 
   const router = createBrowserRouter(
-    createRoutesFromElements(
-      [
-        (<Route path={'/'} element={<StartPage settingsManager={settingsManager} setSettingsManager={setSettingsManager}/>}></Route>),
-        (<Route path={'/main'} element={<MainPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} setIdData={setCurrentIdDatas} settingsManager={settingsManager}/>}></Route>),
-        (<Route path={'/skills'} element={<SkillPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} settingsManager={settingsManager}/>}></Route>),
-        (<Route path={'/unlockables'} element={<UnlockablePage currentSaveFile={currentSaveFile} settingsManager={settingsManager}/>}></Route>),
-        (<Route path={'/experience'} element={<ExperiencePage settingsManager={settingsManager}/>}></Route>),
-        (<Route path={'/inventory'} element={<InventoryPage currentSaveFile={currentSaveFile} setCurrentSaveFile={setCurrentSaveFile} idDatas={idDatas} settingsManager={settingsManager}/>}></Route>),
-        (<Route path={'/backpack'} element={<BackpackPage settingsManager={settingsManager}/>}></Route>),
-        (<Route path={'/campaign'} element={<CampaignPage settingsManager={settingsManager}/>}></Route>),
-        (<Route path={'/player'} element={<PlayerPage settingsManager={settingsManager}/>}></Route>),
-        (<Route path={'/ids'} element={<IDsPage idData={idDatas} settingsManager={settingsManager}/>}></Route>),
-        (<Route path={'/info'} element={<InfoPage settingsManager={settingsManager}/>}></Route>),
-        (<Route path={'/outpost'} element={<CazOutpostPage settingsManager={settingsManager}/>}></Route>),
-        (<Route path={'/caz-collection'} element={<CazCollectionPage settingsManager={settingsManager}/>}></Route>),
-        (<Route path={'/knowledge-vault'} element={<KnowledgeVaultPage settingsManager={settingsManager}/>}></Route>),
-        (<Route path={'/settings'} element={<SettingsPage settingsManager={settingsManager}/>}></Route>),
-        (<Route path={'/debug'} element={<DebugPage settingsManager={settingsManager} currentSaveFile={currentSaveFile}/>}></Route>),
-        (<Route path={'/sponsor'} element={<SponsorPage settingsManager={settingsManager}/>}></Route>),
-      ]
-    )
-  )
-  
+    createRoutesFromElements([
+      <Route
+        path={"/"}
+        element={<WelcomePage appSettings={appSettings} />}
+      ></Route>,
+      <Route
+        path={"/main"}
+        element={
+          <MainPage
+            appSettings={appSettings}
+            currentSaveFile={currentSaveFile}
+            idData={idData}
+            patchedItems={patchedItems}
+          />
+        }
+      ></Route>,
+      <Route
+        path={"/settings"}
+        element={
+          <SettingsPage
+            appSettings={appSettings}
+            settingsManager={settingsManager}
+          />
+        }
+      ></Route>,
+      <Route
+        path={"/skills"}
+        element={
+          <SkillsPage
+            skills={currentSaveFile.value?.skills}
+            currentSaveFile={currentSaveFile}
+          />
+        }
+      ></Route>,
+      <Route
+        path={"/inventory"}
+        element={
+          <InventoryPage
+            currentSaveFile={currentSaveFile}
+            currentIdData={idData}
+            appSettings={appSettings}
+          />
+        }
+      ></Route>,
+      <Route
+        path={"/unlockables"}
+        element={
+          <UnlockablesPage
+            unlockables={currentSaveFile.value?.unlockable_items}
+          />
+        }
+      ></Route>,
+      <Route path={"/backpack"} element={<BackpackPage />}></Route>,
+      <Route path={"/campaign"} element={<CampaignPage />}></Route>,
+      <Route path={"/player"} element={<PlayerPage />}></Route>,
+      <Route path={"/ids"} element={<IDsPage ids={idData.value} />}></Route>,
+      <Route
+        path={"/knowledge-vault"}
+        element={<KnowledgeVaultPage />}
+      ></Route>,
+      <Route
+        path={"/debug"}
+        element={<DebugPage log_history={currentSaveFile.value?.log_history} />}
+      ></Route>,
+      <Route path={"/sponsor"} element={<SponsorPage />}></Route>,
+      <Route
+        path={"/hawks-outpost"}
+        element={
+          <HawksOutpostPage
+            currentSaveFile={currentSaveFile}
+            outpostSaves={outpostSaves}
+          />
+        }
+      ></Route>,
+      <Route
+        path={"/patched-items"}
+        element={<PatchedItemsPage patchedItems={patchedItems.value} />}
+      ></Route>,
+    ])
+  );
+
   return (
-    <>
-      <Background/>
-      <RouterProvider router={router}></RouterProvider>
-    </>
+    <ThemeProvider
+      defaultTheme="dl2"
+      storageKey="vite-ui-theme"
+      appSettings={appSettings}
+      settingsManager={settingsManager}
+    >
+      <div className="bg-muted/40 background-image-container">
+        <RouterProvider router={router}></RouterProvider>
+      </div>
+    </ThemeProvider>
   );
 }
 

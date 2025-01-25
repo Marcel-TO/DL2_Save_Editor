@@ -297,3 +297,4 @@ Event_WinterEvent_Bundle_Arrow_DeepFreeze
 Event_WinterEvent_Evil_Elf_Bundle
 Event_WinterEvent_ExplodingBauble_Bundle
 Event_WinterEvent_Snowball_Bundle
+SMG_DL1_WeaponBundle

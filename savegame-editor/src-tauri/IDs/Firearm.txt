@@ -163,3 +163,4 @@ wpn_2hp_bow_bozak
 wpn_2hp_bow_bozak
 wpn_2hp_bow_winter_elf
 wpn_2hp_bow_winter_elf_Artifact
+Weapon_Firearm_Submachinegun_DL1

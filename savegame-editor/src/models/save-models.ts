@@ -3,6 +3,11 @@ export interface IdData {
     ids: string[]
 }
 
+export interface PatchedItems {
+    not_dropable: string[],
+    not_shareable: string[]
+}
+
 export interface InventoryChunk {
     level: Uint8Array,
     seed: Uint8Array,
@@ -65,5 +70,16 @@ export interface SaveFile {
     skills: Skills,
     unlockable_items: UnlockableItem[],
     items: InventoryItemRow[],
-    log_history: string[]
+    log_history: string[],
+    is_compressed: boolean,
+    game_version: string
+}
+
+export interface OutpostSave {
+    name: string,
+    owner: string,
+    description: string,
+    features: string[],
+    version: string,
+    save_file: SaveFile
 }
