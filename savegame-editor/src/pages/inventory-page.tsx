@@ -22,17 +22,13 @@ import {
   ChevronsUpDown,
   GalleryHorizontal,
   List,
-  Split,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
 import { InventoryItemCard } from "@/components/custom/inventory-item-card";
 import { Input } from "@/components/ui/input";
 import {
-  Tooltip,
-  TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { invoke } from "@tauri-apps/api/core";
 import {
@@ -558,21 +554,39 @@ export const InventoryPage = ({
                                 {...field}
                               />
                             </FormControl>
-                            <Tooltip>
-                              <TooltipTrigger className="col-span-2">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger className="col-span-2">
                                 <Button
-                                  onClick={() => generateRandomSeed()}
                                   variant="outline"
-                                  className="col-span-2 m-0 p-0 w-full"
+                                  className="col-span-2 w-full m-0 p-0"
                                   type="button"
-                                >
-                                  <Split className="h-4 w-4" />
+                                  >
+                                  <ChevronDown className="h-4 w-4" />
                                 </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                Generate a random seed value.
-                              </TooltipContent>
-                            </Tooltip>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuItem
+                                  onSelect={() => form.setValue("seed", 22352)}
+                                  className="cursor-pointer"
+                                  >
+                                  12 different Stats
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onSelect={() => form.setValue("seed", 60184)}
+                                  className="cursor-pointer"
+                                  >
+                                  godmode armor
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onSelect={() =>
+                                    generateRandomSeed()
+                                  }
+                                  className="cursor-pointer"
+                                >
+                                  random Seed
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                             <div className="col-span-6 col-start-3">
                               <FormDescription>
                                 The seed of the desired item. The maximum seed
@@ -613,16 +627,19 @@ export const InventoryPage = ({
                               <DropdownMenuContent>
                                 <DropdownMenuItem
                                   onSelect={() => form.setValue("amount", 0)}
+                                  className="cursor-pointer"
                                 >
                                   0
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onSelect={() => form.setValue("amount", 999)}
+                                  className="cursor-pointer"
                                 >
                                   999
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onSelect={() => form.setValue("amount", 9999)}
+                                  className="cursor-pointer"
                                 >
                                   9999
                                 </DropdownMenuItem>
@@ -630,6 +647,7 @@ export const InventoryPage = ({
                                   onSelect={() =>
                                     form.setValue("amount", 999999)
                                   }
+                                  className="cursor-pointer"
                                 >
                                   999999
                                 </DropdownMenuItem>

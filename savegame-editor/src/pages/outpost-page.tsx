@@ -1,13 +1,7 @@
 import { NavbarComponent } from "@/components/custom/custom-navbar-component";
 import { HelixLoader } from "@/components/custom/helix-loader/helix-loader-component";
 import { OutPostCarouselComponent } from "@/components/custom/outpost-carousel-component";
-import Card, {
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
 import { ToastAction } from "@/components/ui/toast";
-import { TypographyP } from "@/components/ui/typography";
 import { toast } from "@/components/ui/use-toast";
 import { OutpostSave, SaveFile } from "@/models/save-models";
 import { SettingState } from "@/models/settings-model";
