@@ -123,6 +123,16 @@ Currently there are 2 contributers that work hard to increase the experience of 
     <img alt="Static Badge" src="https://img.shields.io/badge/Tester-Batang-2f4045?style=for-the-badge">
   </a>
 </p>
+<p>
+  <a href="https://github.com/EricPlayZ" target="_blank">
+    <img alt="Static Badge" src="https://img.shields.io/badge/CRCDev-EricPlayZ-899994?style=for-the-badge">
+  </a>
+</p>
+<p>
+  <a href="https://youtube.com/@samuiyorus" target="_blank">
+    <img alt="Static Badge" src="https://img.shields.io/badge/Tester-Zdashero-526264?style=for-the-badge">
+  </a>
+</p>
 
 ## Join the Community
 The Editor was built in collaboration with a dedicated Dying Light 2 Modding Discord Server. If you have any questions feel free to join the Community.
