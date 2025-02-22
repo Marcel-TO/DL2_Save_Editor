@@ -1,4 +1,10 @@
-import { GalleryHorizontal, HelpCircle, List, Save } from "lucide-react";
+import {
+  CaseUpperIcon,
+  GalleryHorizontal,
+  HelpCircle,
+  List,
+  Save,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +26,11 @@ import {
 } from "@/components/ui/hover-card";
 import { useState } from "react";
 import { ThemeModeToggle } from "@/components/custom/theme-button";
-import { AppSettings, DefaultItemLayout } from "@/models/settings-model";
+import {
+  AppSettings,
+  DefaultHeaderFont,
+  DefaultItemLayout,
+} from "@/models/settings-model";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -61,12 +71,17 @@ export const SettingsPage = ({
   const [defaultItemLayout, setDefaultItemLayout] = useState<DefaultItemLayout>(
     appSettings.defaultItemLayout.value
   );
+  const [defaultHeaderFont, setDefaultHeaderFont] = useState<DefaultHeaderFont>(
+    appSettings.defaultHeaderFont.value
+  );
 
   // Saving states
   const [isSavingCRC, setIsSavingCRC] = useState(false);
   const [isSavingDebugging, setIsSavingDebugging] = useState(false);
   const [isSavingAutomaticBackup, setIsSavingAutomaticBackup] = useState(false);
   const [isSavingDefaultItemLayout, setIsSavingDefaultItemLayout] =
+    useState(false);
+  const [isSavingDefaultHeaderFont, setIsSavingDefaultHeaderFont] =
     useState(false);
 
   const saveCrcDataToLocalStorage = async (crc: boolean, path: string) => {
@@ -98,7 +113,6 @@ export const SettingsPage = ({
     setTimeout(() => {
       setIsSavingCRC(false);
     }, 1000);
-
 
     // Check if the user wants to bypass the CRC check and does not enter a path
     if (data.crcCheckbox && gameFolderPath == "") {
@@ -175,6 +189,21 @@ export const SettingsPage = ({
     // Disable saving for 1 second to prevent spamming the button
     setTimeout(() => {
       setIsSavingDefaultItemLayout(false);
+    }, 1000);
+  };
+
+  const onSubmitDefaultHeaderFont = async () => {
+    setIsSavingDefaultHeaderFont(true);
+
+    if (appSettings.defaultHeaderFont.storageKey && settingsManager) {
+      await settingsManager.set(appSettings.defaultHeaderFont.storageKey, {
+        value: defaultHeaderFont,
+      });
+    }
+
+    // Disable saving for 1 second to prevent spamming the button
+    setTimeout(() => {
+      setIsSavingDefaultHeaderFont(false);
     }, 1000);
   };
 
@@ -610,6 +639,131 @@ export const SettingsPage = ({
                       </span>
                     )}
                     {isSavingDefaultItemLayout && (
+                      <span className="inline-block animate-popUpAndVanish">
+                        <Save className="w-6 h-6" />
+                      </span>
+                    )}
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card className="mx-20 my-10">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Default Header Font</CardTitle>
+                      <CardDescription>
+                        If you do not like the default header font you can
+                        change it here.
+                      </CardDescription>
+                    </div>
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <HelpCircle className="w-6 h-6 text-muted-foreground cursor-pointer" />
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80" side="left">
+                        <div className="flex justify-between space-x-4">
+                          <div className="space-y-1">
+                            <h4 className="text-sm font-semibold">
+                              Why different Fonts?
+                            </h4>
+                            <p className="text-sm">
+                              Since every person has a different preference, not
+                              everyone likes the font I chose for the header.
+                              Personally I like it, but I understand that not
+                              everyone does. You can choose between three
+                              different fonts. The Editor will remember your
+                              choice. Keep in mind that when changing the
+                              default settings for the layout, it will only
+                              affect the Editor after a restart.
+                            </p>
+                          </div>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="items-top flex space-x-2">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 gap-2 text-sm bg-card/50"
+                        >
+                          {defaultHeaderFont === "drip" ? (
+                            <span className="sr-only sm:not-sr-only font-drip">
+                              Drip Font
+                            </span>
+                          ) : defaultHeaderFont === "mono" ? (
+                            <span className="sr-only sm:not-sr-only font-mono">
+                              Mono Font
+                            </span>
+                          ) : defaultHeaderFont === "sans" ? (
+                            <span className="sr-only sm:not-sr-only font-sans">
+                              Sans Font
+                            </span>
+                          ) : (
+                            <>
+                              <span className="sr-only sm:not-sr-only">
+                                No Font
+                              </span>
+                            </>
+                          )}
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>
+                          View Headers with Font
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuCheckboxItem
+                          checked={defaultHeaderFont === "drip"}
+                          onClick={() => setDefaultHeaderFont("drip")}
+                          className="h-7 gap-1 text-sm"
+                        >
+                          <CaseUpperIcon className="h-3.5 w-3.5" />
+                          <span className="">Drip Font: </span>
+                          <span className="font-drip">ABCDEFG</span>
+                        </DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem
+                          checked={defaultHeaderFont === "mono"}
+                          onClick={() => setDefaultHeaderFont("mono")}
+                          className="h-7 gap-1 text-sm"
+                        >
+                          <CaseUpperIcon className="h-3.5 w-3.5" />
+                          <span className="">Mono Font: </span>
+                          <span className="font-mono">ABCDEFG</span>
+                        </DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem
+                          checked={defaultHeaderFont === "sans"}
+                          onClick={() => setDefaultHeaderFont("sans")}
+                          className="h-7 gap-1 text-sm"
+                        >
+                          <CaseUpperIcon className="h-3.5 w-3.5" />
+                          <span className="">Sans Font: </span>
+                          <span className="font-sans">ABCDEFG</span>
+                        </DropdownMenuCheckboxItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </CardContent>
+                <CardFooter className="border-t px-6 py-4 transition-all">
+                  <Button
+                    onClick={onSubmitDefaultHeaderFont}
+                    className={`transition-all duration-300 ease-in-out ${
+                      isSavingDefaultHeaderFont
+                        ? "rounded-full w-12 h-12"
+                        : "py-2 px-4 rounded flex items-center justify-center"
+                    }`}
+                  >
+                    {!isSavingDefaultHeaderFont && (
+                      <span className="transition-opacity duration-700 ease-in-out">
+                        Submit
+                      </span>
+                    )}
+                    {isSavingDefaultHeaderFont && (
                       <span className="inline-block animate-popUpAndVanish">
                         <Save className="w-6 h-6" />
                       </span>

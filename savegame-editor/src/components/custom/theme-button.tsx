@@ -1,4 +1,13 @@
-import { Biohazard, Droplet, Ghost, Moon, Paintbrush2Icon, PawPrint, Sparkle, Sun } from "lucide-react";
+import {
+  Biohazard,
+  Droplet,
+  Ghost,
+  Moon,
+  Paintbrush2Icon,
+  PawPrint,
+  Sparkle,
+  Sun,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -46,12 +55,15 @@ export function ThemeModeToggle() {
           {theme === "batang" && (
             <Paintbrush2Icon className="h-[1.2rem] w-[1.2rem] transition-all" />
           )}
+          {theme === "beast" && (
+            <PawPrint className="h-[1.2rem] w-[1.2rem] transition-all" />
+          )}
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuGroup>
-          <DropdownMenuLabel>Background</DropdownMenuLabel>
+          <DropdownMenuLabel>Dark</DropdownMenuLabel>
           <DropdownMenuItem
             onClick={() => {
               setTheme("dl2");
@@ -74,6 +86,21 @@ export function ThemeModeToggle() {
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => {
+              setTheme("dark");
+              navigate("/main");
+            }}
+            className={`${
+              theme === "dark" ? "bg-muted" : "bg-transparent"
+            } p-2`}
+          >
+            Dark
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <Separator />
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Light</DropdownMenuLabel>
+          <DropdownMenuItem
+            onClick={() => {
               setTheme("hope");
               navigate("/main");
             }}
@@ -83,10 +110,6 @@ export function ThemeModeToggle() {
           >
             Hope
           </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <Separator />
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>Simple</DropdownMenuLabel>
           <DropdownMenuItem
             onClick={() => {
               setTheme("light");
@@ -97,17 +120,6 @@ export function ThemeModeToggle() {
             } p-2`}
           >
             Light
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => {
-              setTheme("dark");
-              navigate("/main");
-            }}
-            className={`${
-              theme === "dark" ? "bg-muted" : "bg-transparent"
-            } p-2`}
-          >
-            Dark
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => {

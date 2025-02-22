@@ -1,5 +1,5 @@
 use crate::save_logic::struct_data::PatchedItems;
-use std::{error::Error, fs, path::Path};
+use std::{error::Error, fs};
 
 // Define global result definition for easier readability.
 type Result<T> = std::result::Result<T, Box<dyn Error>>;

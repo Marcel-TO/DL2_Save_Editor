@@ -6,7 +6,7 @@ const Card = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => {
   const [isBackgroundImageNoneOrEmpty, setIsBackgroundImageNoneOrEmpty] = React.useState<boolean>(false);
-  
+
   React.useEffect(() => {
     // Function to get the value of the --background-image CSS variable
     const getBackgroundImage = () => {
@@ -70,7 +70,7 @@ const CardDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <p
+  <div
     ref={ref}
     className={cn("text-sm text-muted-foreground", className)}
     {...props}

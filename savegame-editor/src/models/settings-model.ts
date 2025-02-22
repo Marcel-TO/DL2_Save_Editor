@@ -9,6 +9,8 @@ export type SettingState<T> = {
 
 export type DefaultItemLayout = "list" | "grid";
 
+export type DefaultHeaderFont = "drip" | "mono" | "sans";
+
 export type AppSettings = {
     theme: SettingState<Theme>;
     crc: SettingState<boolean>;
@@ -16,4 +18,5 @@ export type AppSettings = {
     isDebugging: SettingState<boolean>;
     hasAutomaticBackup: SettingState<boolean>;
     defaultItemLayout: SettingState<DefaultItemLayout>;
+    defaultHeaderFont: SettingState<DefaultHeaderFont>;
 };

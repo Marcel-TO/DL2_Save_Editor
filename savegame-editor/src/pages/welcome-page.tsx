@@ -45,7 +45,8 @@ export const WelcomePage = ({ appSettings }: WelcomePageProps) => {
                     This tool allows you to take control of your game save,
                     unlocking a realm of possibilities and customization. It is
                     fully open source, so if you like to change something or
-                    want to collaborate to improve the experience for all.
+                    want to collaborate to improve the experience for all, feel
+                    free to do so.
                   </DialogDescription>
                   <DialogFooter>
                     <Button

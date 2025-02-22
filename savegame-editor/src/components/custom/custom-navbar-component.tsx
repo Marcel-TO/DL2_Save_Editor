@@ -10,7 +10,6 @@ import {
   Backpack,
   BookOpenText,
   Fingerprint,
-  Info,
   LockKeyholeOpen,
   MessageSquareWarning,
   Split,
@@ -78,12 +77,6 @@ const otherPages: [string, JSX.Element, string, boolean][] = [
 ];
 const infoPages: [string, JSX.Element, string, boolean][] = [
   [
-    "Info",
-    <Info className="h-5 w-5 transition-all group-hover:scale-110" />,
-    "/info",
-    false,
-  ],
-  [
     "Knowledge Vault",
     <BookOpenText className="h-5 w-5 transition-all group-hover:scale-110" />,
     "/knowledge-vault",
@@ -112,7 +105,7 @@ export const NavbarComponent = () => {
             </Link>
             <Separator />
             {infoPages.map(([text, icon, link, isDisabled]) => (
-              <Tooltip>
+              <Tooltip key={link}>
                 <TooltipTrigger asChild>
                   <Link
                     to={link}
@@ -128,7 +121,7 @@ export const NavbarComponent = () => {
             ))}
             <Separator />
             {editPages.map(([text, icon, link, isDisabled]) => (
-              <Tooltip>
+              <Tooltip key={link}>
                 <TooltipTrigger asChild>
                   <Link
                     to={link}
@@ -144,7 +137,7 @@ export const NavbarComponent = () => {
             ))}
             <Separator />
             {otherPages.map(([text, icon, link, isDisabled]) => (
-              <Tooltip>
+              <Tooltip key={link}>
                 <TooltipTrigger asChild>
                   <Link
                     to={link}
