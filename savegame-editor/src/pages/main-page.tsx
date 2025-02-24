@@ -86,6 +86,7 @@ export function MainPage({
   const [userName, setUserName] = useState<string>("");
 
   // States for the Save File
+  const [currentSaveFileValue, setCurrentSaveFile] = useState<SaveFile>();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // initialize toast for error messages
@@ -141,11 +142,12 @@ export function MainPage({
       return "";
     };
 
+    setCurrentSaveFile(currentSaveFile.value);
     fetchReleaseInfo();
     setUserName(getUserName());
     handleSetIdData();
     handleSetPatchedItems();
-  }, []);
+  }, [currentSaveFile.value]);
 
   async function listenDragDrop() {
     listen<{ paths: string[] }>(TauriEvent.DRAG_DROP, async (event) => {
@@ -225,6 +227,7 @@ export function MainPage({
 
     if (newSave) {
       currentSaveFile.setValue(newSave);
+      setCurrentSaveFile(newSave);
       console.log(newSave);
       setIsLoading(false);
     }
@@ -247,7 +250,7 @@ export function MainPage({
   }
 
   function handleSavingCurrentSaveFile() {
-    if (currentSaveFile.value?.is_compressed == true) {
+    if (currentSaveFileValue?.is_compressed == true) {
       saveCurrentSaveFileCompressed();
     } else {
       saveCurrentSaveFileDecompressed();
@@ -265,18 +268,19 @@ export function MainPage({
       ],
     });
 
-    if (filePath != null && currentSaveFile.value != undefined) {
+    if (filePath != null && currentSaveFileValue != undefined) {
       // Save data to file
-      await writeFile(filePath, currentSaveFile.value.file_content).catch(
-        (err) => {
-          toast({
-            title: "Uh oh! Something went wrong. :/",
-            description:
-              "The Editor stumbled accross the following error: " + err,
-          });
-          return;
-        }
-      );
+      await writeFile(
+        filePath,
+        new Uint8Array(currentSaveFileValue.file_content)
+      ).catch((err) => {
+        toast({
+          title: "Uh oh! Something went wrong. :/",
+          description:
+            "The Editor stumbled accross the following error: " + err,
+        });
+        return;
+      });
     }
   }
 
@@ -291,10 +295,10 @@ export function MainPage({
       ],
     });
 
-    if (filePath != null && currentSaveFile.value != undefined) {
+    if (filePath != null && currentSaveFileValue != undefined) {
       // Save data to file
       let compressed = await invoke<Uint8Array>("compress_save", {
-        data: currentSaveFile.value.file_content,
+        data: currentSaveFileValue.file_content,
       }).catch((err) => {
         toast({
           title: "Uh oh! Something went wrong. :/",
@@ -305,7 +309,7 @@ export function MainPage({
       });
 
       if (compressed) {
-        await writeFile(filePath, compressed).catch((err) => {
+        await writeFile(filePath, new Uint8Array(compressed)).catch((err) => {
           toast({
             title: "Uh oh! Something went wrong. :/",
             description:
@@ -328,9 +332,9 @@ export function MainPage({
       ],
     });
 
-    if (filePath != null && currentSaveFile.value != undefined) {
+    if (filePath != null && currentSaveFileValue != undefined) {
       // Save data to file
-      await writeFile(filePath, currentSaveFile.value.file_content).catch(
+      await writeFile(filePath, currentSaveFileValue.file_content).catch(
         (err) => {
           toast({
             title: "Uh oh! Something went wrong. :/",
@@ -408,7 +412,7 @@ export function MainPage({
               <CardHeader className="flex flex-row items-start bg-muted/50">
                 <div className="grid gap-0.5">
                   <CardTitle className="group flex items-center gap-2 text-lg">
-                    {currentSaveFile.value?.path.split(/[/\\]/).pop() ??
+                    {currentSaveFileValue?.path.split(/[/\\]/).pop() ??
                       "No Save Selected"}
                     <TooltipProvider>
                       <Tooltip>
@@ -419,7 +423,7 @@ export function MainPage({
                             className="h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
                             onClick={() =>
                               navigator.clipboard.writeText(
-                                currentSaveFile.value?.path ?? ""
+                                currentSaveFileValue?.path ?? ""
                               )
                             }
                           >
@@ -432,15 +436,15 @@ export function MainPage({
                     </TooltipProvider>
                   </CardTitle>
                   <CardDescription>
-                    {currentSaveFile.value ? (
+                    {currentSaveFileValue ? (
                       <>
                         <div className="flex flex-col">
                           <div>
-                            Save Version: {currentSaveFile.value?.game_version}
+                            Save Version: {currentSaveFileValue?.game_version}
                           </div>
                           <div>
                             Is Compressed:{" "}
-                            {currentSaveFile.value?.is_compressed == true
+                            {currentSaveFileValue?.is_compressed == true
                               ? "Yes"
                               : "No"}
                           </div>
@@ -456,7 +460,7 @@ export function MainPage({
                     size="sm"
                     variant="outline"
                     className="h-8 gap-1"
-                    disabled={currentSaveFile.value ? false : true}
+                    disabled={currentSaveFileValue ? false : true}
                     onClick={() => handleSavingCurrentSaveFile()}
                   >
                     <Save className="h-3.5 w-3.5" />
@@ -470,7 +474,7 @@ export function MainPage({
                         size="icon"
                         variant="outline"
                         className="h-8 w-8"
-                        disabled={currentSaveFile.value ? false : true}
+                        disabled={currentSaveFileValue ? false : true}
                       >
                         <MoreVertical className="h-3.5 w-3.5" />
                         <span className="sr-only">More</span>
@@ -482,7 +486,10 @@ export function MainPage({
                         <Link to={"/debug"}>
                           <DropdownMenuItem>Debug</DropdownMenuItem>
                         </Link>
-                        <DropdownMenuItem onClick={() => openSecondWindow()} disabled>
+                        <DropdownMenuItem
+                          onClick={() => openSecondWindow()}
+                          disabled
+                        >
                           Hex View
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
@@ -523,9 +530,10 @@ export function MainPage({
                           <DialogFooter>
                             <DialogClose asChild>
                               <Button
-                                onClick={() =>
-                                  currentSaveFile.setValue(undefined)
-                                }
+                                onClick={() => {
+                                  currentSaveFile.setValue(undefined);
+                                  setCurrentSaveFile(undefined);
+                                }}
                                 variant="destructive"
                               >
                                 Reset
@@ -543,13 +551,13 @@ export function MainPage({
                   <div className="font-semibold">Skills</div>
                   <ul className="grid gap-3">
                     <li className="flex items-center justify-between">
-                      {currentSaveFile.value ? (
+                      {currentSaveFileValue ? (
                         <>
                           <span className="text-muted-foreground">
                             Base Skills
                           </span>
                           <span>
-                            {currentSaveFile.value?.skills.base_skills.length}
+                            {currentSaveFileValue?.skills.base_skills.length}
                           </span>
                         </>
                       ) : (
@@ -557,13 +565,13 @@ export function MainPage({
                       )}
                     </li>
                     <li className="flex items-center justify-between">
-                      {currentSaveFile.value ? (
+                      {currentSaveFileValue ? (
                         <>
                           <span className="text-muted-foreground">
                             Legend Skills
                           </span>
                           <span>
-                            {currentSaveFile.value?.skills.legend_skills.length}
+                            {currentSaveFileValue?.skills.legend_skills.length}
                           </span>
                         </>
                       ) : (
@@ -575,11 +583,11 @@ export function MainPage({
                 <Separator className="my-2" />
                 <div className="font-semibold">Inventory</div>
                 <ul className="grid gap-3">
-                  {currentSaveFile.value ? (
+                  {currentSaveFileValue ? (
                     <>
-                      {currentSaveFile.value.items.map((item) => (
+                      {currentSaveFileValue.items.map((item, index) => (
                         <li
-                          key={item.name}
+                          key={index}
                           className="flex items-center justify-between"
                         >
                           <span className="text-muted-foreground">
@@ -596,11 +604,11 @@ export function MainPage({
                 <Separator className="my-4" />
                 <div className="font-semibold">Unlockables</div>
                 <ul className="grid gap-3">
-                  {currentSaveFile.value ? (
+                  {currentSaveFileValue ? (
                     <li className="flex items-center justify-between">
                       <span className="text-muted-foreground">Amount</span>
                       <span>
-                        {currentSaveFile.value?.unlockable_items.length}
+                        {currentSaveFileValue?.unlockable_items.length}
                       </span>
                     </li>
                   ) : (
@@ -609,7 +617,7 @@ export function MainPage({
                 </ul>
                 <Separator className="my-4" />
                 <div className="font-semibold mb-2">Campaign</div>
-                {currentSaveFile.value ? (
+                {currentSaveFileValue ? (
                   <>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="grid">
@@ -649,7 +657,7 @@ export function MainPage({
               </CardContent>
               <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
                 <div className="text-xs text-muted-foreground">
-                  Path: {currentSaveFile.value?.path}
+                  Path: {currentSaveFileValue?.path}
                 </div>
               </CardFooter>
             </Card>
@@ -795,7 +803,7 @@ export function MainPage({
                   </CardHeader>
                 </Card>
               </Link>
-              <Card className="sm:col-span-2" x-chunk="dashboard-05-chunk-0">
+              <Card className="sm:col-span-2">
                 <CardHeader className="pb-3">
                   <CardTitle>Knowledge-Vault</CardTitle>
                   <CardDescription className="max-w-lg text-balance leading-relaxed">
