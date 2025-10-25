@@ -27,7 +27,7 @@ type Result<T> = std::result::Result<T, Box<dyn Error>>;
 // Defines the first sequence for the skill section.
 static START_SKILLS: &[u8] = b"Skills::SkillInstance";
 
-// Defines the last sequence for the skill section.
+// Defines the last sequence for the skill section.  "ProgressionState::EElementVersion"
 static END_SKILLS: [u8; 33] = [
     0x50, 0x72, 0x6F, 0x67, 0x72, 0x65, 0x73, 0x73, 0x69, 0x6F, 0x6E, 0x53, 0x74, 0x61, 0x74, 0x65,
     0x3A, 0x3A, 0x45, 0x45, 0x6C, 0x65, 0x6D, 0x65, 0x6E, 0x74, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6F,
@@ -457,7 +457,7 @@ fn find_base_skill_matches(content: &[u8]) -> Vec<String> {
     // Defines the regex instance.
     let regex: Regex = Regex::new(pattern).expect("Failed to create regex");
 
-    // Find all matches convert them to String and filter all matches that start with LP_
+    // Find all matches convert them to String and filter out all matches that start with LP_
     let matches: Vec<String> = regex
         .find_iter(&string_data)
         .map(|m| m.as_str().to_string())
