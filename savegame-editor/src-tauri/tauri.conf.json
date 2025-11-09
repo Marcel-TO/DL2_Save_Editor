@@ -1,9 +1,25 @@
 {
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Dying Light 2 Save Editor",
+  "version": "1.0.9",
+  "identifier": "dev.marcel-to.savegame-editor",
   "build": {
     "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "npm run build",
-    "frontendDist": "../dist",
-    "devUrl": "http://localhost:1420"
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "savegame-editor",
+        "width": 800,
+        "height": 600
+      }
+    ],
+    "security": {
+      "csp": null
+    }
   },
   "bundle": {
     "resources": [
@@ -21,27 +37,5 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
-  },
-  "productName": "Dying Light 2 Save Editor",
-  "mainBinaryName": "Dying Light 2 Save Editor",
-  "version": "1.0.8",
-  "identifier": "com.dyinglight.save.editor",
-  "plugins": {},
-  "app": {
-    "withGlobalTauri": false,
-    "windows": [
-      {
-        "fullscreen": false,
-        "resizable": true,
-        "maximized": true,
-        "title": "Dying Light 2 Save Editor",
-        "width": 1080,
-        "height": 800,
-        "useHttpsScheme": true
-      }
-    ],
-    "security": {
-      "csp": null
-    }
   }
 }

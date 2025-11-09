@@ -91,13 +91,10 @@ pub fn load_save_file(
     // Check if the editor did not manage to validate the skills.
     match &skills {
         Ok(skills_unwrapped) => {
-            logger.log_message(
-                &format!(
-                    "{} Skills got validated",
-                    skills_unwrapped.base_skills.len() + skills_unwrapped.legend_skills.len()
-                ),
-                Vec::new(),
-            );
+            logger.log_message(&format!(
+                "{} Skills got validated",
+                skills_unwrapped.base_skills.len() + skills_unwrapped.legend_skills.len()
+            ));
         }
         Err(err) => return Err(err.to_string().into()),
     }
@@ -109,10 +106,7 @@ pub fn load_save_file(
     // Check if the editor did not manage to validate the unlockables.
     match &unlockable_result {
         Ok(unlocks) => {
-            logger.log_message(
-                &format!("{} Unlockables got validated.", unlocks.len()),
-                Vec::new(),
-            );
+            logger.log_message(&format!("{} Unlockables got validated.", unlocks.len()));
         }
         Err(err) => return Err(err.to_string().into()),
     }
@@ -141,10 +135,7 @@ pub fn load_save_file(
     // Check if the editor did not manage to validate the unlockables.
     match &items_result {
         Ok(i) => {
-            logger.log_message(
-                &format!("{} Tabs from inventory got validated.", i.len()),
-                Vec::new(),
-            );
+            logger.log_message(&format!("{} Tabs from inventory got validated.", i.len()));
         }
         Err(err) => return Err(err.to_string().into()),
     }
@@ -527,7 +518,6 @@ fn analize_skill_data(
         if is_debugging {
             logger.log_message(
                 &format!("Found at offset: [{}] the skill: [{}]", index, name).as_str(),
-                Vec::new(),
             );
         }
 
@@ -560,7 +550,6 @@ fn analize_skill_data(
         if is_debugging {
             logger.log_message(
                 &format!("Found at offset: [{}] the skill: [{}]", index, name).as_str(),
-                Vec::new(),
             );
         }
 
@@ -606,13 +595,10 @@ fn analize_unlockable_items_data(
     // Takes the last inventory index for needed information.
     let start_index: usize = indices[indices.len() - 1];
     if is_debugging {
-        logger.log_message(
-            &format!(
-                "The starting index for the unlockables is: [{}]",
-                start_index
-            ),
-            Vec::new(),
-        );
+        logger.log_message(&format!(
+            "The starting index for the unlockables is: [{}]",
+            start_index
+        ));
     }
 
     // Compresses the data and only extracts the inventory part of the file.
@@ -659,10 +645,7 @@ fn analize_unlockable_items_data(
 
         // If debugging is set to true, log collected data of current unlockable.
         if is_debugging {
-            logger.log_message(
-                &format!("Found the unlockable: [{}]", clean_string).as_str(),
-                Vec::new(),
-            );
+            logger.log_message(&format!("Found the unlockable: [{}]", clean_string).as_str());
         }
 
         items.push(UnlockableItem::new(clean_string, current_index, size, sgd));
@@ -703,7 +686,7 @@ fn get_index_for_inventory_items(
         let inventory_index = start_index + sgd_position - 36;
 
         if is_debugging {
-            logger.log_message(format!("The starting index of the inventory is expected to be at [{}]; (the first SGDs Data)", inventory_index).as_str(), Vec::new())
+            logger.log_message(format!("The starting index of the inventory is expected to be at [{}]; (the first SGDs Data)", inventory_index).as_str())
         }
 
         return Ok(inventory_index);
@@ -715,7 +698,7 @@ fn get_index_for_inventory_items(
             + unlockable_items[unlockable_items.len() - 1].size
             + 76;
         if is_debugging {
-            logger.log_message(format!("The starting index of the inventory is expected to be at [{}]; (the first SGDs Data)", inventory_index).as_str(), Vec::new())
+            logger.log_message(format!("The starting index of the inventory is expected to be at [{}]; (the first SGDs Data)", inventory_index).as_str())
         }
         Ok(inventory_index)
     } else {
@@ -754,14 +737,11 @@ fn get_all_items(
 
         match find_result {
             Ok((ref chunks, ref new_index)) => {
-                logger.log_message(
-                    &format!(
-                        "[{}] inventory chunks found. The new index is: [{}]",
-                        chunks.len(),
-                        new_index
-                    ),
-                    Vec::new(),
-                );
+                logger.log_message(&format!(
+                    "[{}] inventory chunks found. The new index is: [{}]",
+                    chunks.len(),
+                    new_index
+                ));
                 logger.log_break();
             }
             Err(_) => {
@@ -790,7 +770,7 @@ fn get_all_items(
                 // Check if the bullet acts as item or mod or if there is a transmog item.
                 if validate_item_or_transmog(&current_item_ids[i], &current_item_id) {
                     if is_debugging {
-                        logger.log_message(&format!("Since this item can be item and mod, the editor validated it as a mod: [{}]", current_item_ids[i].to_string()), Vec::new());
+                        logger.log_message(&format!("Since this item can be item and mod, the editor validated it as a mod: [{}]", current_item_ids[i].to_string()));
                     }
 
                     mods.push(Mod::new(
@@ -805,7 +785,7 @@ fn get_all_items(
                     && current_item_indices[i] - (current_item_index + current_item_id.len()) <= 35
                 {
                     if is_debugging {
-                        logger.log_message(&format!("Since this item can be item and transmog, the editor validated it as a transmog: [{}]", current_item_ids[i].to_string()), Vec::new());
+                        logger.log_message(&format!("Since this item can be item and transmog, the editor validated it as a transmog: [{}]", current_item_ids[i].to_string()));
                     }
 
                     mods.push(Mod::new(
@@ -840,17 +820,11 @@ fn get_all_items(
                     ));
 
                     if is_debugging {
-                        logger.log_message_no_linebreak(
-                            &format!("At offset [{}] validated item: ", current_item_index),
-                            Vec::new(),
-                        );
-                        logger.log_message(
-                            &format!(
-                                "[{}]",
-                                current_item_id.replace("\x00", "").replace("\x01", "")
-                            ),
-                            vec![term::Attr::ForegroundColor(term::color::CYAN)],
-                        );
+                        logger.log_message(&format!(
+                            "At offset [{}] validated item: [{}]",
+                            current_item_index,
+                            current_item_id.replace("\x00", "").replace("\x01", "")
+                        ));
                     }
 
                     mods.clear();
@@ -859,10 +833,10 @@ fn get_all_items(
             // Add mod to mods list
             else {
                 if is_debugging {
-                    logger.log_message(
-                        &format!("Validated mod: [{}]", current_item_ids[i].to_string()),
-                        Vec::new(),
-                    );
+                    logger.log_message(&format!(
+                        "Validated mod: [{}]",
+                        current_item_ids[i].to_string()
+                    ));
                 }
 
                 mods.push(Mod::new(
@@ -888,7 +862,7 @@ fn get_all_items(
         index += 75;
 
         if is_debugging {
-            logger.log_message(&format!("Used the index of from the last mod and added the +75 to the offset for the next item: [{}]", index), Vec::new());
+            logger.log_message(&format!("Used the index of from the last mod and added the +75 to the offset for the next item: [{}]", index));
             logger.log_break();
         }
     }
@@ -1123,10 +1097,7 @@ fn find_all_inventory_chunks(
             let chunk_space: Vec<u8> = content[index..index + space_offset].to_vec();
 
             if is_debugging {
-                logger.log_message(
-                    &format!("SGDs found at offset: [{}]", data_index),
-                    Vec::new(),
-                );
+                logger.log_message(&format!("SGDs found at offset: [{}]", data_index));
             }
 
             chunks.push(InventoryChunk::new(
@@ -1379,10 +1350,10 @@ fn find_amount_of_matches(
                     // Checks whether the match is bullet that acts as a mod.
                     if validate_item_or_transmog(mat.as_str(), &last_match) {
                         if is_debugging {
-                            logger.log_message(
-                                &format!("Found potential SGDs match for mod: [{}]", mat.as_str()),
-                                Vec::new(),
-                            );
+                            logger.log_message(&format!(
+                                "Found potential SGDs match for mod: [{}]",
+                                mat.as_str()
+                            ));
                         }
 
                         match_values.push(current_matching_value.clone());
@@ -1399,13 +1370,10 @@ fn find_amount_of_matches(
                         && index - (last_index + last_match.len()) <= 30
                     {
                         if is_debugging {
-                            logger.log_message(
-                                &format!(
-                                    "Found potential SGDs match for transmog: [{}]",
-                                    mat.as_str()
-                                ),
-                                Vec::new(),
-                            );
+                            logger.log_message(&format!(
+                                "Found potential SGDs match for transmog: [{}]",
+                                mat.as_str()
+                            ));
                         }
 
                         match_values.push(current_matching_value.clone());
@@ -1426,23 +1394,19 @@ fn find_amount_of_matches(
                     iteration_index = index + last_match.len();
 
                     if is_debugging {
-                        logger.log_message_no_linebreak(
-                            "Found potential SGDs match for item: ",
-                            Vec::new(),
-                        );
-                        logger.log_message(
-                            &format!("[{}]", mat.as_str()),
-                            vec![term::Attr::ForegroundColor(term::color::CYAN)],
-                        );
+                        logger.log_message(&format!(
+                            "Found potential SGDs match for item: [{}]",
+                            mat.as_str()
+                        ));
                     }
 
                     continue;
                 } else {
                     if is_debugging {
-                        logger.log_message(
-                            &format!("Found potential SGDs match for mod: [{}]", mat.as_str()),
-                            Vec::new(),
-                        );
+                        logger.log_message(&format!(
+                            "Found potential SGDs match for mod: [{}]",
+                            mat.as_str()
+                        ));
                     }
 
                     match_values.push(current_matching_value.clone());
