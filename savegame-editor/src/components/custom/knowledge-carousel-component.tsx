@@ -13,27 +13,27 @@ import { Button } from "@/components/ui/button";
 const knowledge: [string, string, string][] = [
     [
         "Getting Started",
-        "https://marcel-to.vercel.app/projects/dl2-save-editor/getting-started",
+        "https://marcel-to.net/projects/dl2-save-editor/getting-started",
         "/assets/pictures/backgrounds/slider-2.jpg",
     ],
     [
         "Tutorial",
-        "https://marcel-to.vercel.app/projects/dl2-save-editor/tutorial",
+        "https://marcel-to.net/projects/dl2-save-editor/tutorial",
         "/assets/pictures/backgrounds/slider-3.jpg",
     ],
     [
         "Commonly Asked Questions",
-        "https://marcel-to.vercel.app/projects/dl2-save-editor/qna",
+        "https://marcel-to.net/projects/dl2-save-editor/qna",
         "/assets/pictures/backgrounds/slider-4.jpg",
     ],
     [
         "Prerequisites for Programming",
-        "https://marcel-to.vercel.app/projects/dl2-save-editor/prerequisites-for-programming",
+        "https://marcel-to.net/projects/dl2-save-editor/prerequisites-for-programming",
         "/assets/pictures/backgrounds/slider-5.jpg",
     ],
     [
         "The Editor in Detail: Frontend",
-        "https://marcel-to.vercel.app/projects/dl2-save-editor/editor-in-detail-frontend",
+        "https://marcel-to.net/projects/dl2-save-editor/editor-in-detail-frontend",
         "/assets/pictures/backgrounds/slider-2.jpg",
     ],
     [
