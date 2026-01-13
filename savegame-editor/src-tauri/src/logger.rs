@@ -2,16 +2,14 @@
 #![allow(unused_variables)]
 use std::io;
 use std::io::prelude::*;
-use term;
-use term_size;
 
 pub struct ConsoleLogger {
     pub log_histroy: Vec<String>,
 }
 
 pub trait LoggerFunctions {
-    fn log_message(&mut self, message: &str, attributes: Vec<term::Attr>);
-    fn log_message_no_linebreak(&mut self, message: &str, attributes: Vec<term::Attr>);
+    fn log_message(&mut self, message: &str);
+    fn log_message_no_linebreak(&mut self, message: &str);
     fn log_error(&mut self, message: &str);
     fn log_break(&mut self);
     fn wait_for_input(&self);
@@ -20,26 +18,19 @@ pub trait LoggerFunctions {
 }
 
 impl LoggerFunctions for ConsoleLogger {
-    fn log_message(&mut self, message: &str, attributes: Vec<term::Attr>) {
-        println!("{:?}", message);
+    fn log_message(&mut self, message: &str) {
+        println!("[INFO]: {:?}", message);
         // Adding the message to the log history.
         self.log_histroy.push(message.to_string());
     }
 
-    fn log_message_no_linebreak(&mut self, message: &str, attributes: Vec<term::Attr>) {
+    fn log_message_no_linebreak(&mut self, message: &str) {
         print!("{:?}", message);
-
-        // terminal.reset().unwrap();
     }
 
     fn log_error(&mut self, message: &str) {
-        let mut terminal = term::stdout().unwrap();
-        terminal.fg(term::color::BRIGHT_RED).unwrap();
-        let error_msg = format!("Error: {}", message);
-        println!("{:?}", error_msg);
-        self.log_histroy.push(error_msg);
-
-        terminal.reset().unwrap();
+        println!("[ERROR]: {:?}", message);
+        self.log_histroy.push(message.to_string());
     }
 
     fn log_break(&mut self) {
@@ -51,16 +42,6 @@ impl LoggerFunctions for ConsoleLogger {
         stdout.write(b"Press Enter to continue...").unwrap();
         stdout.flush().unwrap();
         io::stdin().read(&mut [0]).unwrap();
-
-        if let Some((w, _)) = term_size::dimensions() {
-            print!("\x1B[1A");
-
-            for _ in 0..w {
-                print!(" ");
-            }
-
-            println!("");
-        }
     }
 
     fn get_user_input(&self) -> String {
