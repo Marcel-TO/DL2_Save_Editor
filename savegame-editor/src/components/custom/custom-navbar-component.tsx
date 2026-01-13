@@ -106,7 +106,7 @@ export const NavbarComponent = () => {
             </Link>
             <Separator />
             {infoPages.map(([text, icon, link, isDisabled]) => (
-              <Tooltip>
+              <Tooltip key={link}>
                 <TooltipTrigger asChild>
                   <Link
                     to={link}
@@ -122,7 +122,7 @@ export const NavbarComponent = () => {
             ))}
             <Separator />
             {editPages.map(([text, icon, link, isDisabled]) => (
-              <Tooltip>
+              <Tooltip key={link}>
                 <TooltipTrigger asChild>
                   <Link
                     to={link}
@@ -138,7 +138,7 @@ export const NavbarComponent = () => {
             ))}
             <Separator />
             {otherPages.map(([text, icon, link, isDisabled]) => (
-              <Tooltip>
+              <Tooltip key={link}>
                 <TooltipTrigger asChild>
                   <Link
                     to={link}
