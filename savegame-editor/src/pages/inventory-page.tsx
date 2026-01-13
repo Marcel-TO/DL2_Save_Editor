@@ -36,7 +36,7 @@ import {
     DefaultItemLayout,
     SettingState,
 } from "@/models/settings-model";
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -193,16 +193,16 @@ export const InventoryPage = ({
     // initialize the current item values and their requriements
     const ItemFormSchema = z.object({
         name: z.string().min(1, { message: "Item ID cannot be empty" }),
-        level: z.number()
+        level: z.coerce.number()
             .gte(0, { message: "Level must be a positive number" })
             .max(65535, { message: "Level must be less than 65535" }),
-        seed: z.number()
+        seed: z.coerce.number()
             .gte(0, { message: "Seed must be a positive number" })
             .max(65535, { message: "Seed must be less than 65535" }),
-        amount: z.number()
+        amount: z.coerce.number()
             .gte(0, { message: "Amount must be a positive number" })
             .max(4294967295, { message: "Amount must be less than 4294967295" }),
-        durability: z.number()
+        durability: z.coerce.number()
             .max(4294967295, { message: "Durability must be less than 4294967295" }),
     });
 
@@ -217,7 +217,7 @@ export const InventoryPage = ({
         form.setValue("durability", item.chunk_data.durability_value);
     };
 
-    const form = useForm<z.infer<typeof ItemFormSchema>>({
+    const form = useForm<z.input<typeof ItemFormSchema>>({
         resolver: zodResolver(ItemFormSchema),
         defaultValues: {
             name: currentItem ? currentItem.name : "",
@@ -229,31 +229,22 @@ export const InventoryPage = ({
     });
 
     async function onSubmitChangeValues(data: z.infer<typeof ItemFormSchema>) {
-        // Check whether the validation went through and it is ok to save values.
-        try {
-            ItemFormSchema.parse(data);
-        } catch (error: any) {
-            return;
-        }
-
         form.setValue("name", data.name);
         form.setValue("level", Number(data.level));
-        form.setValue("seed", data.seed);
-        form.setValue("amount", data.amount);
-        form.setValue("durability", data.durability);
+        form.setValue("seed", Number(data.seed));
+        form.setValue("amount", Number(data.amount));
+        form.setValue("durability", Number(data.durability));
 
         // Rewrite locally for performance reasons.
-        if (currentItemRow?.inventory_items != undefined) {
-            currentItemRow.inventory_items[currentItemIndex].name = data.name;
-            currentItemRow.inventory_items[currentItemIndex].chunk_data.level_value =
-                data.level;
-            currentItemRow.inventory_items[currentItemIndex].chunk_data.seed_value =
-                data.seed;
-            currentItemRow.inventory_items[currentItemIndex].chunk_data.amount_value =
-                data.amount;
-            currentItemRow.inventory_items[
-                currentItemIndex
-            ].chunk_data.durability_value = data.durability;
+        if (currentItemRow?.inventory_items) {
+            const item =
+                currentItemRow.inventory_items[currentItemIndex];
+
+            item.name = data.name;
+            item.chunk_data.level_value = data.level;
+            item.chunk_data.seed_value = data.seed;
+            item.chunk_data.amount_value = data.amount;
+            item.chunk_data.durability_value = data.durability;
         }
 
         await submitItemValues(
@@ -494,247 +485,258 @@ export const InventoryPage = ({
                                 <SheetContent>
                                     <SheetHeader className="my-6">Edit Item</SheetHeader>
 
-                                    <IdComboBox
-                                        ids={currentIdData.value ?? []}
-                                        currentSelected={form.getValues("name")}
-                                        setCurrentSelected={(id: string) =>
-                                            form.setValue("name", id)
-                                        }
-                                    />
+                                    <div className="mx-6">
+                                        <IdComboBox
+                                            ids={currentIdData.value ?? []}
+                                            currentSelected={form.getValues("name")}
+                                            setCurrentSelected={(id: string) =>
+                                                form.setValue("name", id)
+                                            }
+                                        />
+                                    </div>
 
-                                    <Form {...form}>
-                                        <form onSubmit={form.handleSubmit(onSubmitChangeValues)}>
-                                            <FormField
-                                                control={form.control}
-                                                name="level"
-                                                render={({ field }) => (
-                                                    <FormItem className="grid grid-cols-8 grid-rows-2 items-center gap-x-2 my-4">
-                                                        <FormLabel className="text-right col-span-2">
-                                                            Level
-                                                        </FormLabel>
-                                                        <FormControl className="col-span-6">
-                                                            <Input
-                                                                type="number"
-                                                                placeholder="level"
-                                                                min={0}
-                                                                {...field}
-                                                            />
-                                                        </FormControl>
-                                                        <div className="col-span-6 col-start-3">
-                                                            <FormDescription>
-                                                                The level of the desired item. The maximum level
-                                                                is 65534.
-                                                            </FormDescription>
-                                                            <FormMessage />
-                                                        </div>
-                                                    </FormItem>
-                                                )}
-                                            />
+                                    <div className="mx-6">
 
-                                            <FormField
-                                                control={form.control}
-                                                name="seed"
-                                                render={({ field }) => (
-                                                    <FormItem className="grid grid-cols-8 grid-rows-2 items-center gap-x-2 my-4">
-                                                        <FormLabel className="text-right col-span-2">
-                                                            Seed
-                                                        </FormLabel>
-                                                        <FormControl className="col-span-4">
-                                                            <Input
-                                                                type="number"
-                                                                placeholder="seed"
-                                                                min={0}
-                                                                {...field}
-                                                            />
-                                                        </FormControl>
-                                                        <DropdownMenu>
-                                                            <DropdownMenuTrigger className="col-span-2">
-                                                                <Button
-                                                                    variant="outline"
-                                                                    className="col-span-2 w-full m-0 p-0"
-                                                                    type="button"
-                                                                >
-                                                                    <ChevronDown className="h-4 w-4" />
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent>
-                                                                <DropdownMenuItem
-                                                                    onSelect={() => form.setValue("seed", 22352)}
-                                                                    className="cursor-pointer"
-                                                                >
-                                                                    12 different Stats
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem
-                                                                    onSelect={() => form.setValue("seed", 60184)}
-                                                                    className="cursor-pointer"
-                                                                >
-                                                                    godmode armor
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem
-                                                                    onSelect={() =>
-                                                                        generateRandomSeed()
-                                                                    }
-                                                                    className="cursor-pointer"
-                                                                >
-                                                                    random Seed
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
-                                                        <div className="col-span-6 col-start-3">
-                                                            <FormDescription>
-                                                                The seed of the desired item. The maximum seed
-                                                                is 65534.
-                                                            </FormDescription>
-                                                            <FormMessage />
-                                                        </div>
-                                                    </FormItem>
-                                                )}
-                                            />
+                                        <Form {...form}>
+                                            <form onSubmit={form.handleSubmit(
+                                                onSubmitChangeValues as SubmitHandler<z.input<typeof ItemFormSchema>>
+                                            )}>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="level"
+                                                    render={({ field }) => (
+                                                        <FormItem className="grid grid-cols-8 grid-rows-2 items-center gap-x-2 my-4">
+                                                            <FormLabel className="text-right col-span-2">
+                                                                Level
+                                                            </FormLabel>
+                                                            <FormControl className="col-span-6">
+                                                                <Input
+                                                                    type="number"
+                                                                    placeholder="level"
+                                                                    min={0}
+                                                                    {...field}
+                                                                    value={field.value as number}
+                                                                />
+                                                            </FormControl>
+                                                            <div className="col-span-6 col-start-3">
+                                                                <FormDescription>
+                                                                    The level of the desired item. The maximum level
+                                                                    is 65534.
+                                                                </FormDescription>
+                                                                <FormMessage />
+                                                            </div>
+                                                        </FormItem>
+                                                    )}
+                                                />
 
-                                            <FormField
-                                                control={form.control}
-                                                name="amount"
-                                                render={({ field }) => (
-                                                    <FormItem className="grid grid-cols-8 grid-rows-2 items-center gap-x-2 my-4">
-                                                        <FormLabel className="text-right col-span-2">
-                                                            Amount
-                                                        </FormLabel>
-                                                        <FormControl className="col-span-4">
-                                                            <Input
-                                                                type="number"
-                                                                placeholder="amount"
-                                                                min={0}
-                                                                {...field}
-                                                            />
-                                                        </FormControl>
-                                                        <DropdownMenu>
-                                                            <DropdownMenuTrigger className="col-span-2">
-                                                                <Button
-                                                                    variant="outline"
-                                                                    className="col-span-2 w-full m-0 p-0"
-                                                                    type="button"
-                                                                >
-                                                                    <ChevronDown className="h-4 w-4" />
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent>
-                                                                <DropdownMenuItem
-                                                                    onSelect={() => form.setValue("amount", 0)}
-                                                                    className="cursor-pointer"
-                                                                >
-                                                                    0
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem
-                                                                    onSelect={() => form.setValue("amount", 999)}
-                                                                    className="cursor-pointer"
-                                                                >
-                                                                    999
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem
-                                                                    onSelect={() => form.setValue("amount", 9999)}
-                                                                    className="cursor-pointer"
-                                                                >
-                                                                    9999
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem
-                                                                    onSelect={() =>
-                                                                        form.setValue("amount", 999999)
-                                                                    }
-                                                                    className="cursor-pointer"
-                                                                >
-                                                                    999999
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
-                                                        <div className="col-span-6 col-start-3">
-                                                            <FormDescription>
-                                                                The maximum amount is 4294967295. But use higher
-                                                                values than the game allows at your own risk.
-                                                            </FormDescription>
-                                                            <FormMessage />
-                                                        </div>
-                                                    </FormItem>
-                                                )}
-                                            />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="seed"
+                                                    render={({ field }) => (
+                                                        <FormItem className="grid grid-cols-8 grid-rows-2 items-center gap-x-2 my-4">
+                                                            <FormLabel className="text-right col-span-2">
+                                                                Seed
+                                                            </FormLabel>
+                                                            <FormControl className="col-span-4">
+                                                                <Input
+                                                                    type="number"
+                                                                    placeholder="seed"
+                                                                    min={0}
+                                                                    {...field}
+                                                                    value={field.value as number}
+                                                                />
+                                                            </FormControl>
+                                                            <DropdownMenu>
+                                                                <DropdownMenuTrigger className="col-span-2">
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        className="col-span-2 w-full m-0 p-0"
+                                                                        type="button"
+                                                                    >
+                                                                        <ChevronDown className="h-4 w-4" />
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
+                                                                <DropdownMenuContent>
+                                                                    <DropdownMenuItem
+                                                                        onSelect={() => form.setValue("seed", 22352)}
+                                                                        className="cursor-pointer"
+                                                                    >
+                                                                        12 different Stats
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem
+                                                                        onSelect={() => form.setValue("seed", 60184)}
+                                                                        className="cursor-pointer"
+                                                                    >
+                                                                        godmode armor
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem
+                                                                        onSelect={() =>
+                                                                            generateRandomSeed()
+                                                                        }
+                                                                        className="cursor-pointer"
+                                                                    >
+                                                                        random Seed
+                                                                    </DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                            </DropdownMenu>
+                                                            <div className="col-span-6 col-start-3">
+                                                                <FormDescription>
+                                                                    The seed of the desired item. The maximum seed
+                                                                    is 65534.
+                                                                </FormDescription>
+                                                                <FormMessage />
+                                                            </div>
+                                                        </FormItem>
+                                                    )}
+                                                />
 
-                                            <FormField
-                                                control={form.control}
-                                                name="durability"
-                                                render={({ field }) => (
-                                                    <FormItem className="grid grid-cols-8 grid-rows-2 items-center gap-x-2 my-4">
-                                                        <FormLabel className="text-right col-span-2">
-                                                            Durability
-                                                        </FormLabel>
-                                                        <FormControl className="col-span-4">
-                                                            <Input
-                                                                type="number"
-                                                                placeholder="durability"
-                                                                {...field}
-                                                            />
-                                                        </FormControl>
-                                                        <DropdownMenu>
-                                                            <DropdownMenuTrigger className="col-span-2">
-                                                                <Button
-                                                                    variant="outline"
-                                                                    className="col-span-2 w-full m-0 p-0"
-                                                                    type="button"
-                                                                >
-                                                                    <ChevronDown className="h-4 w-4" />
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent>
-                                                                <DropdownMenuItem
-                                                                    onSelect={() =>
-                                                                        form.setValue("durability", -1.0)
-                                                                    }
-                                                                >
-                                                                    -1.0
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem
-                                                                    onSelect={() =>
-                                                                        form.setValue("durability", 0)
-                                                                    }
-                                                                >
-                                                                    0
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem
-                                                                    onSelect={() =>
-                                                                        form.setValue("durability", 9999)
-                                                                    }
-                                                                >
-                                                                    9999
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem
-                                                                    onSelect={() =>
-                                                                        form.setValue("durability", 999999)
-                                                                    }
-                                                                >
-                                                                    999999
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
-                                                        <div className="col-span-6 col-start-3">
-                                                            <FormDescription>
-                                                                The maximum durability is 4294967295. But use
-                                                                higher values than the game allows at your own
-                                                                risk.
-                                                            </FormDescription>
-                                                            <FormMessage />
-                                                        </div>
-                                                    </FormItem>
-                                                )}
-                                            />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="amount"
+                                                    render={({ field }) => (
+                                                        <FormItem className="grid grid-cols-8 grid-rows-2 items-center gap-x-2 my-4">
+                                                            <FormLabel className="text-right col-span-2">
+                                                                Amount
+                                                            </FormLabel>
+                                                            <FormControl className="col-span-4">
+                                                                <Input
+                                                                    type="number"
+                                                                    placeholder="amount"
+                                                                    min={0}
+                                                                    {...field}
+                                                                    value={field.value as number}
+                                                                />
+                                                            </FormControl>
+                                                            <DropdownMenu>
+                                                                <DropdownMenuTrigger className="col-span-2">
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        className="col-span-2 w-full m-0 p-0"
+                                                                        type="button"
+                                                                    >
+                                                                        <ChevronDown className="h-4 w-4" />
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
+                                                                <DropdownMenuContent>
+                                                                    <DropdownMenuItem
+                                                                        onSelect={() => form.setValue("amount", 0)}
+                                                                        className="cursor-pointer"
+                                                                    >
+                                                                        0
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem
+                                                                        onSelect={() => form.setValue("amount", 999)}
+                                                                        className="cursor-pointer"
+                                                                    >
+                                                                        999
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem
+                                                                        onSelect={() => form.setValue("amount", 9999)}
+                                                                        className="cursor-pointer"
+                                                                    >
+                                                                        9999
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem
+                                                                        onSelect={() =>
+                                                                            form.setValue("amount", 999999)
+                                                                        }
+                                                                        className="cursor-pointer"
+                                                                    >
+                                                                        999999
+                                                                    </DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                            </DropdownMenu>
+                                                            <div className="col-span-6 col-start-3">
+                                                                <FormDescription>
+                                                                    The maximum amount is 4294967295. But use higher
+                                                                    values than the game allows at your own risk.
+                                                                </FormDescription>
+                                                                <FormMessage />
+                                                            </div>
+                                                        </FormItem>
+                                                    )}
+                                                />
 
-                                            <SheetFooter className="my-6">
-                                                <Button
-                                                    className="w-full"
-                                                    onClick={() => form.trigger()}
-                                                >
-                                                    Save
-                                                </Button>
-                                            </SheetFooter>
-                                        </form>
-                                    </Form>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="durability"
+                                                    render={({ field }) => (
+                                                        <FormItem className="grid grid-cols-8 grid-rows-2 items-center gap-x-2 my-4">
+                                                            <FormLabel className="text-right col-span-2">
+                                                                Durability
+                                                            </FormLabel>
+                                                            <FormControl className="col-span-4">
+                                                                <Input
+                                                                    type="number"
+                                                                    placeholder="durability"
+                                                                    {...field}
+                                                                    value={field.value as number}
+                                                                />
+                                                            </FormControl>
+                                                            <DropdownMenu>
+                                                                <DropdownMenuTrigger className="col-span-2">
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        className="col-span-2 w-full m-0 p-0"
+                                                                        type="button"
+                                                                    >
+                                                                        <ChevronDown className="h-4 w-4" />
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
+                                                                <DropdownMenuContent>
+                                                                    <DropdownMenuItem
+                                                                        onSelect={() =>
+                                                                            form.setValue("durability", -1.0)
+                                                                        }
+                                                                    >
+                                                                        -1.0
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem
+                                                                        onSelect={() =>
+                                                                            form.setValue("durability", 0)
+                                                                        }
+                                                                    >
+                                                                        0
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem
+                                                                        onSelect={() =>
+                                                                            form.setValue("durability", 9999)
+                                                                        }
+                                                                    >
+                                                                        9999
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem
+                                                                        onSelect={() =>
+                                                                            form.setValue("durability", 999999)
+                                                                        }
+                                                                    >
+                                                                        999999
+                                                                    </DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                            </DropdownMenu>
+                                                            <div className="col-span-6 col-start-3">
+                                                                <FormDescription>
+                                                                    The maximum durability is 4294967295. But use
+                                                                    higher values than the game allows at your own
+                                                                    risk.
+                                                                </FormDescription>
+                                                                <FormMessage />
+                                                            </div>
+                                                        </FormItem>
+                                                    )}
+                                                />
+
+                                                <SheetFooter className="my-6">
+                                                    <Button
+                                                        className="w-full"
+                                                        onClick={() => form.trigger()}
+                                                    >
+                                                        Save
+                                                    </Button>
+                                                </SheetFooter>
+                                            </form>
+                                        </Form>
+                                    </div>
                                 </SheetContent>
                             </TooltipProvider>
                         </Sheet>

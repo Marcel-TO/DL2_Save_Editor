@@ -261,7 +261,7 @@ export function MainPage({
 
         if (filePath != null && currentSaveFile.value != undefined) {
             // Save data to file
-            await writeFile(filePath, currentSaveFile.value.file_content).catch(
+            await writeFile(filePath, new Uint8Array(currentSaveFile.value.file_content)).catch(
                 (err) => {
                     toast.error("Uh oh! Something went wrong. :/", {
                         description:
@@ -299,7 +299,7 @@ export function MainPage({
             });
 
             if (compressed) {
-                await writeFile(filePath, compressed).catch((err) => {
+                await writeFile(filePath, new Uint8Array(compressed)).catch((err) => {
                     toast.error("Uh oh! Something went wrong. :/", {
                         description:
                             "The Editor stumbled accross the following error: " + err,
@@ -324,7 +324,7 @@ export function MainPage({
 
         if (filePath != null && currentSaveFile.value != undefined) {
             // Save data to file
-            await writeFile(filePath, currentSaveFile.value.file_content).catch(
+            await writeFile(filePath, new Uint8Array(currentSaveFile.value.file_content)).catch(
                 (err) => {
                     toast.error("Uh oh! Something went wrong. :/", {
                         description:
@@ -582,7 +582,7 @@ export function MainPage({
                                             ))}
                                         </>
                                     ) : (
-                                        <Skeleton className="w-full h-[100px]" />
+                                        <Skeleton className="w-full h-25" />
                                     )}
                                 </ul>
                                 <Separator className="my-4" />
@@ -635,7 +635,7 @@ export function MainPage({
                                         </div>
                                     </>
                                 ) : (
-                                    <Skeleton className="w-full h-[100px]" />
+                                    <Skeleton className="w-full h-25" />
                                 )}
                                 <Separator className="my-4" />
                             </CardContent>
@@ -681,7 +681,7 @@ export function MainPage({
                                                     </DrawerDescription>
                                                 </DrawerHeader>
                                                 <div className="p-4">
-                                                    <div className="mt-3 h-[120px] bg-muted">
+                                                    <div className="mt-3 h-30 bg-muted">
                                                         <div className="flex flex-col items-center justify-center h-full">
                                                             <Save
                                                                 className="h-12 w-12 text-muted-foreground"
