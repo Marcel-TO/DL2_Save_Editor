@@ -27,9 +27,9 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon } from "lucide-react";
-import { Button } from "../ui/button";
-import Card, { CardHeader, CardTitle, CardContent } from "../ui/card";
-import { Input } from "../ui/input";
+import { Button } from "@/components/ui/button";
+import {Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 interface DataTableProps<TData, TValue> {
   title?: string;

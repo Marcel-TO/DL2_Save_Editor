@@ -1,9 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { InventoryItem } from "@/models/save-models";
-import { Separator } from "../ui/separator";
+import { Separator } from "@/components/ui/separator";
 import { HelpCircle } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type InventoryItemCardProps = {
   item: InventoryItem;

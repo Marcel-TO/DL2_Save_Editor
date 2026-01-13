@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
+import { JSX } from "react";
 
 // The different pages
 const editPages: [string, JSX.Element, string, boolean][] = [

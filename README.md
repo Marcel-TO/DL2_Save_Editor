@@ -14,6 +14,8 @@
 
 We are thrilled to present the first Open-Source Save Editor for the Videogame ***Dying Light 2***. This tool allows players to take control of their game saves, unlocking a realm of possibilities and customization. 
 
+![image](https://github.com/user-attachments/assets/da5db2bb-75fd-43ce-9cc4-4de3c2d3215d)
+
 ## Getting Started
 If you want to test out the Editor yourself, feel free to download the Application inside the release and visit the wiki for further details (like Tutorial + QnA).
 <p align="center">
@@ -119,6 +121,16 @@ Currently there are 2 contributers that work hard to increase the experience of 
 <p>
   <a href="https://github.com/B-a-t-a-n-g" target="_blank">
     <img alt="Static Badge" src="https://img.shields.io/badge/Tester-Batang-2f4045?style=for-the-badge">
+  </a>
+</p>
+<p>
+  <a href="https://github.com/EricPlayZ" target="_blank">
+    <img alt="Static Badge" src="https://img.shields.io/badge/CRCDev-EricPlayZ-899994?style=for-the-badge">
+  </a>
+</p>
+<p>
+  <a href="https://youtube.com/@samuiyorus" target="_blank">
+    <img alt="Static Badge" src="https://img.shields.io/badge/Tester-Zdashero-526264?style=for-the-badge">
   </a>
 </p>
 

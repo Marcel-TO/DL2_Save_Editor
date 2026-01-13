@@ -1,5 +1,3 @@
-use std::mem;
-
 use serde::{Deserialize, Serialize};
 
 use crate::save_logic::file_analyser::format_bytes_to_string;
@@ -75,11 +73,10 @@ impl InventoryChunk {
             level_value: u16::from_le_bytes(level.clone().try_into().unwrap()),
             seed_value: u16::from_le_bytes(seed.clone().try_into().unwrap()),
             amount_value: u32::from_le_bytes(amount.clone().try_into().unwrap()),
-            durability_value: format!("{:.1}", unsafe {
-                mem::transmute::<u32, f32>(u32::from_le_bytes(
-                    durability.clone().try_into().unwrap(),
-                ))
-            }),
+            durability_value: format!(
+                "{:.1}",
+                f32::from_bits(u32::from_le_bytes(durability.clone().try_into().unwrap()))
+            ),
             counter_stats_value: u32::from_le_bytes(counter_stats.clone().try_into().unwrap()),
         }
     }
