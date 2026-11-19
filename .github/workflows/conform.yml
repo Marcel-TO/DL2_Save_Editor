@@ -12,10 +12,10 @@ jobs:
     name: Conform
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - uses: siderolabs/conform@v0.1.0-alpha.30
+      - uses: siderolabs/conform@v0.1.0-alpha.33
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
