@@ -1,187 +1,125 @@
 import {
-  TooltipProvider,
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
-import {
-  Home,
-  Settings,
   Backpack,
   BookOpenText,
   Fingerprint,
+  Heart,
+  Home,
   LockKeyholeOpen,
   MessageSquareWarning,
+  Settings,
+  ShieldAlert,
   Split,
+  Star,
   Swords,
   User,
-  Heart,
-  StarIcon,
-  ShieldAlertIcon,
+  type LucideIcon,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
-import { JSX } from "react";
 
-// The different pages
-const editPages: [string, JSX.Element, string, boolean][] = [
-  [
-    "Skills",
-    <Split className="h-5 w-5 transition-all group-hover:scale-110" />,
-    "/skills",
-    false,
-  ],
-  [
-    "Inventory",
-    <Swords className="h-5 w-5 transition-all group-hover:scale-110" />,
-    "/inventory",
-    false,
-  ],
-  [
-    "Unlockables",
-    <LockKeyholeOpen className="h-5 w-5 transition-all group-hover:scale-110" />,
-    "/unlockables",
-    false,
-  ],
-  [
-    "Backpack",
-    <Backpack className="h-5 w-5 transition-all group-hover:scale-110" />,
-    "/backpack",
-    true,
-  ],
-  [
-    "Campaign",
-    <MessageSquareWarning className="h-5 w-5 transition-all group-hover:scale-110" />,
-    "/campaign",
-    true,
-  ],
-];
-const otherPages: [string, JSX.Element, string, boolean][] = [
-  [
-    "Player",
-    <User className="h-5 w-5 transition-all group-hover:scale-110" />,
-    "/player",
-    true,
-  ],
-  [
-    "IDs",
-    <Fingerprint className="h-5 w-5 transition-all group-hover:scale-110" />,
-    "/ids",
-    false,
-  ],
-  [
-    "Patched Items",
-    <ShieldAlertIcon className="h-5 w-5 transition-all group-hover:scale-110" />,
-    "/patched-items",
-    false,
-  ],
-];
-const infoPages: [string, JSX.Element, string, boolean][] = [
-  [
-    "Knowledge Vault",
-    <BookOpenText className="h-5 w-5 transition-all group-hover:scale-110" />,
-    "/knowledge-vault",
-    false,
-  ],
-  [
-    "Hawks Outpost",
-    <StarIcon className="h-5 w-5 transition-all group-hover:scale-110 hover:fill-primary" />,
-    "/hawks-outpost",
-    false,
-  ],
+type NavItem = {
+  label: string;
+  icon: LucideIcon;
+  path: string;
+  comingSoon?: boolean;
+};
+
+const editPages: NavItem[] = [
+  { label: "Skills", icon: Split, path: "/skills" },
+  { label: "Inventory", icon: Swords, path: "/inventory" },
+  { label: "Unlockables", icon: LockKeyholeOpen, path: "/unlockables" },
+  { label: "Backpack", icon: Backpack, path: "/backpack", comingSoon: true },
+  {
+    label: "Campaign",
+    icon: MessageSquareWarning,
+    path: "/campaign",
+    comingSoon: true,
+  },
 ];
 
-export const NavbarComponent = () => {
+const dataPages: NavItem[] = [
+  { label: "IDs", icon: Fingerprint, path: "/ids" },
+  { label: "Patched items", icon: ShieldAlert, path: "/patched-items" },
+  { label: "Player", icon: User, path: "/player", comingSoon: true },
+];
+
+const infoPages: NavItem[] = [
+  { label: "Knowledge vault", icon: BookOpenText, path: "/knowledge-vault" },
+  { label: "Hawks Outpost", icon: Star, path: "/hawks-outpost" },
+];
+
+const linkClassName =
+  "group flex min-h-10 items-center gap-3 rounded-lg px-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground sm:px-3";
+
+const PageLink = ({ item }: { item: NavItem }) => {
+  const Icon = item.icon;
+
+  if (item.comingSoon) {
+    return (
+      <div
+        aria-disabled="true"
+        className={cn(linkClassName, "cursor-not-allowed opacity-50")}
+        title={`${item.label} is not available yet`}
+      >
+        <Icon className="size-5 shrink-0" />
+        <span className="hidden sm:inline">{item.label}</span>
+        <span className="ml-auto hidden text-xs sm:inline">Soon</span>
+      </div>
+    );
+  }
+
   return (
-    <>
-      <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 h-full flex-col border-r bg-background sm:flex overflow-y-auto">
-        <TooltipProvider>
-          <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
-            <Link
-              to={"/main"}
-              className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
-            >
-              <Home className="h-4 w-4 transition-all group-hover:scale-110" />
-              <span className="sr-only">Home</span>
-            </Link>
-            <Separator />
-            {infoPages.map(([text, icon, link, isDisabled]) => (
-              <Tooltip key={link}>
-                <TooltipTrigger asChild>
-                  <Link
-                    to={link}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                    aria-disabled={isDisabled}
-                  >
-                    {icon}
-                    <span className="sr-only">{text}</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">{text}</TooltipContent>
-              </Tooltip>
-            ))}
-            <Separator />
-            {editPages.map(([text, icon, link, isDisabled]) => (
-              <Tooltip key={link}>
-                <TooltipTrigger asChild>
-                  <Link
-                    to={link}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                    aria-disabled={isDisabled}
-                  >
-                    {icon}
-                    <span className="sr-only">{text}</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">{text}</TooltipContent>
-              </Tooltip>
-            ))}
-            <Separator />
-            {otherPages.map(([text, icon, link, isDisabled]) => (
-              <Tooltip key={link}>
-                <TooltipTrigger asChild>
-                  <Link
-                    to={link}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                    aria-disabled={isDisabled}
-                  >
-                    {icon}
-                    <span className="sr-only">{text}</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">{text}</TooltipContent>
-              </Tooltip>
-            ))}
-            <Separator />
-          </nav>
-          <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  to={"/sponsor"}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                >
-                  <Heart className="h-5 w-5 hover:text-pink-500 hover:fill-pink-500" />
-                  <span className="sr-only">Sponsor</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">Sponsor</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  to={"/settings"}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                >
-                  <Settings className="h-5 w-5" />
-                  <span className="sr-only">Settings</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">Settings</TooltipContent>
-            </Tooltip>
-          </nav>
-        </TooltipProvider>
-      </aside>
-    </>
+    <NavLink
+      to={item.path}
+      end={item.path === "/main"}
+      className={({ isActive }) => cn(linkClassName, isActive && "bg-primary/15 text-foreground")}
+    >
+      <Icon className="size-5 shrink-0 transition-transform group-hover:scale-105" />
+      <span className="hidden sm:inline">{item.label}</span>
+    </NavLink>
   );
 };
+
+const PageGroup = ({ label, items }: { label: string; items: NavItem[] }) => (
+  <div className="grid gap-1">
+    <p className="hidden px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 sm:block">
+      {label}
+    </p>
+    {items.map((item) => (
+      <PageLink key={item.path} item={item} />
+    ))}
+  </div>
+);
+
+export const NavbarComponent = () => (
+  <aside className="fixed inset-y-0 left-0 z-20 flex w-14 flex-col border-r bg-background/95 backdrop-blur sm:w-56">
+    <nav
+      aria-label="Main navigation"
+      className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-2 py-4 sm:px-3"
+    >
+      <NavLink
+        to="/main"
+        end
+        aria-label="Overview"
+        className={({ isActive }) =>
+          cn(
+            "flex min-h-10 items-center gap-3 rounded-lg px-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent sm:px-3",
+            isActive && "bg-primary/15",
+          )
+        }
+      >
+        <Home className="size-5 shrink-0" />
+        <span className="hidden sm:inline">Save workspace</span>
+      </NavLink>
+      <Separator />
+      <PageGroup label="Editor" items={editPages} />
+      <PageGroup label="Save data" items={dataPages} />
+      <PageGroup label="Resources" items={infoPages} />
+    </nav>
+    <nav aria-label="App settings" className="grid gap-1 border-t px-2 py-3 sm:px-3">
+      <PageLink item={{ label: "Support", icon: Heart, path: "/sponsor" }} />
+      <PageLink item={{ label: "Settings", icon: Settings, path: "/settings" }} />
+    </nav>
+  </aside>
+);

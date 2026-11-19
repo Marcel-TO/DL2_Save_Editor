@@ -1,0 +1,24 @@
+# Update Rust Backend dependencies
+update-backend:
+    cd src-tauri && cargo update
+
+# Update Frontend Dependencies
+update-frontend:
+    bun update --latest && bun run build
+
+update: update-backend update-frontend
+
+dev:
+    bun run tauri dev
+
+lint:
+    bun run lint
+
+format:
+    bun run format
+
+format-check:
+    bun run format:check
+
+build:
+    bun run tauri build

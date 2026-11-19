@@ -34,19 +34,19 @@ impl LoggerFunctions for ConsoleLogger {
     }
 
     fn log_break(&mut self) {
-        println!("");
+        println!();
     }
 
     fn wait_for_input(&self) {
         let mut stdout = io::stdout();
-        stdout.write(b"Press Enter to continue...").unwrap();
+        stdout.write_all(b"Press Enter to continue...").unwrap();
         stdout.flush().unwrap();
-        io::stdin().read(&mut [0]).unwrap();
+        io::stdin().read_line(&mut String::new()).unwrap();
     }
 
     fn get_user_input(&self) -> String {
         let mut stdout = io::stdout();
-        stdout.write(b"[devtool]>>>").unwrap();
+        stdout.write_all(b"[devtool]>>>").unwrap();
         stdout.flush().unwrap();
 
         let mut input = String::new();

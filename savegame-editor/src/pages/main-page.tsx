@@ -1,825 +1,728 @@
-import { Copy, Download, MoreVertical, Save, ExternalLink } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { NavbarComponent } from "@/components/custom/custom-navbar-component";
-import { IdData, PatchedItems, SaveFile } from "@/models/save-models";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
-import packageJson from "../../package.json";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-    Drawer,
-    DrawerTrigger,
-    DrawerContent,
-    DrawerHeader,
-    DrawerTitle,
-    DrawerDescription,
-    DrawerFooter,
-    DrawerClose,
-} from "@/components/ui/drawer";
-import { listen, TauriEvent } from "@tauri-apps/api/event";
+import { listen, TauriEvent, type UnlistenFn } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { writeFile } from "@tauri-apps/plugin-fs";
 import { open, save } from "@tauri-apps/plugin-dialog";
-import { AppSettings, SettingState } from "@/models/settings-model";
 import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-} from "@/components/ui/dialog";
-import { DialogTrigger } from "@radix-ui/react-dialog";
-import { TypographyH1 } from "@/components/ui/typography";
-import { HelixLoader } from "@/components/custom/helix-loader/helix-loader-component";
+  ArrowUpRight,
+  BookOpenText,
+  Check,
+  Copy,
+  Download,
+  FileArchive,
+  FileWarning,
+  FolderOpen,
+  MoreVertical,
+  PackageOpen,
+  Save,
+  Settings,
+  ShieldCheck,
+  Sparkles,
+  Swords,
+} from "lucide-react";
 import { toast } from "sonner";
+import { NavbarComponent } from "@/components/custom/custom-navbar-component";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { AppSettings, SettingState } from "@/models/settings-model";
+import { IdData, PatchedItems, SaveFile } from "@/models/save-models";
+import packageJson from "../../package.json";
 
 type MainPageProps = {
-    appSettings: AppSettings;
-    currentSaveFile: SettingState<SaveFile | undefined>;
-    idData: SettingState<IdData[] | undefined>;
-    patchedItems: SettingState<PatchedItems | undefined>;
+  appSettings: AppSettings;
+  currentSaveFile: SettingState<SaveFile | undefined>;
+  idData: SettingState<IdData[] | undefined>;
+  patchedItems: SettingState<PatchedItems | undefined>;
 };
 
-export function MainPage({
-    currentSaveFile,
-    appSettings,
-    idData,
-    patchedItems,
-}: MainPageProps) {
-    // State for the current loading state.
-    const [isLoading, setIsLoading] = useState(false);
-    // States for the Card Details
-    const [latestEditorVersion, setLatestEditorVersion] = useState<string>("");
-    const [amountOfDownloads, setAmountOfDownloads] = useState<number | null>(
-        null
+const getFileName = (path: string) => path.split(/[/\\]/).pop() || path;
+
+export function MainPage({ currentSaveFile, appSettings, idData, patchedItems }: MainPageProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+  const [latestEditorVersion, setLatestEditorVersion] = useState("");
+  const [amountOfDownloads, setAmountOfDownloads] = useState<number>();
+  const dragDropUnlisten = useRef<UnlistenFn | undefined>(undefined);
+  const saveFile = currentSaveFile.value;
+  const setIdData = idData.setValue;
+  const setPatchedItems = patchedItems.setValue;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const handleSetIdData = async () => {
+      try {
+        const ids = await invoke<IdData[]>("get_ids", {});
+        if (!cancelled) setIdData(ids);
+      } catch (error) {
+        toast.error("Could not load item IDs.", {
+          description: String(error),
+        });
+      }
+    };
+
+    const handleSetPatchedItems = async () => {
+      try {
+        const items = await invoke<PatchedItems>("get_patched_items", {});
+        if (!cancelled) setPatchedItems(items);
+      } catch (error) {
+        toast.error("Could not load patched items.", {
+          description: String(error),
+        });
+      }
+    };
+
+    const fetchReleaseInfo = async () => {
+      try {
+        const response = await fetch(
+          "https://api.github.com/repos/Marcel-TO/DL2_Save_Editor/releases",
+        );
+        if (!response.ok) {
+          throw new Error("Could not load release information.");
+        }
+
+        const releases: {
+          tag_name: string;
+          assets: { download_count: number }[];
+        }[] = await response.json();
+        const latestRelease = releases[0];
+        const downloads = releases.reduce(
+          (total, release) =>
+            total +
+            release.assets.reduce((assetTotal, asset) => assetTotal + asset.download_count, 0),
+          0,
+        );
+
+        if (!cancelled) {
+          setAmountOfDownloads(downloads);
+          setLatestEditorVersion(latestRelease?.tag_name ?? "");
+        }
+      } catch (error) {
+        console.error("Could not load release information:", error);
+      }
+    };
+
+    void fetchReleaseInfo();
+    void handleSetIdData();
+    void handleSetPatchedItems();
+
+    return () => {
+      cancelled = true;
+      dragDropUnlisten.current?.();
+    };
+  }, [setIdData, setPatchedItems]);
+
+  async function loadSave(filePath: string) {
+    setIsLoading(true);
+    setIsDrawerOpen(false);
+
+    try {
+      const loadedSave = await invoke<SaveFile>("load_save", {
+        file_path: filePath,
+        is_debugging: appSettings.isDebugging.value,
+        has_automatic_backup: appSettings.hasAutomaticBackup.value,
+      });
+      currentSaveFile.setValue({ ...loadedSave, is_dirty: false });
+
+      if (loadedSave.backup_path) {
+        toast.success("Save loaded and backup created.", {
+          description: getFileName(loadedSave.backup_path),
+        });
+      } else {
+        toast.success("Save loaded.", {
+          description: "Automatic backups are turned off in Settings.",
+        });
+      }
+    } catch (error) {
+      toast.error("Could not load this save.", {
+        description: String(error),
+        action: (
+          <Button variant="outline" onClick={() => setIsDrawerOpen(true)}>
+            Try again
+          </Button>
+        ),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function listenForSaveDrop() {
+    dragDropUnlisten.current?.();
+    dragDropUnlisten.current = await listen<{ paths: string[] }>(
+      TauriEvent.DRAG_DROP,
+      ({ payload }) => {
+        if (payload.paths.length !== 1 || !payload.paths[0]?.endsWith(".sav")) {
+          toast.error("Choose one .sav file at a time.");
+          return;
+        }
+        void loadSave(payload.paths[0]);
+      },
     );
-    const [percentageToNextThousand, setPercentageToNextThousand] = useState(0);
-    const [userName, setUserName] = useState<string>("");
+  }
 
-    // States for the Save File
-    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-    useEffect(() => {
-        const fetchReleaseInfo = async () => {
-            try {
-                const response = await fetch(
-                    "https://api.github.com/repos/Marcel-TO/DL2_Save_Editor/releases"
-                );
-
-                if (!response.ok) {
-                    throw new Error("Failed to fetch release information");
-                }
-
-                const releases = await response.json();
-
-                // Calculate total downloads for all releases and assets
-                const downloads = releases.reduce(
-                    (total: any, release: { assets: any[] }) => {
-                        return (
-                            total +
-                            release.assets.reduce(
-                                (assetTotal: any, asset: { download_count: any }) => {
-                                    return assetTotal + asset.download_count;
-                                },
-                                0
-                            )
-                        );
-                    },
-                    0
-                );
-                setAmountOfDownloads(downloads);
-                setPercentageToNextThousand(
-                    Math.ceil(((downloads % 1000) / 1000) * 100)
-                );
-
-                // Get the latest release
-                const latestRelease = releases[0];
-                setLatestEditorVersion(latestRelease.tag_name);
-            } catch (error) {
-                console.error("Error fetching GitHub release information:", error);
-            }
-        };
-
-        // Function to get the value of the --background-image CSS variable
-        const getUserName = () => {
-            const element = document.documentElement; // Target the root element
-            if (element) {
-                return getComputedStyle(element).getPropertyValue("--user-name");
-            }
-            return "";
-        };
-
-        fetchReleaseInfo();
-        setUserName(getUserName());
-        handleSetIdData();
-        handleSetPatchedItems();
-    }, []);
-
-    async function listenDragDrop() {
-        listen<{ paths: string[] }>(TauriEvent.DRAG_DROP, async (event) => {
-            let filepath = event.payload.paths[0];
-
-            if (filepath == null) {
-                toast.error("Uh oh! Something went wrong. :/", {
-                    description: "No file path found.",
-                    duration: 8000,
-                    action: (
-                        <Button
-                            variant="outline"
-                            onClick={() => setIsDrawerOpen(true)}
-                        >
-                            Try again
-                        </Button>
-                    ),
-                });
-                return;
-            } else if (event.payload.paths.length > 1) {
-                toast.error("Uh oh! Something went wrong.", {
-                    description: "Please only drop one file at a time.",
-                    duration: 8000,
-                    action: (
-                        <Button
-                            variant="outline"
-                            onClick={() => setIsDrawerOpen(true)}
-                        >
-                            Try again
-                        </Button>
-                    ),
-                });
-                return;
-            } else if (!filepath.endsWith(".sav")) {
-                toast.error("Uh oh! Something went wrong.", {
-                    duration: 8000,
-                    description:
-                        "Please only drop .sav files that contain your save data.",
-                    action: (
-                        <Button
-                            variant="outline"
-                            onClick={() => setIsDrawerOpen(true)}
-                        >
-                            Try again
-                        </Button>
-                    ),
-                });
-                return;
-            }
-
-            loadSave(filepath);
-        });
+  async function openSaveDrawer() {
+    setIsDrawerOpen(true);
+    try {
+      await listenForSaveDrop();
+    } catch (error) {
+      toast.error("Could not enable file drop.", {
+        description: String(error),
+      });
     }
+  }
 
-    const loadSave = async (filepath: string) => {
-        setIsLoading(true);
-        setIsDrawerOpen(false);
-        let newSave = await invoke<SaveFile>("load_save", {
-            file_path: filepath,
-            is_debugging: appSettings.isDebugging.value,
-            has_automatic_backup: appSettings.hasAutomaticBackup.value,
-        }).catch((err) => {
-            toast.error("Uh oh! Something went wrong.", {
-                description: "The Editor stumbled accross the following error: " + err,
-                duration: 8000,
-                action: (
-                    <Button
-                        variant="outline"
-                        onClick={() => setIsDrawerOpen(true)}
-                    >
-                        Try again
-                    </Button>
-                ),
-            });
-            return;
-        });
+  async function selectCurrentSaveFile() {
+    try {
+      const filePath = await open({
+        multiple: false,
+        filters: [{ name: "Save file", extensions: ["sav"] }],
+      });
 
-        if (newSave) {
-            currentSaveFile.setValue(newSave);
-            setIsLoading(false);
-        }
-    };
-
-    async function selectCurrentSaveFile() {
-        let filepath = await open({
-            multiple: false,
-            filters: [
-                {
-                    name: "SAV File",
-                    extensions: ["sav"],
-                },
-            ],
-        });
-
-        if (filepath != null && !Array.isArray(filepath)) {
-            loadSave(filepath);
-        }
+      if (filePath && !Array.isArray(filePath)) {
+        await loadSave(filePath);
+      }
+    } catch (error) {
+      toast.error("Could not open the file picker.", {
+        description: String(error),
+      });
     }
+  }
 
-    function handleSavingCurrentSaveFile() {
-        if (currentSaveFile.value?.is_compressed == true) {
-            saveCurrentSaveFileCompressed();
-        } else {
-            saveCurrentSaveFileDecompressed();
-        }
+  function markSaveAsClean() {
+    if (currentSaveFile.value) {
+      currentSaveFile.setValue({
+        ...currentSaveFile.value,
+        is_dirty: false,
+      });
     }
+  }
 
-    async function saveCurrentSaveFileDecompressed() {
-        let filePath = await save({
-            defaultPath: "/save_main_0",
-            filters: [
-                {
-                    name: "SAV File",
-                    extensions: ["sav"],
-                },
-            ],
-        });
+  async function saveCurrentSaveFileDecompressed() {
+    if (!currentSaveFile.value) return;
 
-        if (filePath != null && currentSaveFile.value != undefined) {
-            // Save data to file
-            await writeFile(filePath, new Uint8Array(currentSaveFile.value.file_content)).catch(
-                (err) => {
-                    toast.error("Uh oh! Something went wrong. :/", {
-                        description:
-                            "The Editor stumbled accross the following error: " + err,
-                        duration: 8000,
-                    });
-                    return;
-                }
-            );
-        }
+    try {
+      const filePath = await save({
+        defaultPath: getFileName(currentSaveFile.value.path),
+        filters: [{ name: "Save file", extensions: ["sav"] }],
+      });
+      if (!filePath) return;
+
+      await writeFile(filePath, new Uint8Array(currentSaveFile.value.file_content));
+      markSaveAsClean();
+      toast.success("Save exported.", { description: filePath });
+    } catch (error) {
+      toast.error("Could not export the save.", {
+        description: String(error),
+      });
     }
+  }
 
-    async function saveCurrentSaveFileCompressed() {
-        let filePath = await save({
-            defaultPath: "/save_main_0",
-            filters: [
-                {
-                    name: "SAV File",
-                    extensions: ["sav"],
-                },
-            ],
-        });
+  async function saveCurrentSaveFileCompressed() {
+    if (!currentSaveFile.value) return;
 
-        if (filePath != null && currentSaveFile.value != undefined) {
-            // Save data to file
-            let compressed = await invoke<Uint8Array>("compress_save", {
-                data: currentSaveFile.value.file_content,
-            }).catch((err) => {
-                toast.error("Uh oh! Something went wrong. :/", {
-                    description:
-                        "The Editor stumbled accross the following error: " + err,
-                    duration: 8000,
-                });
-                return;
-            });
+    try {
+      const filePath = await save({
+        defaultPath: getFileName(currentSaveFile.value.path),
+        filters: [{ name: "Save file", extensions: ["sav"] }],
+      });
+      if (!filePath) return;
 
-            if (compressed) {
-                await writeFile(filePath, new Uint8Array(compressed)).catch((err) => {
-                    toast.error("Uh oh! Something went wrong. :/", {
-                        description:
-                            "The Editor stumbled accross the following error: " + err,
-                        duration: 8000,
-                    });
-                    return;
-                });
-            }
-        }
+      const compressed = await invoke<Uint8Array>("compress_save", {
+        data: currentSaveFile.value.file_content,
+      });
+      await writeFile(filePath, new Uint8Array(compressed));
+      markSaveAsClean();
+      toast.success("Compressed save exported.", { description: filePath });
+    } catch (error) {
+      toast.error("Could not export the compressed save.", {
+        description: String(error),
+      });
     }
+  }
 
-    async function saveBackupSaveFile() {
-        let filePath = await save({
-            defaultPath: "/save_main_0",
-            filters: [
-                {
-                    name: "SAV Backup File",
-                    extensions: ["sav.bak"],
-                },
-            ],
-        });
+  async function saveBackupSaveFile() {
+    if (!currentSaveFile.value) return;
 
-        if (filePath != null && currentSaveFile.value != undefined) {
-            // Save data to file
-            await writeFile(filePath, new Uint8Array(currentSaveFile.value.file_content)).catch(
-                (err) => {
-                    toast.error("Uh oh! Something went wrong. :/", {
-                        description:
-                            "The Editor stumbled accross the following error: " + err,
-                        duration: 8000,
-                    });
-                    return;
-                }
-            );
-        }
+    try {
+      const filePath = await save({
+        defaultPath: `${getFileName(currentSaveFile.value.path)}.bak`,
+        filters: [{ name: "Backup file", extensions: ["bak"] }],
+      });
+      if (!filePath) return;
+
+      await writeFile(filePath, new Uint8Array(currentSaveFile.value.file_content));
+      toast.success("Backup exported.", { description: filePath });
+    } catch (error) {
+      toast.error("Could not export the backup.", {
+        description: String(error),
+      });
     }
+  }
 
-    async function handleSetIdData() {
-        let ids = await invoke<IdData[]>("get_ids", {}).catch((err) => {
-            toast.error("Uh oh! Something went wrong. :/", {
-                description:
-                    err ??
-                    "An error occured while trying to load the IDs file. Please make sure the IDs folder exists in the editor's directory.",
-                duration: 8000,
-            });
-            return;
-        });
+  function handleSavingCurrentSaveFile() {
+    if (!currentSaveFile.value) return;
 
-        if (ids) {
-            idData.setValue(ids);
-        }
+    if (currentSaveFile.value.is_compressed) {
+      void saveCurrentSaveFileCompressed();
+    } else {
+      void saveCurrentSaveFileDecompressed();
     }
+  }
 
-    async function handleSetPatchedItems() {
-        let patched_items = await invoke<PatchedItems>(
-            "get_patched_items",
-            {}
-        ).catch((err) => {
-            toast.error("Uh oh! Something went wrong. :/", {
-                description:
-                    err ??
-                    "An error occured while trying to load the Patched Items. Please make sure the Patched_items folder exists in the editor's directory.",
-                duration: 8000,
-            });
-            return;
-        });
+  const inventoryCount =
+    saveFile?.items.reduce((total, row) => total + row.inventory_items.length, 0) ?? 0;
+  const latestReleaseUrl = latestEditorVersion
+    ? `https://github.com/Marcel-TO/DL2_Save_Editor/releases/tag/${encodeURIComponent(latestEditorVersion)}`
+    : "https://github.com/Marcel-TO/DL2_Save_Editor/releases/latest";
 
-        if (patched_items) {
-            patchedItems.setValue(patched_items);
-        }
-    }
-
-    const openSecondWindow = async () => {
-        await invoke("open_second_window").catch((err) => {
-            toast.error("Uh oh! Something went wrong. :/", {
-                description: err ?? "An error occured while loading the save file.",
-                duration: 8000,
-                action: (
-                    <Button
-                        variant="outline"
-                        onClick={() => setIsDrawerOpen(true)}
-                    >
-                        Try again
-                    </Button>
-                ),
-            });
-            return;
-        });
-    };
-
-    return (
-        <div className="flex min-h-screen w-full flex-col">
-            <NavbarComponent />
-            <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-                <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
-                    <div>
-                        <Card className="overflow-hidden" x-chunk="dashboard-05-chunk-4">
-                            <CardHeader className="flex flex-row items-start">
-                                <div className="grid gap-0.5">
-                                    <CardTitle className="group flex items-center gap-2 text-lg">
-                                        {currentSaveFile.value?.path.split(/[/\\]/).pop() ??
-                                            "No Save Selected"}
-                                        <TooltipProvider>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button
-                                                        size="icon"
-                                                        variant="outline"
-                                                        className="h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
-                                                        onClick={() =>
-                                                            navigator.clipboard.writeText(
-                                                                currentSaveFile.value?.path ?? ""
-                                                            )
-                                                        }
-                                                    >
-                                                        <Copy className="h-3 w-3" />
-                                                        <span className="sr-only">Copy</span>
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>Copy Path</TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
-                                    </CardTitle>
-                                    <CardDescription>
-                                        {currentSaveFile.value ? (
-                                            <>
-                                                <div className="flex flex-col">
-                                                    <div>
-                                                        Save Version: {currentSaveFile.value?.game_version}
-                                                    </div>
-                                                    <div>
-                                                        Is Compressed:{" "}
-                                                        {currentSaveFile.value?.is_compressed == true
-                                                            ? "Yes"
-                                                            : "No"}
-                                                    </div>
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <></>
-                                        )}
-                                    </CardDescription>
-                                </div>
-                                <div className="ml-auto flex items-center gap-1">
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="h-8 gap-1"
-                                        disabled={currentSaveFile.value ? false : true}
-                                        onClick={() => handleSavingCurrentSaveFile()}
-                                    >
-                                        <Save className="h-3.5 w-3.5" />
-                                        <span className="lg:sr-only xl:not-sr-only xl:whitespace-nowrap">
-                                            Save File
-                                        </span>
-                                    </Button>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button
-                                                size="icon"
-                                                variant="outline"
-                                                className="h-8 w-8"
-                                                disabled={currentSaveFile.value ? false : true}
-                                            >
-                                                <MoreVertical className="h-3.5 w-3.5" />
-                                                <span className="sr-only">More</span>
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <DropdownMenuGroup>
-                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                <Link to={"/debug"}>
-                                                    <DropdownMenuItem>Debug</DropdownMenuItem>
-                                                </Link>
-                                                <DropdownMenuItem onClick={() => openSecondWindow()} disabled>
-                                                    Hex View
-                                                </DropdownMenuItem>
-                                            </DropdownMenuGroup>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuGroup>
-                                                <DropdownMenuLabel>Export As</DropdownMenuLabel>
-                                                <DropdownMenuItem
-                                                    onClick={() => saveCurrentSaveFileCompressed()}
-                                                >
-                                                    Compressed
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem
-                                                    onClick={() => saveCurrentSaveFileDecompressed()}
-                                                >
-                                                    Decompressed
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => saveBackupSaveFile()}>
-                                                    Backup
-                                                </DropdownMenuItem>
-                                            </DropdownMenuGroup>
-                                            <DropdownMenuSeparator />
-                                            <Dialog>
-                                                <DialogTrigger asChild>
-                                                    <Button variant="destructive" className="w-full">
-                                                        Reset
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <DialogContent>
-                                                    <DialogHeader>
-                                                        Are you sure that you want to reset?
-                                                    </DialogHeader>
-                                                    <DialogDescription>
-                                                        When resetting, the current save will be deselcted.
-                                                        This means that all unsaved changes to the save will
-                                                        be lost. If this is not your intention, please save
-                                                        before continuing.
-                                                    </DialogDescription>
-                                                    <DialogFooter>
-                                                        <DialogClose asChild>
-                                                            <Button
-                                                                onClick={() =>
-                                                                    currentSaveFile.setValue(undefined)
-                                                                }
-                                                                variant="destructive"
-                                                            >
-                                                                Reset
-                                                            </Button>
-                                                        </DialogClose>
-                                                    </DialogFooter>
-                                                </DialogContent>
-                                            </Dialog>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="p-6 text-sm">
-                                <div className="grid gap-3">
-                                    <div className="font-semibold">Skills</div>
-                                    <ul className="grid gap-3">
-                                        <li className="flex items-center justify-between">
-                                            {currentSaveFile.value ? (
-                                                <>
-                                                    <span className="text-muted-foreground">
-                                                        Base Skills
-                                                    </span>
-                                                    <span>
-                                                        {currentSaveFile.value?.skills.base_skills.length}
-                                                    </span>
-                                                </>
-                                            ) : (
-                                                <Skeleton className="w-full h-4" />
-                                            )}
-                                        </li>
-                                        <li className="flex items-center justify-between">
-                                            {currentSaveFile.value ? (
-                                                <>
-                                                    <span className="text-muted-foreground">
-                                                        Legend Skills
-                                                    </span>
-                                                    <span>
-                                                        {currentSaveFile.value?.skills.legend_skills.length}
-                                                    </span>
-                                                </>
-                                            ) : (
-                                                <Skeleton className="w-full h-4" />
-                                            )}
-                                        </li>
-                                    </ul>
-                                </div>
-                                <Separator className="my-2" />
-                                <div className="font-semibold">Inventory</div>
-                                <ul className="grid gap-3">
-                                    {currentSaveFile.value ? (
-                                        <>
-                                            {currentSaveFile.value.items.map((item) => (
-                                                <li
-                                                    key={item.name}
-                                                    className="flex items-center justify-between"
-                                                >
-                                                    <span className="text-muted-foreground">
-                                                        {item.name}
-                                                    </span>
-                                                    <span>{item.inventory_items.length}</span>
-                                                </li>
-                                            ))}
-                                        </>
-                                    ) : (
-                                        <Skeleton className="w-full h-25" />
-                                    )}
-                                </ul>
-                                <Separator className="my-4" />
-                                <div className="font-semibold">Unlockables</div>
-                                <ul className="grid gap-3">
-                                    {currentSaveFile.value ? (
-                                        <li className="flex items-center justify-between">
-                                            <span className="text-muted-foreground">Amount</span>
-                                            <span>
-                                                {currentSaveFile.value?.unlockable_items.length}
-                                            </span>
-                                        </li>
-                                    ) : (
-                                        <Skeleton className="w-full h-4" />
-                                    )}
-                                </ul>
-                                <Separator className="my-4" />
-                                <div className="font-semibold mb-2">Campaign</div>
-                                {currentSaveFile.value ? (
-                                    <>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="grid">
-                                                <div className="font-semibold">Chapter 1</div>
-                                                <div className="grid not-italic text-muted-foreground">
-                                                    <span>Level: xx</span>
-                                                    <span>Token: xxxxxx</span>
-                                                </div>
-                                            </div>
-                                            <div className="grid">
-                                                <div className="font-semibold">Chapter 2</div>
-                                                <div className="grid not-italic text-muted-foreground">
-                                                    <span>Level: xx</span>
-                                                    <span>Token: xxxxxx</span>
-                                                </div>
-                                            </div>
-                                            <div className="grid">
-                                                <div className="font-semibold">Chapter 3</div>
-                                                <div className="grid not-italic text-muted-foreground">
-                                                    <span>Level: xx</span>
-                                                    <span>Token: xxxxxx</span>
-                                                </div>
-                                            </div>
-                                            <div className="grid">
-                                                <div className="font-semibold">Chapter 4</div>
-                                                <div className="grid not-italic text-muted-foreground">
-                                                    <span>Level: xx</span>
-                                                    <span>Token: xxxxxx</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <Skeleton className="w-full h-25" />
-                                )}
-                                <Separator className="my-4" />
-                            </CardContent>
-                            <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
-                                <div className="text-xs text-muted-foreground">
-                                    Path: {currentSaveFile.value?.path}
-                                </div>
-                            </CardFooter>
-                        </Card>
-                    </div>
-                    <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
-                        <TypographyH1
-                            text={`Welcome ${userName}`}
-                            className="text-primary mt-4 text-7xl"
-                            fontType={appSettings.defaultHeaderFont.value}
-                        />
-                        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-                            <Card className="sm:col-span-2" x-chunk="dashboard-05-chunk-0">
-                                <CardHeader className="pb-3">
-                                    <CardTitle>DL2 Save Editor</CardTitle>
-                                    <CardDescription className="max-w-lg text-balance leading-relaxed">
-                                        Take control of your game saves, unlocking a realm of
-                                        possibilities and customization.
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardFooter>
-                                    <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-                                        <DrawerTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                className="border-primary text-primary transform transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
-                                                onClick={() => listenDragDrop()}
-                                            >
-                                                Load Save
-                                            </Button>
-                                        </DrawerTrigger>
-                                        <DrawerContent>
-                                            <div className="mx-auto w-full max-w-sm">
-                                                <DrawerHeader>
-                                                    <DrawerTitle>Load a Save</DrawerTitle>
-                                                    <DrawerDescription>
-                                                        Select or drag your save file to load.
-                                                    </DrawerDescription>
-                                                </DrawerHeader>
-                                                <div className="p-4">
-                                                    <div className="mt-3 h-30 bg-muted">
-                                                        <div className="flex flex-col items-center justify-center h-full">
-                                                            <Save
-                                                                className="h-12 w-12 text-muted-foreground"
-                                                                strokeWidth={1}
-                                                            />
-                                                            <span className="text-muted-foreground">
-                                                                Drag and drop your save file here.
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <DrawerFooter>
-                                                    <Button onClick={selectCurrentSaveFile}>
-                                                        Select
-                                                    </Button>
-                                                    <DrawerClose asChild>
-                                                        <Button variant="outline">Cancel</Button>
-                                                    </DrawerClose>
-                                                </DrawerFooter>
-                                            </div>
-                                        </DrawerContent>
-                                    </Drawer>
-                                </CardFooter>
-                            </Card>
-                            <Card x-chunk="dashboard-05-chunk-1">
-                                <CardHeader className="pb-2">
-                                    <CardDescription>Editor Version</CardDescription>
-                                    <CardTitle className="text-4xl">
-                                        {packageJson.version}
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-xs text-muted-foreground">
-                                        Latest Version: {latestEditorVersion}
-                                    </div>
-                                </CardContent>
-                                <CardFooter>
-                                    <Link
-                                        to={
-                                            "https://github.com/Marcel-TO/DL2_Save_Editor/releases/" +
-                                            latestEditorVersion
-                                        }
-                                        target="_blank"
-                                    >
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            className="h-7 gap-1 text-sm"
-                                        >
-                                            <Download className="h-3.5 w-3.5" />
-                                            <span className="sr-only sm:not-sr-only">
-                                                latest release
-                                            </span>
-                                        </Button>
-                                    </Link>
-                                </CardFooter>
-                            </Card>
-                            <Card x-chunk="dashboard-05-chunk-2">
-                                <CardHeader className="pb-2">
-                                    <CardDescription>Downloads</CardDescription>
-                                    <CardTitle className="text-4xl">
-                                        {amountOfDownloads}
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-xs text-muted-foreground">
-                                        {100 - percentageToNextThousand}% to next thousand
-                                    </div>
-                                </CardContent>
-                                <CardFooter>
-                                    <Progress
-                                        value={percentageToNextThousand}
-                                        aria-label="Progress to next thousands"
-                                    />
-                                </CardFooter>
-                            </Card>
-                        </div>
-                        <Separator />
-                        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-                            <Link to={"/settings"}>
-                                <Card className="transform transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg w-full h-full">
-                                    <CardHeader className="grid center">
-                                        <CardDescription>Select to visit</CardDescription>
-                                        <CardTitle className="text-4xl flex flex-row">
-                                            Settings
-                                        </CardTitle>
-                                    </CardHeader>
-                                </Card>
-                            </Link>
-                            <Link
-                                to={"https://github.com/Marcel-TO/DL2_Save_Editor"}
-                                target="_blank"
-                            >
-                                <Card className="transform transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg w-full h-full">
-                                    <CardHeader className="pb-2">
-                                        <CardDescription className="flex flex-row gap-2">
-                                            Select to visit
-                                            <ExternalLink className="w-4" />
-                                        </CardDescription>
-                                        <CardTitle className="text-4xl">Github</CardTitle>
-                                    </CardHeader>
-                                </Card>
-                            </Link>
-                            <Card className="sm:col-span-2" x-chunk="dashboard-05-chunk-0">
-                                <CardHeader className="pb-3">
-                                    <CardTitle>Knowledge-Vault</CardTitle>
-                                    <CardDescription className="max-w-lg text-balance leading-relaxed">
-                                        A collection of guides, tutorials and information on how to
-                                        use the editor and what you can do with it.
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardFooter>
-                                    <Link
-                                        to={"/knowledge-vault"}
-                                        className="transform transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg"
-                                    >
-                                        <Button
-                                            variant="outline"
-                                            className="border-primary text-primary"
-                                        >
-                                            Learn more
-                                        </Button>
-                                    </Link>
-                                </CardFooter>
-                            </Card>
-                        </div>
-                    </div>
-                </main>
+  return (
+    <div className="min-h-screen">
+      <NavbarComponent />
+      <main className="ml-14 px-4 py-6 sm:ml-56 sm:px-8 sm:py-10">
+        <div className="mx-auto grid w-full max-w-6xl gap-6">
+          <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+                Dying Light 2 · Save editor
+              </p>
+              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Save workspace</h1>
+              <p className="mt-2 truncate text-sm text-primary">
+                {saveFile
+                  ? getFileName(saveFile.path)
+                  : "Open a save to review and edit your game data."}
+              </p>
             </div>
-
-            {/* Loading Animation */}
-            {isLoading && (
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => void openSaveDrawer()} disabled={isLoading}>
+                <FolderOpen />
+                {saveFile ? "Open another save" : "Open save"}
+              </Button>
+              {saveFile && (
                 <>
-                    <section className="fixed w-full h-full grid place-content-center bg-background/50">
-                        <HelixLoader></HelixLoader>
-                    </section>
+                  <Button
+                    variant="outline"
+                    onClick={handleSavingCurrentSaveFile}
+                    disabled={isLoading}
+                  >
+                    <Save />
+                    Export save
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="icon" aria-label="More save actions">
+                        <MoreVertical />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Save actions</DropdownMenuLabel>
+                      <DropdownMenuItem onSelect={() => void saveCurrentSaveFileCompressed()}>
+                        <FileArchive />
+                        Export compressed
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => void saveCurrentSaveFileDecompressed()}>
+                        <PackageOpen />
+                        Export decompressed
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => void saveBackupSaveFile()}>
+                        <ShieldCheck />
+                        Export backup
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onSelect={() => setIsResetDialogOpen(true)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        Close save
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </>
-            )}
+              )}
+            </div>
+          </header>
+
+          {!saveFile ? (
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.8fr)]">
+              <Card className="overflow-hidden">
+                <CardHeader className="gap-4">
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-primary/15 text-primary">
+                    <FolderOpen className="size-6" />
+                  </div>
+                  <div className="grid gap-2">
+                    <CardTitle className="text-2xl">Start with a save file</CardTitle>
+                    <CardDescription className="max-w-xl text-sm leading-6">
+                      Open a .sav file to inspect your skills, inventory, and unlockables. The
+                      editor keeps changes in memory until you export the edited save.
+                    </CardDescription>
+                  </div>
+                </CardHeader>
+                <CardFooter className="flex flex-wrap gap-3 border-t">
+                  <Button onClick={() => void openSaveDrawer()}>
+                    <FolderOpen />
+                    Choose save file
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    You can also drag a .sav file into the app window.
+                  </p>
+                </CardFooter>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <ShieldCheck className="size-5 text-primary" />
+                    Backup protection
+                  </CardTitle>
+                  <CardDescription className="leading-6">
+                    {appSettings.hasAutomaticBackup.value
+                      ? "A numbered backup is created beside the original save each time you load it."
+                      : "Automatic backups are off. Turn them on before loading a save if you want a recovery copy."}
+                  </CardDescription>
+                </CardHeader>
+                <CardFooter className="border-t">
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/settings">
+                      <Settings />
+                      Backup settings
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg">Before you edit</CardTitle>
+                  <CardDescription>A quick checklist for keeping your save safe.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-4 sm:grid-cols-3">
+                  <div className="flex gap-3">
+                    <ShieldCheck className="mt-0.5 size-5 shrink-0 text-primary" />
+                    <p className="text-sm leading-6">
+                      Keep an original or automatic backup before exporting changes.
+                    </p>
+                  </div>
+                  <div className="flex gap-3">
+                    <FileWarning className="mt-0.5 size-5 shrink-0 text-primary" />
+                    <p className="text-sm leading-6">
+                      Inventory editing is experimental. Review changes in-game.
+                    </p>
+                  </div>
+                  <div className="flex gap-3">
+                    <BookOpenText className="mt-0.5 size-5 shrink-0 text-primary" />
+                    <p className="text-sm leading-6">
+                      Check the knowledge vault for save editing guides.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <>
+              {saveFile.is_dirty && (
+                <div
+                  aria-live="polite"
+                  className="flex items-start gap-3 rounded-lg border border-primary/40 bg-primary/60 text-primary-foreground px-4 py-3 backdrop-blur-sm"
+                >
+                  <Sparkles className="mt-0.5 size-5 shrink-0 text-primary-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Unsaved edits</p>
+                    <p className="text-sm text-secondary">
+                      Export this save to keep your changes in a file.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.8fr)]">
+                <Card>
+                  <CardHeader>
+                    <CardDescription>Loaded save</CardDescription>
+                    <CardTitle className="break-all text-xl">
+                      {getFileName(saveFile.path)}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid gap-4 text-sm sm:grid-cols-2">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Game version
+                      </p>
+                      <p className="mt-1">{saveFile.game_version || "Unknown"}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        File format
+                      </p>
+                      <p className="mt-1">
+                        {saveFile.is_compressed ? "Compressed" : "Decompressed"}
+                      </p>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        File path
+                      </p>
+                      <div className="mt-1 flex items-start gap-2">
+                        <p className="min-w-0 break-all text-muted-foreground">{saveFile.path}</p>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          className="size-7 shrink-0"
+                          aria-label="Copy save path"
+                          onClick={() => {
+                            void navigator.clipboard.writeText(saveFile.path);
+                            toast.success("Save path copied.");
+                          }}
+                        >
+                          <Copy />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      {saveFile.backup_path ? (
+                        <Check className="size-5 text-primary" />
+                      ) : (
+                        <FileWarning className="size-5 text-muted-foreground" />
+                      )}
+                      Automatic backup
+                    </CardTitle>
+                    <CardDescription className="leading-6">
+                      {saveFile.backup_path
+                        ? "A recovery copy was created before this save was loaded."
+                        : "No automatic backup was created for this save."}
+                    </CardDescription>
+                  </CardHeader>
+                  {saveFile.backup_path && (
+                    <CardContent>
+                      <p className="break-all text-sm text-muted-foreground">
+                        {saveFile.backup_path}
+                      </p>
+                    </CardContent>
+                  )}
+                  {!saveFile.backup_path && (
+                    <CardFooter className="border-t">
+                      <Button asChild variant="outline" size="sm">
+                        <Link to="/settings">
+                          <Settings />
+                          Turn on backups
+                        </Link>
+                      </Button>
+                    </CardFooter>
+                  )}
+                </Card>
+              </div>
+
+              <section aria-label="Save contents" className="grid gap-4 sm:grid-cols-3">
+                <Link
+                  to="/skills"
+                  className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <Card className="h-full transition-colors hover:border-primary/60">
+                    <CardHeader className="flex-row items-center justify-between">
+                      <CardDescription>Skills</CardDescription>
+                      <Sparkles className="size-5 text-primary" />
+                    </CardHeader>
+                    <CardContent>
+                      <CardTitle className="text-3xl">
+                        {saveFile.skills.base_skills.length + saveFile.skills.legend_skills.length}
+                      </CardTitle>
+                      <p className="mt-1 text-xs text-muted-foreground">Base and legend skills</p>
+                    </CardContent>
+                  </Card>
+                </Link>
+                <Link
+                  to="/inventory"
+                  className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <Card className="h-full transition-colors hover:border-primary/60">
+                    <CardHeader className="flex-row items-center justify-between">
+                      <CardDescription>Inventory</CardDescription>
+                      <Swords className="size-5 text-primary" />
+                    </CardHeader>
+                    <CardContent>
+                      <CardTitle className="text-3xl">{inventoryCount}</CardTitle>
+                      <p className="mt-1 text-xs text-muted-foreground">Items found in this save</p>
+                    </CardContent>
+                  </Card>
+                </Link>
+                <Link
+                  to="/unlockables"
+                  className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <Card className="h-full transition-colors hover:border-primary/60">
+                    <CardHeader className="flex-row items-center justify-between">
+                      <CardDescription>Unlockables</CardDescription>
+                      <PackageOpen className="size-5 text-primary" />
+                    </CardHeader>
+                    <CardContent>
+                      <CardTitle className="text-3xl">{saveFile.unlockable_items.length}</CardTitle>
+                      <p className="mt-1 text-xs text-muted-foreground">Items found in this save</p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </section>
+            </>
+          )}
+
+          <section aria-label="Editor resources" className="grid gap-4 sm:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardDescription>Editor version</CardDescription>
+                <CardTitle className="text-2xl">{packageJson.version}</CardTitle>
+                <CardDescription>
+                  {latestEditorVersion
+                    ? `Latest release: ${latestEditorVersion}`
+                    : "Release information is unavailable."}
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="border-t">
+                <Button asChild variant="outline" size="sm">
+                  <a href={latestReleaseUrl} target="_blank" rel="noreferrer">
+                    <Download />
+                    View releases
+                    <ArrowUpRight />
+                  </a>
+                </Button>
+                {amountOfDownloads !== undefined && (
+                  <p className="ml-auto text-sm text-muted-foreground">
+                    {new Intl.NumberFormat().format(amountOfDownloads)} downloads
+                  </p>
+                )}
+              </CardFooter>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Need a hand?</CardTitle>
+                <CardDescription className="leading-6">
+                  Read the save editing guides and learn what each editor page changes.
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="border-t">
+                <Button asChild variant="outline" size="sm">
+                  <Link to="/knowledge-vault">
+                    <BookOpenText />
+                    Open knowledge vault
+                  </Link>
+                </Button>
+              </CardFooter>
+            </Card>
+          </section>
         </div>
-    );
+      </main>
+
+      <Drawer
+        open={isDrawerOpen}
+        onOpenChange={(open) => {
+          setIsDrawerOpen(open);
+          if (!open) {
+            dragDropUnlisten.current?.();
+            dragDropUnlisten.current = undefined;
+          }
+        }}
+      >
+        <DrawerContent>
+          <div className="mx-auto w-full max-w-lg">
+            <DrawerHeader>
+              <DrawerTitle>Open a save file</DrawerTitle>
+              <DrawerDescription>Choose a .sav file, or drop one in this window.</DrawerDescription>
+            </DrawerHeader>
+            <div className="mx-4 rounded-xl border border-dashed p-8 text-center">
+              <FolderOpen className="mx-auto size-10 text-muted-foreground" />
+              <p className="mt-3 text-sm text-muted-foreground">
+                Select a file from your computer or drag it into the app.
+              </p>
+            </div>
+            <DrawerFooter>
+              <Button onClick={() => void selectCurrentSaveFile()}>
+                <FolderOpen />
+                Browse files
+              </Button>
+              <DrawerClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Close this save?</DialogTitle>
+            <DialogDescription>
+              {saveFile?.is_dirty
+                ? "You have unsaved edits. Export the save first or close it and discard those edits."
+                : "This removes the save from the current workspace."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Keep editing</Button>
+            </DialogClose>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                currentSaveFile.setValue(undefined);
+                setIsResetDialogOpen(false);
+              }}
+            >
+              Close save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {isLoading && (
+        <div
+          aria-live="polite"
+          className="fixed inset-0 z-50 grid place-content-center bg-background/70 backdrop-blur-sm"
+        >
+          <div className="rounded-xl border bg-card p-6 text-center shadow-lg">
+            <PackageOpen className="mx-auto size-8 animate-pulse text-primary" />
+            <p className="mt-3 text-sm font-medium">Reading save file...</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

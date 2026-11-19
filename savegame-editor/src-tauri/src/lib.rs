@@ -8,7 +8,7 @@ use save_logic::bypass_crc::get_files_and_copy_to_destination;
 use save_logic::file_analyser::{
     change_items_amount, change_items_durability, create_backup_from_file,
     edit_inventory_item_chunk, edit_skill, export_save_for_pc, get_contents_from_file,
-    load_save_file, load_save_file_pc, remove_inventory_item,
+    load_save_file, load_save_file_pc, remove_inventory_item, InventoryItemEdit,
 };
 use save_logic::id_fetcher::{fetch_ids, update_ids};
 use save_logic::patched_items_fetcher::fetch_patched_ids;
@@ -80,35 +80,38 @@ fn load_save(
     // Initializes IDs
     let ids: Result<Vec<IdData>, Box<dyn Error>> = fetch_ids(&resource_path.display().to_string());
 
-    let file_content: Vec<u8> = get_contents_from_file(&file_path).unwrap();
+    let file_content: Vec<u8> = get_contents_from_file(file_path).unwrap();
 
     // Checks if the file is compressed.
     if file_content[0] == 31 && file_content[1] == 139 {
-        let save_file = load_save_pc(app_handle, file_path, is_debugging, has_automatic_backup);
-        match save_file {
-            Ok(save) => return Ok(save),
-            Err(err) => return Err(err),
-        }
+        return load_save_pc(app_handle, file_path, is_debugging, has_automatic_backup);
     }
 
-    // Creates a backup file if the settings are set to true.
-    if has_automatic_backup {
-        create_backup_from_file(&file_path, &file_content);
-    }
+    let backup_path = if has_automatic_backup {
+        Some(
+            create_backup_from_file(file_path, &file_content).map_err(|error| {
+                format!(
+                    "Could not create a backup before loading the save: {}",
+                    error
+                )
+            })?,
+        )
+    } else {
+        None
+    };
 
-    let save_file = load_save_file(
-        &file_path,
+    let mut save_file = load_save_file(
+        file_path,
         file_content,
         ids.unwrap(),
         &mut logger,
         is_debugging,
         false,
-    );
+    )
+    .map_err(|error| error.to_string())?;
 
-    match save_file {
-        Ok(save) => return Ok(save),
-        Err(err) => return Err(err.to_string()),
-    }
+    save_file.backup_path = backup_path;
+    Ok(save_file)
 }
 
 #[tauri::command(rename_all = "snake_case")]
@@ -129,26 +132,33 @@ fn load_save_pc(
     // Initializes IDs
     let ids = fetch_ids(&resource_path.display().to_string()).unwrap();
 
-    let file_content: Vec<u8> = get_contents_from_file(&file_path).unwrap();
+    let file_content: Vec<u8> = get_contents_from_file(file_path).unwrap();
 
-    // Creates a backup file if the settings are set to true.
-    if has_automatic_backup {
-        create_backup_from_file(&file_path, &file_content);
-    }
+    let backup_path = if has_automatic_backup {
+        Some(
+            create_backup_from_file(file_path, &file_content).map_err(|error| {
+                format!(
+                    "Could not create a backup before loading the save: {}",
+                    error
+                )
+            })?,
+        )
+    } else {
+        None
+    };
 
-    let save_file = load_save_file_pc(
-        &file_path,
+    let mut save_file = load_save_file_pc(
+        file_path,
         file_content,
         ids,
         &mut logger,
         is_debugging,
         true,
-    );
+    )
+    .map_err(|error| error.to_string())?;
 
-    match save_file {
-        Ok(save) => return Ok(save),
-        Err(err) => return Err(err.to_string()),
-    }
+    save_file.backup_path = backup_path;
+    Ok(save_file)
 }
 
 #[tauri::command(rename_all = "snake_case")]
@@ -177,27 +187,10 @@ async fn handle_edit_skill(
 
 #[tauri::command(rename_all = "snake_case")]
 async fn handle_edit_item_chunk(
-    current_item_index: usize,
-    new_id: String,
-    current_item_chunk_index: usize,
-    current_item_size: usize,
-    new_level: u16,
-    new_seed: u16,
-    new_amount: u32,
-    new_durability: f32,
+    edit: InventoryItemEdit,
     save_file_content: Vec<u8>,
 ) -> Result<Vec<u8>, String> {
-    let new_save_content = edit_inventory_item_chunk(
-        current_item_index,
-        new_id,
-        current_item_chunk_index,
-        current_item_size,
-        new_level,
-        new_seed,
-        new_amount,
-        new_durability,
-        save_file_content,
-    );
+    let new_save_content = edit_inventory_item_chunk(edit, save_file_content);
 
     Ok(new_save_content)
 }

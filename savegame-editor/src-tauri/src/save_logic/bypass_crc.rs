@@ -15,7 +15,7 @@ pub fn get_files_and_copy_to_destination(crc_path: &String, game_files_path: &st
     for entry in entries {
         let entry = entry.map_err(|e| format!("Error reading directory entry: {}", e))?;
 
-        if entry.file_type().map_or(false, |t| t.is_file()) {
+        if entry.file_type().is_ok_and(|t| t.is_file()) {
             let path = entry.path();
             let filename = path
                 .file_name()
@@ -23,10 +23,8 @@ pub fn get_files_and_copy_to_destination(crc_path: &String, game_files_path: &st
                 .to_string_lossy()
                 .to_string();
             let file_content = get_contents_from_file(
-                &path
-                    .to_str()
-                    .ok_or_else(|| "Error converting path to string".to_string())?
-                    .to_string(),
+                path.to_str()
+                    .ok_or_else(|| "Error converting path to string".to_string())?,
             )
             .map_err(|e| format!("Error reading file content: {}", e))?;
             let target_file_path = format!("{}/{}", game_files_path, filename);

@@ -1,15 +1,13 @@
 import {
-  ColumnDef,
   ColumnFiltersState,
+  ColumnVisibilityState,
   flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
+  RowData,
+  RowSelectionState,
   SortingState,
-  useReactTable,
-  VisibilityState,
+  useTable,
 } from "@tanstack/react-table";
+import { DataTableColumnDef, dataTableFeatures } from "@/lib/table-features";
 
 import {
   Table,
@@ -28,38 +26,35 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends RowData> {
   title?: string;
   counter_description?: string;
-  columns: ColumnDef<TData, TValue>[];
+  columns: DataTableColumnDef<TData>[];
   data: TData[];
-  executeFunctionForRow?: Function;
+  executeFunctionForRow?: (row: TData, index: number) => void;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends RowData>({
   title,
   counter_description,
   columns,
   data,
   executeFunctionForRow,
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibilityState>({});
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  const table = useReactTable({
+  const table = useTable({
+    features: dataTableFeatures,
     data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     state: {
@@ -79,16 +74,12 @@ export function DataTable<TData, TValue>({
       )}
       <CardContent>
         <div className="w-full">
-          <div className="flex items-center py-4">
+          <div className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center">
             <Input
-              placeholder="Filter Name..."
-              value={
-                (table.getColumn("name")?.getFilterValue() as string) ?? ""
-              }
-              onChange={(event) =>
-                table.getColumn("name")?.setFilterValue(event.target.value)
-              }
-              className="mr-8"
+              placeholder="Filter by name..."
+              value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+              onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
+              className="sm:max-w-sm"
             />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -106,9 +97,7 @@ export function DataTable<TData, TValue>({
                         key={column.id}
                         className="capitalize"
                         checked={column.getIsVisible()}
-                        onCheckedChange={(value) =>
-                          column.toggleVisibility(!!value)
-                        }
+                        onCheckedChange={(value) => column.toggleVisibility(!!value)}
                       >
                         {column.id}
                       </DropdownMenuCheckboxItem>
@@ -127,42 +116,57 @@ export function DataTable<TData, TValue>({
                         <TableHead key={header.id}>
                           {header.isPlaceholder
                             ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
+                            : flexRender(header.column.columnDef.header, header.getContext())}
                         </TableHead>
                       );
                     })}
+                    {executeFunctionForRow && (
+                      <TableHead>
+                        <span className="sr-only">Actions</span>
+                      </TableHead>
+                    )}
                   </TableRow>
                 ))}
               </TableHeader>
               <TableBody>
                 {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row, index) => (
+                  table.getRowModel().rows.map((row) => (
                     <TableRow
                       key={row.id}
                       data-state={row.getIsSelected() && "selected"}
                       onClick={() => {
                         if (executeFunctionForRow) {
-                          executeFunctionForRow(row.original, index);
+                          executeFunctionForRow(row.original, row.index);
                         }
                       }}
                     >
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}
+                      {executeFunctionForRow && (
+                        <TableCell className="text-right">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            aria-label={`Edit row ${row.index + 1}`}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              executeFunctionForRow(row.original, row.index);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={columns.length}
+                      colSpan={columns.length + (executeFunctionForRow ? 1 : 0)}
                       className="h-24 text-center"
                     >
                       No results.
@@ -174,28 +178,18 @@ export function DataTable<TData, TValue>({
           </div>
           <div className="flex items-center justify-end space-x-2 py-4">
             <div className="flex-1 text-sm text-muted-foreground">
-              {counter_description ?? "Showing"}{" "}
-              {table.getCanNextPage() ? (
-                <>
-                  {table.getState().pagination.pageIndex *
-                    table.getPaginationRowModel().rows.length}{" "}
-                  {" - "}
-                  {(table.getState().pagination.pageIndex + 1) *
-                    table.getPaginationRowModel().rows.length}{" "}
-                  {"of "}
-                </>
-              ) : (
-                <>
-                  {table.getState().pagination.pageIndex *
-                    table.getState().pagination.pageSize}{" "}
-                  {" - "}
-                  {table.getState().pagination.pageIndex *
-                    table.getState().pagination.pageSize +
-                    table.getPaginationRowModel().rows.length}{" "}
-                  {"of "}
-                </>
-              )}
-              {table.getCoreRowModel().rows.length}
+              {(() => {
+                const pageSize = table.state.pagination.pageSize;
+                const pageIndex = table.state.pagination.pageIndex;
+                const pageRows = table.getPaginatedRowModel().rows.length;
+                const totalRows = table.getFilteredRowModel().rows.length;
+                const firstRow = pageRows === 0 ? 0 : pageIndex * pageSize + 1;
+                const itemName = counter_description ?? "items";
+
+                return pageRows === 0
+                  ? `Showing 0 of ${totalRows} ${itemName.toLowerCase()}`
+                  : `Showing ${firstRow} - ${firstRow + pageRows - 1} of ${totalRows} ${itemName}`;
+              })()}
             </div>
             <div className="space-x-2">
               <Button

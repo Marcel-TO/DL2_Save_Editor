@@ -11,8 +11,9 @@ use flate2::write::GzEncoder;
 use flate2::Compression;
 use regex::Regex;
 use std::error::Error;
-use std::io::Write;
+use std::io::{ErrorKind, Write};
 use std::{fs, io::Read};
+use std::{fs::OpenOptions, path::PathBuf};
 // Import all struct datas.
 use crate::save_logic::struct_data::{
     IdData, InventoryChunk, InventoryItem, InventoryItemRow, ItemTypeEnum, SaveFile, SkillItem,
@@ -60,7 +61,7 @@ pub fn load_save_file(
     // Get the game version.
     let game_version: String = get_game_version(&file_content);
     // Gets the indices of the skill data.
-    let skill_start_index: usize = get_index_from_sequence(&file_content, &0, &START_SKILLS, true);
+    let skill_start_index: usize = get_index_from_sequence(&file_content, &0, START_SKILLS, true);
     let skill_end_index: usize =
         get_index_from_sequence(&file_content, &skill_start_index, &END_SKILLS, true);
 
@@ -72,11 +73,11 @@ pub fn load_save_file(
     let skill_data_range: &[u8] = &file_content[skill_start_index - 1..skill_end_index];
 
     // Collect all skills.
-    let base_skills: Vec<String> = find_base_skill_matches(&skill_data_range);
-    let legend_skills: Vec<String> = find_legend_skill_matches(&skill_data_range);
+    let base_skills: Vec<String> = find_base_skill_matches(skill_data_range);
+    let legend_skills: Vec<String> = find_legend_skill_matches(skill_data_range);
 
     // Check if the editor did not find a base skill which is essential for analysing the save.
-    if base_skills.len() == 0 {
+    if base_skills.is_empty() {
         return Err("In the skill section, the editor could not validate a single skill.".into());
     }
 
@@ -140,16 +141,18 @@ pub fn load_save_file(
         Err(err) => return Err(err.to_string().into()),
     }
 
-    Ok(SaveFile::new(
-        file_path.to_string(),
+    Ok(SaveFile {
+        path: file_path.to_string(),
+        backup_path: None,
+        file_string: format_bytes_to_string(file_content.clone()),
         file_content,
-        skills.unwrap().clone(),
+        skills: skills.unwrap().clone(),
         unlockable_items,
-        items_result?,
-        logger.log_histroy.clone(),
+        items: items_result?,
+        log_history: logger.log_histroy.clone(),
         is_compressed,
         game_version,
-    ))
+    })
 }
 
 /// Represents a method for loading a PC savefile and preparing all necessary information.
@@ -176,7 +179,7 @@ pub fn load_save_file_pc(
     if let Err(error) = gz.read_to_end(&mut file_content) {
         return Err(format!(
             "{} -> Make sure that the file you want to decompress is actually compressed.",
-            error.to_string()
+            error
         )
         .into());
     }
@@ -198,12 +201,11 @@ pub fn load_save_file_pc(
 ///
 /// ### Returns `Vec<u8>`
 /// The compressed data.
-pub fn export_save_for_pc(data: &Vec<u8>) -> Vec<u8> {
+pub fn export_save_for_pc(data: &[u8]) -> Vec<u8> {
     let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
     let _ = encoder.write_all(data);
-    let compressed = encoder.finish().unwrap();
 
-    compressed
+    encoder.finish().unwrap()
 }
 
 /// Represents a method for converting byte content into string content
@@ -252,26 +254,37 @@ pub fn edit_skill(
 /// Represents a method for changing the values of a the item chunks
 ///
 /// ### Parameter
-/// - `current_item_chunk_index`: The index on where the chunk starts.
-/// - `new_level`: The new level value.
-/// - `new_seed`: The new seed value.
-/// - `new_amount`: The new amount value.
-/// - `new_durability`: The new durability value.
+/// - `edit`: The item offsets, replacement ID, and chunk values.
 /// - `save_file_content`: The content of the save file.
 ///
 /// ### Returns `Vec<u8>`
 /// The new content of the save file.
+#[derive(serde::Deserialize)]
+pub struct InventoryItemEdit {
+    pub current_item_index: usize,
+    pub new_id: String,
+    pub current_item_chunk_index: usize,
+    pub current_item_size: usize,
+    pub new_level: u16,
+    pub new_seed: u16,
+    pub new_amount: u32,
+    pub new_durability: f32,
+}
+
 pub fn edit_inventory_item_chunk(
-    current_item_index: usize,
-    new_id: String,
-    current_item_chunk_index: usize,
-    current_item_size: usize,
-    new_level: u16,
-    new_seed: u16,
-    new_amount: u32,
-    new_durability: f32,
+    edit: InventoryItemEdit,
     mut save_file_content: Vec<u8>,
 ) -> Vec<u8> {
+    let InventoryItemEdit {
+        current_item_index,
+        new_id,
+        current_item_chunk_index,
+        current_item_size,
+        new_level,
+        new_seed,
+        new_amount,
+        new_durability,
+    } = edit;
     let zero_bytes: Vec<u8> = vec![0; current_item_size - 4]; // -4 because of leaving the old SGDs
     let new_id_bytes: Vec<u8> = new_id.as_bytes().to_vec();
     let level_bytes: Vec<u8> = new_level.to_le_bytes().to_vec();
@@ -396,7 +409,7 @@ pub fn remove_inventory_item(
     chunk_index: usize,
     mut save_file_content: Vec<u8>,
 ) -> Vec<u8> {
-    start_index = start_index - 6; // This is due to [id value][id size] in front of the ID
+    start_index -= 6; // This is due to [id value][id size] in front of the ID
     let size: usize = end_index - start_index;
     let zero_bytes: Vec<u8> = vec![0; size];
     let zero_chunk_bytes: Vec<u8> = vec![0; 37];
@@ -423,9 +436,7 @@ fn replace_content_of_file(
 ) -> Vec<u8> {
     // Check if all indices are within bounds
     if replace_index + replace_value.len() < content.len() {
-        for i in 0..replace_value.len() {
-            content[replace_index + i] = replace_value[i];
-        }
+        content[replace_index..replace_index + replace_value.len()].copy_from_slice(&replace_value);
 
         content
     } else {
@@ -517,7 +528,7 @@ fn analize_skill_data(
         // If debuggin is set to true, log found collected data of current skill.
         if is_debugging {
             logger.log_message(
-                &format!("Found at offset: [{}] the skill: [{}]", index, name).as_str(),
+                format!("Found at offset: [{}] the skill: [{}]", index, name).as_str(),
             );
         }
 
@@ -549,7 +560,7 @@ fn analize_skill_data(
         // If debugging is set to true, log found collected data of current skill.
         if is_debugging {
             logger.log_message(
-                &format!("Found at offset: [{}] the skill: [{}]", index, name).as_str(),
+                format!("Found at offset: [{}] the skill: [{}]", index, name).as_str(),
             );
         }
 
@@ -588,7 +599,7 @@ fn analize_unlockable_items_data(
     let mut items: Vec<UnlockableItem> = Vec::new();
 
     // Checks if the sequence is not valid.
-    if indices.len() == 0 {
+    if indices.is_empty() {
         return Err("Start pattern(s) for unlockables not found in save".into());
     }
 
@@ -630,29 +641,29 @@ fn analize_unlockable_items_data(
     matching_string_indices.append(&mut craftplan_indices);
     matching_string_indices.append(&mut tool_skin_indices);
 
-    if matching_string_indices.len() == 0 {
+    if matching_string_indices.is_empty() {
         return Err("No matching unlockable item strings found. in save".into());
     }
 
     // Iterate through all matching indices.
     for i in 0..matching_string_indices.len() {
         // Cleans string and returns unwanted characters.
-        let clean_string: String = get_full_string(&inventory_data, matching_string_indices[i]);
-        let current_index: usize = matching_string_indices[i] + &start_index;
-        let size: usize = clean_string.as_bytes().len();
+        let clean_string: String = get_full_string(inventory_data, matching_string_indices[i]);
+        let current_index: usize = matching_string_indices[i] + start_index;
+        let size: usize = clean_string.len();
         let sgd: Vec<u8> =
             inventory_data[matching_string_indices[i]..matching_string_indices[i] + size].to_vec();
 
         // If debugging is set to true, log collected data of current unlockable.
         if is_debugging {
-            logger.log_message(&format!("Found the unlockable: [{}]", clean_string).as_str());
+            logger.log_message(format!("Found the unlockable: [{}]", clean_string).as_str());
         }
 
         items.push(UnlockableItem::new(clean_string, current_index, size, sgd));
     }
 
     // Sorts the items by their index.
-    items.sort_by(|a, b| a.index.cmp(&b.index));
+    items.sort_by_key(|a| a.index);
     Ok(items)
 }
 
@@ -693,7 +704,7 @@ fn get_index_for_inventory_items(
     }
 
     // +76 as jump offset between unlockables and SGDs from items
-    if unlockable_items.len() > 0 {
+    if !unlockable_items.is_empty() {
         let inventory_index = unlockable_items[unlockable_items.len() - 1].index
             + unlockable_items[unlockable_items.len() - 1].size
             + 76;
@@ -770,7 +781,7 @@ fn get_all_items(
                 // Check if the bullet acts as item or mod or if there is a transmog item.
                 if validate_item_or_transmog(&current_item_ids[i], &current_item_id) {
                     if is_debugging {
-                        logger.log_message(&format!("Since this item can be item and mod, the editor validated it as a mod: [{}]", current_item_ids[i].to_string()));
+                        logger.log_message(&format!("Since this item can be item and mod, the editor validated it as a mod: [{}]", current_item_ids[i]));
                     }
 
                     mods.push(Mod::new(
@@ -785,7 +796,7 @@ fn get_all_items(
                     && current_item_indices[i] - (current_item_index + current_item_id.len()) <= 35
                 {
                     if is_debugging {
-                        logger.log_message(&format!("Since this item can be item and transmog, the editor validated it as a transmog: [{}]", current_item_ids[i].to_string()));
+                        logger.log_message(&format!("Since this item can be item and transmog, the editor validated it as a transmog: [{}]", current_item_ids[i]));
                     }
 
                     mods.push(Mod::new(
@@ -804,9 +815,7 @@ fn get_all_items(
                 _current_inv_chunk = chunks[chunk_counter].clone();
 
                 // The chunk counter is decreased to get the correct chunk for the item, since the chunk is mirrored to the ids.
-                if chunk_counter > 0 {
-                    chunk_counter -= 1;
-                }
+                chunk_counter = chunk_counter.saturating_sub(1);
 
                 // Add the previous item (if exists) to the list.
                 if current_item_id != String::new() {
@@ -833,10 +842,7 @@ fn get_all_items(
             // Add mod to mods list
             else {
                 if is_debugging {
-                    logger.log_message(&format!(
-                        "Validated mod: [{}]",
-                        current_item_ids[i].to_string()
-                    ));
+                    logger.log_message(&format!("Validated mod: [{}]", current_item_ids[i]));
                 }
 
                 mods.push(Mod::new(
@@ -850,10 +856,10 @@ fn get_all_items(
         // Add the inner section to the item list.
         let item_row = create_item_row(inner_item_list.clone(), ids.clone());
         items.push(item_row);
-        let last_inner_item: &InventoryItem = &inner_item_list.last().unwrap();
+        let last_inner_item: &InventoryItem = inner_item_list.last().unwrap();
         index = last_inner_item.index;
 
-        if last_inner_item.mod_data.len() > 0 {
+        if !last_inner_item.mod_data.is_empty() {
             let last_mod: &Mod = last_inner_item.mod_data.last().unwrap();
             index = last_mod.index + last_mod.name.len();
         }
@@ -871,32 +877,21 @@ fn get_all_items(
 }
 
 fn validate_item_or_mod(current_match: &str) -> bool {
-    if !current_match.to_lowercase().contains("mod")
-        && !current_match.to_lowercase().contains("charm")
-    {
-        return true;
-    }
-
-    false
+    !current_match.to_lowercase().contains("mod") && !current_match.to_lowercase().contains("charm")
 }
 
 fn validate_item_or_transmog(current_match: &str, last_match: &str) -> bool {
-    if (current_match.to_lowercase().contains("bullet")
+    (current_match.to_lowercase().contains("bullet")
         || current_match.to_lowercase().contains("craftplan"))
         && (last_match.to_lowercase().contains("bow")
             || (last_match.to_lowercase().contains("firearm")
                 && !last_match.to_lowercase().contains("bullet"))
             || last_match.to_lowercase().contains("gun")
             || last_match.to_lowercase().contains("harpoon"))
-    {
-        return true;
-    }
-
-    false
 }
 
 fn validate_outfit(current_match: &str) -> bool {
-    if current_match.to_lowercase().contains("outfit")
+    current_match.to_lowercase().contains("outfit")
         || current_match.to_lowercase().contains("shoes")
         || current_match.to_lowercase().contains("torso")
         || current_match.to_lowercase().contains("jacket")
@@ -909,11 +904,6 @@ fn validate_outfit(current_match: &str) -> bool {
         || current_match.to_lowercase().contains("gloves")
         || current_match.to_lowercase().contains("mask")
         || current_match.to_lowercase().contains("helmet")
-    {
-        return true;
-    }
-
-    false
 }
 
 /// Represents the method for matching the item of each section to its dedicated row.
@@ -1072,15 +1062,15 @@ fn find_all_inventory_chunks(
     }
 
     // Finding all SGD matches and their corresponding indices.
-    let (match_values, match_indices) = get_sgd_matches(&content, first_sgds_index_result.unwrap());
+    let (match_values, match_indices) = get_sgd_matches(content, first_sgds_index_result.unwrap());
 
     // Check if no matches where found.
     if match_values.is_empty() {
-        return Err(format!("No matches found from the start index: [{}]", start_index).into());
+        Err(format!("No matches found from the start index: [{}]", start_index).into())
     } else {
         // Iterate through each value and get the needed 12 Bytes of data.
-        for i in 0..match_values.len() {
-            let data_index: usize = match_indices[i] - data_offset;
+        for &match_index in &match_indices[..match_values.len()] {
+            let data_index: usize = match_index - data_offset;
 
             // Extracts the content
             let mut index: usize = data_index;
@@ -1161,7 +1151,7 @@ fn find_first_sgd_index(content: &[u8], start_index: usize) -> Result<usize> {
         curr_index = match_index + 4;
     }
 
-    return Err("No SGDs found.".into());
+    Err("No SGDs found.".into())
 }
 
 /// Represents a method for finding the current game version of the save.
@@ -1179,12 +1169,8 @@ fn get_game_version(content: &[u8]) -> String {
     // Defines the regex instance.
     let re: Regex = Regex::new(pattern).unwrap();
     match re.find(&string_data) {
-        Some(mat) => {
-            return mat.as_str().to_string();
-        }
-        None => {
-            return "Unknown".to_string();
-        }
+        Some(mat) => mat.as_str().to_string(),
+        None => "Unknown".to_string(),
     }
 }
 
@@ -1205,11 +1191,11 @@ fn get_sgd_matches(content: &[u8], start_index: usize) -> (Vec<String>, Vec<usiz
     let pattern: &str = r"[A-Za-z0-9_]*SGDs";
     // Defines the regex instance.
     let re: Regex = Regex::new(pattern).unwrap();
-    let mut match_iter = re.find_iter(&string_data);
+    let match_iter = re.find_iter(&string_data);
     let mut curr_index = start_index;
 
     // iterate through each match.
-    while let Some(mat) = match_iter.next() {
+    for mat in match_iter {
         // Looking for all SGDs inside the current chunk.
         if mat.end() - mat.start() == 4 {
             let tmp_match_value = mat.as_str().to_string();
@@ -1224,16 +1210,16 @@ fn get_sgd_matches(content: &[u8], start_index: usize) -> (Vec<String>, Vec<usiz
     }
 
     let mut match_indices: Vec<usize> =
-        get_indices_from_values(&content, start_index, &match_values);
+        get_indices_from_values(content, start_index, &match_values);
 
     // Check if Savegame section is between the start and the first SGDs.
     let mut first_index: usize = 0;
 
-    if match_values.len() >= 1 {
+    if !match_values.is_empty() {
         first_index = match_indices[0];
     }
 
-    let is_savegame: bool = is_savegame_between(&content, start_index, first_index);
+    let is_savegame: bool = is_savegame_between(content, start_index, first_index);
 
     // Reset matches if savegame is between.
     if is_savegame {
@@ -1261,11 +1247,7 @@ fn is_savegame_between(content: &[u8], start_index: usize, end_index: usize) -> 
     let target_data: &[u8] = &content[start_index..end_index];
     let index: usize = get_index_from_sequence(target_data, &0, "Savegame".as_bytes(), true);
 
-    if index <= 0 {
-        false
-    } else {
-        true
-    }
+    index > 0
 }
 
 /// Represents the method for finding all matches for each chunk.
@@ -1296,7 +1278,7 @@ fn find_amount_of_matches(
     // Convert the byte data to string to check regex patterns.
     let string_data = String::from_utf8_lossy(&content[start_index..]);
 
-    let nightrunner_items = vec![
+    let nightrunner_items = [
         "NightRunnerItemSGDs",
         "ParachuteSGDs",
         "ClimbPickaxeSGDs",
@@ -1325,7 +1307,7 @@ fn find_amount_of_matches(
                 let index = get_index_from_sequence(
                     content,
                     &iteration_index,
-                    &current_matching_value.as_bytes(),
+                    current_matching_value.as_bytes(),
                     true,
                 );
                 // Check if the current SGD is valid
@@ -1437,9 +1419,9 @@ fn get_indices_from_values(content: &[u8], start_index: usize, values: &[String]
     let mut indices: Vec<usize> = Vec::new();
 
     // Get first index.
-    if values.len() > 0 {
+    if !values.is_empty() {
         let first_index: usize =
-            get_index_from_sequence(content, &start_index, &values[0].as_bytes(), true);
+            get_index_from_sequence(content, &start_index, values[0].as_bytes(), true);
         indices.push(first_index);
     }
 
@@ -1447,7 +1429,7 @@ fn get_indices_from_values(content: &[u8], start_index: usize, values: &[String]
     for i in 1..values.len() {
         let last_index: usize = indices[i - 1];
         let match_bytes: &[u8] = values[i].as_bytes();
-        let current_index: usize = last_index + &values[i - 1].as_bytes().len();
+        let current_index: usize = last_index + values[i - 1].len();
 
         indices.push(get_index_from_sequence(
             content,
@@ -1489,9 +1471,9 @@ fn get_index_from_sequence(
         let mut last_index: usize = 0;
 
         // checks if the sequence starts with the same value as the current data.
-        for i in 0..sequence.len() {
+        for (i, &byte) in sequence.iter().enumerate() {
             last_index = counter + i;
-            if content[last_index] != sequence[i] {
+            if content[last_index] != byte {
                 is_valid = false;
                 break;
             }
@@ -1539,9 +1521,9 @@ fn get_all_indices_from_sequence(
         let mut last_index: usize = 0;
 
         // checks if the sequence starts with the same value as the current data.
-        for i in 0..sequence.len() {
+        for (i, &byte) in sequence.iter().enumerate() {
             last_index = counter + i;
-            if content[last_index] != sequence[i] {
+            if content[last_index] != byte {
                 is_valid = false;
                 break;
             }
@@ -1587,10 +1569,32 @@ pub fn get_contents_from_file(file_path: &str) -> Result<Vec<u8>> {
 /// ### Parameter
 /// - `file_path`: The save file.
 /// - `file_content`: The content of the file.
-pub fn create_backup_from_file(file_path: &str, file_content: &[u8]) {
-    let backup_path = format!("{}.bak", file_path);
-    let mut file = fs::File::create(&backup_path).unwrap();
-    file.write_all(file_content).unwrap();
+pub fn create_backup_from_file(file_path: &str, file_content: &[u8]) -> std::io::Result<String> {
+    let first_backup = format!("{}.bak", file_path);
+    let mut version = 0u64;
+
+    loop {
+        let backup_path = if version == 0 {
+            PathBuf::from(&first_backup)
+        } else {
+            PathBuf::from(format!("{}.{}", first_backup, version))
+        };
+        let mut file = match OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&backup_path)
+        {
+            Ok(file) => file,
+            Err(error) if error.kind() == ErrorKind::AlreadyExists => {
+                version += 1;
+                continue;
+            }
+            Err(error) => return Err(error),
+        };
+
+        file.write_all(file_content)?;
+        return Ok(backup_path.display().to_string());
+    }
 }
 
 /// Represents a method for converting to string and removing unnecessary characters.
@@ -1616,4 +1620,75 @@ fn get_full_string(data: &[u8], index: usize) -> String {
     String::from_utf8_lossy(extracted_bytes)
         .replace("\x00", "")
         .to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        create_backup_from_file, edit_inventory_item_chunk, replace_content_of_file,
+        InventoryItemEdit,
+    };
+    use std::fs;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[test]
+    fn inventory_edit_deserializes_and_updates_the_expected_bytes() {
+        let edit: InventoryItemEdit = serde_json::from_value(serde_json::json!({
+            "current_item_index": 2,
+            "new_id": "Test",
+            "current_item_chunk_index": 24,
+            "current_item_size": 12,
+            "new_level": 2,
+            "new_seed": 300,
+            "new_amount": 70000,
+            "new_durability": 42.5
+        }))
+        .unwrap();
+        let mut expected = vec![0x7f; 64];
+        expected[2..10].copy_from_slice(b"Test\0\0\0\0");
+        expected[24..26].copy_from_slice(&2u16.to_le_bytes());
+        expected[26..28].copy_from_slice(&300u16.to_le_bytes());
+        expected[28..32].copy_from_slice(&70000u32.to_le_bytes());
+        expected[32..36].copy_from_slice(&42.5f32.to_le_bytes());
+
+        assert_eq!(edit_inventory_item_chunk(edit, vec![0x7f; 64]), expected);
+    }
+
+    #[test]
+    fn replacement_preserves_existing_boundary_behavior() {
+        assert_eq!(
+            replace_content_of_file(1, vec![9, 8], vec![1, 2, 3, 4]),
+            vec![1, 9, 8, 4]
+        );
+        assert_eq!(
+            replace_content_of_file(2, vec![9, 8], vec![1, 2, 3, 4]),
+            vec![1, 2, 3, 4]
+        );
+    }
+
+    #[test]
+    fn backup_creation_preserves_existing_backups() {
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let test_dir = std::env::temp_dir().join(format!(
+            "dl2-save-editor-backup-test-{}-{}",
+            std::process::id(),
+            timestamp
+        ));
+        fs::create_dir(&test_dir).unwrap();
+        let save_path = test_dir.join("save.sav");
+        let save_path = save_path.to_str().unwrap();
+
+        let first = create_backup_from_file(save_path, b"first").unwrap();
+        let second = create_backup_from_file(save_path, b"second").unwrap();
+
+        assert!(first.ends_with("save.sav.bak"));
+        assert!(second.ends_with("save.sav.bak.1"));
+        assert_eq!(fs::read(first).unwrap(), b"first");
+        assert_eq!(fs::read(second).unwrap(), b"second");
+
+        fs::remove_dir_all(test_dir).unwrap();
+    }
 }

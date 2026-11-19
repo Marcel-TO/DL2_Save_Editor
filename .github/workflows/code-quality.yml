@@ -1,0 +1,26 @@
+name: Code quality
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-and-format:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: savegame-editor
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: savegame-editor/src-tauri -> target
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+      - run: bun run format:check

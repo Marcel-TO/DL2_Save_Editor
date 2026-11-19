@@ -125,7 +125,7 @@ impl InventoryItem {
             index,
             size,
             sgd_data,
-            chunk_data: chunk_data,
+            chunk_data,
             mod_data,
         }
     }
@@ -212,6 +212,8 @@ impl UnlockableItem {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SaveFile {
     pub path: String,
+    #[serde(default)]
+    pub backup_path: Option<String>,
     pub file_content: Vec<u8>,
     pub file_string: String,
     pub skills: Skills,
@@ -220,31 +222,6 @@ pub struct SaveFile {
     pub log_history: Vec<String>,
     pub is_compressed: bool,
     pub game_version: String,
-}
-
-impl SaveFile {
-    pub fn new(
-        path: String,
-        file_content: Vec<u8>,
-        skills: Skills,
-        unlockable_items: Vec<UnlockableItem>,
-        items: Vec<InventoryItemRow>,
-        log_history: Vec<String>,
-        is_compressed: bool,
-        game_version: String,
-    ) -> Self {
-        SaveFile {
-            path,
-            file_content: file_content.clone(),
-            file_string: format_bytes_to_string(file_content.clone()),
-            items,
-            unlockable_items,
-            skills,
-            log_history,
-            is_compressed,
-            game_version,
-        }
-    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

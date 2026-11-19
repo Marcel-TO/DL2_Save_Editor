@@ -1,4 +1,4 @@
-import './helix-loader-component.css';
+import "./helix-loader-component.css";
 
 export const HelixLoader = () => {
   return (

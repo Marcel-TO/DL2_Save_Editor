@@ -18,7 +18,7 @@ pub fn fetch_patched_ids(id_path: &String) -> Result<PatchedItems> {
     for entry in entries {
         let entry = entry.map_err(|e| format!("Error reading directory entry: {}", e))?;
 
-        if entry.file_type().map_or(false, |t| t.is_file()) {
+        if entry.file_type().is_ok_and(|t| t.is_file()) {
             if let Ok(ids) = read_patch_file(entry.path().to_str().ok_or("Invalid file path")?) {
                 if entry.file_name().to_str().unwrap() == "not_dropable.txt" {
                     not_dropable = ids;

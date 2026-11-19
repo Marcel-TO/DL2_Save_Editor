@@ -30,34 +30,18 @@ export function ThemeModeToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="transition-all">
-          {theme === "light" && (
-            <Sun className="h-[1.2rem] w-[1.2rem] transition-all" />
-          )}
-          {theme === "dark" && (
-            <Moon className="h-[1.2rem] w-[1.2rem] transition-all" />
-          )}
-          {theme === "dl2" && (
-            <Biohazard className="h-[1.2rem] w-[1.2rem] transition-all" />
-          )}
-          {theme === "skyfall" && (
-            <Droplet className="h-[1.2rem] w-[1.2rem] transition-all" />
-          )}
-          {theme === "hope" && (
-            <Sparkle className="h-[1.2rem] w-[1.2rem] transition-all" />
-          )}
+          {theme === "light" && <Sun className="h-[1.2rem] w-[1.2rem] transition-all" />}
+          {theme === "dark" && <Moon className="h-[1.2rem] w-[1.2rem] transition-all" />}
+          {theme === "dl2" && <Biohazard className="h-[1.2rem] w-[1.2rem] transition-all" />}
+          {theme === "skyfall" && <Droplet className="h-[1.2rem] w-[1.2rem] transition-all" />}
+          {theme === "hope" && <Sparkle className="h-[1.2rem] w-[1.2rem] transition-all" />}
           {/* Easter Egg Themes */}
-          {theme === "mchawk" && (
-            <PawPrint className="h-[1.2rem] w-[1.2rem] transition-all" />
-          )}
-          {theme === "spooked" && (
-            <Ghost className="h-[1.2rem] w-[1.2rem] transition-all" />
-          )}
+          {theme === "mchawk" && <PawPrint className="h-[1.2rem] w-[1.2rem] transition-all" />}
+          {theme === "spooked" && <Ghost className="h-[1.2rem] w-[1.2rem] transition-all" />}
           {theme === "batang" && (
             <Paintbrush2Icon className="h-[1.2rem] w-[1.2rem] transition-all" />
           )}
-          {theme === "beast" && (
-            <PawPrint className="h-[1.2rem] w-[1.2rem] transition-all" />
-          )}
+          {theme === "beast" && <PawPrint className="h-[1.2rem] w-[1.2rem] transition-all" />}
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
@@ -78,9 +62,7 @@ export function ThemeModeToggle() {
               setTheme("skyfall");
               navigate("/main");
             }}
-            className={`${
-              theme === "skyfall" ? "bg-muted" : "bg-transparent"
-            } p-2`}
+            className={`${theme === "skyfall" ? "bg-muted" : "bg-transparent"} p-2`}
           >
             Skyfall
           </DropdownMenuItem>
@@ -89,9 +71,7 @@ export function ThemeModeToggle() {
               setTheme("dark");
               navigate("/main");
             }}
-            className={`${
-              theme === "dark" ? "bg-muted" : "bg-transparent"
-            } p-2`}
+            className={`${theme === "dark" ? "bg-muted" : "bg-transparent"} p-2`}
           >
             Dark
           </DropdownMenuItem>
@@ -104,9 +84,7 @@ export function ThemeModeToggle() {
               setTheme("hope");
               navigate("/main");
             }}
-            className={`${
-              theme === "hope" ? "bg-muted" : "bg-transparent"
-            } p-2`}
+            className={`${theme === "hope" ? "bg-muted" : "bg-transparent"} p-2`}
           >
             Hope
           </DropdownMenuItem>
@@ -115,9 +93,7 @@ export function ThemeModeToggle() {
               setTheme("light");
               navigate("/main");
             }}
-            className={`${
-              theme === "light" ? "bg-muted/70" : "bg-transparent"
-            } p-2`}
+            className={`${theme === "light" ? "bg-muted/70" : "bg-transparent"} p-2`}
           >
             Light
           </DropdownMenuItem>
@@ -126,9 +102,7 @@ export function ThemeModeToggle() {
               setTheme("system");
               navigate("/main");
             }}
-            className={`${
-              theme === "system" ? "bg-muted" : "bg-transparent"
-            } p-2`}
+            className={`${theme === "system" ? "bg-muted" : "bg-transparent"} p-2`}
           >
             System
           </DropdownMenuItem>

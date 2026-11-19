@@ -65,6 +65,8 @@ export interface UnlockableItem {
 
 export interface SaveFile {
   path: string;
+  backup_path?: string | null;
+  is_dirty?: boolean;
   file_content: Uint8Array;
   file_string: string;
   skills: Skills;

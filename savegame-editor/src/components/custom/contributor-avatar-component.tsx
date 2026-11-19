@@ -24,8 +24,8 @@ export const ContributorAvatarComponent = ({
   return (
     <>
       <div className="flex items-center gap-4 border rounded-md my-5 p-5">
-        <Avatar 
-          className={`hidden h-9 w-9 sm:flex ${contributor.themeName ? 'cursor-pointer' : ''} ${contributor.background}`}
+        <Avatar
+          className={`hidden h-9 w-9 sm:flex ${contributor.themeName ? "cursor-pointer" : ""} ${contributor.background}`}
           onClick={() => {
             if (contributor.themeName !== undefined) {
               setTheme(contributor.themeName);

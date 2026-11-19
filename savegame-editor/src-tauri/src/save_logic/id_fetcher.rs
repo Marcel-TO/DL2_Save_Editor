@@ -16,7 +16,7 @@ pub fn fetch_ids(id_path: &String) -> Result<Vec<IdData>> {
     for entry in entries {
         let entry = entry.map_err(|e| format!("Error reading directory entry: {}", e))?;
 
-        if entry.file_type().map_or(false, |t| t.is_file()) {
+        if entry.file_type().is_ok_and(|t| t.is_file()) {
             if let Ok(id_data) = read_id_file(entry.path().to_str().ok_or("Invalid file path")?) {
                 id_datas.push(id_data);
             }

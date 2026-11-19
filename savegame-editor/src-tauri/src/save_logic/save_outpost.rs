@@ -32,7 +32,7 @@ pub fn fetch_outpost_saves(
             save_dir.map_err(|e: io::Error| format!("Error reading directory entry: {}", e))?;
 
         // Check if the entry is a directory.
-        if entry.file_type().map_or(false, |t| t.is_dir()) {
+        if entry.file_type().is_ok_and(|t| t.is_dir()) {
             // get file inside the directory.
             let entries: ReadDir =
                 fs::read_dir(entry.path().to_str().ok_or("Invalid file path")?).unwrap();
@@ -44,12 +44,12 @@ pub fn fetch_outpost_saves(
                 let entry: DirEntry = entry
                     .map_err(|e: io::Error| format!("Error reading directory entry: {}", e))?;
                 // check if the entry is a file.
-                if entry.file_type().map_or(false, |t| t.is_file()) {
+                if entry.file_type().is_ok_and(|t| t.is_file()) {
                     let path = entry.path();
                     // check if the file is a save file or a save.json file.
-                    if path.extension().map_or(false, |e| e == "sav") {
+                    if path.extension().is_some_and(|e| e == "sav") {
                         save_file = Some(path);
-                    } else if path.file_name().map_or(false, |f| f == "save.json") {
+                    } else if path.file_name().is_some_and(|f| f == "save.json") {
                         save_json = Some(path);
                     }
                 }
@@ -75,8 +75,9 @@ pub fn fetch_outpost_saves(
             );
 
             // return the OutpostSave struct
-            match save_file {
-                Ok(save_file) => outpost_saves.push(OutpostSave::new(
+            {
+                let save_file = save_file?;
+                outpost_saves.push(OutpostSave::new(
                     save_json["name"].as_str().unwrap_or("").to_string(),
                     save_json["owner"].as_str().unwrap_or("").to_string(),
                     save_json["description"].as_str().unwrap_or("").to_string(),
@@ -88,8 +89,7 @@ pub fn fetch_outpost_saves(
                         .collect::<Vec<String>>(),
                     save_json["version"].as_str().unwrap_or("").to_string(),
                     save_file,
-                )),
-                Err(e) => return Err(e.into()),
+                ))
             }
         }
     }
