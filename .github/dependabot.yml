@@ -6,22 +6,60 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-    prefix: "chore"
-      include_scope: true
+      day: "monday"
+      time: "02:00"
+      timezone: "Europe/Vienna"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    assignees:
+      - "Marcel-TO"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
 
   # Maintain dependencies for Rust / Backend
   - package-ecosystem: "cargo"
-    directory: "/savegame-editor/src-tauri" # Location of package manifests
+    directory: "/savegame-editor/src-tauri"
     schedule:
       interval: "monthly"
-    prefix: "chore"
-      include_scope: true
+      day: "monday"
+      time: "02:00"
+      timezone: "Europe/Vienna"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "backend:rust"
+    assignees:
+      - "Marcel-TO"
+    groups:
+      backend-rust:
+        patterns:
+          - "*"
 
   # Maintain dependencies for npm
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directory: "/savegame-editor"
     schedule:
       interval: "monthly"
-    commit_message:
+      day: "monday"
+      time: "02:00"
+      timezone: "Europe/Vienna"
+    commit-message:
       prefix: "chore"
-      include_scope: true
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "frontend:bun"
+    assignees:
+      - "Marcel-TO"
+    groups:
+      frontend-bun:
+        patterns:
+          - "*"
