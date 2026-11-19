@@ -3,6 +3,9 @@ name: Conform Policies
 
 on: [push, pull_request]
 
+permissions:
+  contents: read
+
 jobs:
   conform: # enforces policies on pipelines such as conventional commits.
     runs-on: ubuntu-latest
